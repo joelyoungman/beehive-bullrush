@@ -268,6 +268,7 @@ const Snd = {
   ui() { this.init(); this.pop(0, 680 + Math.random() * 140, 0.11); this.pluck(this.scale(5 + Math.floor(Math.random() * 5)), 0.06, 0.01); },
   go() { for (let i = 0; i < 6; i++) this.pluck(this.scale(i + 3), 0.15, i * 0.07); },
   boop() { if (!this.ok('boop', 40)) return; this.v(820, { d: 0.1, to: 1240, glide: 0.06, vol: 0.085, rev: 0.25 }); this.pop(0, 560, 0.07); },
+  gavel(n = 2) { for (let i = 0; i < n; i++) { const w = i * 0.2; this.v(190, { d: 0.11, to: 85, vol: 0.34, when: w, rev: 0.5 }); this.v(430, { d: 0.05, vol: 0.12, when: w, type: 'triangle', lp: 1800, rev: 0.4 }); this.n({ d: 0.035, vol: 0.12, f: 1100, q: 0.6, when: w, rev: 0.5 }); } },
   boing() { if (!this.ok('boing', 70)) return; const fq = 170 + Math.random() * 50; this.v(fq, { d: 0.34, to: fq * 2.2, glide: 0.1, vol: 0.18, lp: 1400, rev: 0.2 }); this.v(fq * 2.2, { d: 0.3, to: fq * 1.2, vol: 0.1, when: 0.09, lp: 1600 }); this.pop(0, 300, 0.14); },
   juke() { if (!this.ok('juke', 60)) return; this.pop(0, 740, 0.09); this.pluck(this.scale(7 + Math.floor(Math.random() * 3)), 0.08, 0.03); },
   tag() { if (!this.ok('tag', 70)) return; this.pop(0, 420, 0.26); this.n({ d: 0.12, vol: 0.08, f: 500, q: 0.7 }); this.thump(0, 0.26); this.pluck(67, 0.11, 0.06); this.pluck(60, 0.13, 0.17); },
@@ -357,7 +358,7 @@ function formation(snap) {
   for (const m of G.mps) { m.safe = false; m.conv = false; m.joined = m.role === 'tagger'; if (snap) { m.x = m.tx; m.y = m.ty; m.vx = m.vy = 0; } m.state = 'idle'; m.stun = 0; }
 }
 function callRound() {
-  Snd.whistle(0.9); cam.gerry.blow = 1.2;
+  Snd.gavel(2); cam.gerry.blow = 1.2; sideSay(cam.gerry, 'Gerry Brownlee', 'Order!', false);
   banner('BULLRUSH!', G.round === 1 ? 'Runners: get to the South End!' : `Round ${G.round} — back to the ${G.dir > 0 ? 'South' : 'North'} End!`);
   setTimeout(() => Snd.cheer(0.22, 1.8), 350);
   for (const m of G.mps) { m.delay = m.role === 'runner' ? rand(0, 0.9) : rand(0, 0.3); m.saCd = 0; m.tgt = null; }
@@ -393,19 +394,56 @@ function placeCameos() {
     c.trees = [[-25, 31, 37], [W + 26, 40, 58]]; c.flags = [[-7, -3], [W + 7, -3]]; }
   c.gold.p = 0.5; c.gold.dir = 1;
 }
-const HECKLES = ['Keep left!', 'Call that a tackle?', 'Merge like a zip!', 'Traffic is backing up!', 'Move it, Taggers!', 'Eyes on the road!', 'That lane is closed!', 'Faster! Faster!'];
+// Things these people are on record as saying, each with its source. Everyone else gets stock phrases of the House.
+const QUOTES = {
+  'Shane Jones': [{ t: 'Goodbye, Freddie!', src: 'https://thespinoff.co.nz/opinion/21-12-2023/shane-jones-versus-the-frog' }],
+  'Christopher Luxon': [{ t: "I'm wealthy, I'm, you know, sorted.", src: 'https://www.odt.co.nz/node/3238011' }],
+  'Chlöe Swarbrick': [{ t: 'OK, boomer.', src: 'https://www.1news.co.nz/2019/11/05/chloe-swarbrick-quips-ok-boomer-at-national-mp-during-climate-speech' }],
+  'Rawiri Waititi': [{ t: 'Colonial noose!', src: 'https://www.1news.co.nz/2020/12/08/colonial-noose-maori-partys-rawiri-waititi-takes-stand-against-parliament-tie-rules' }],
+  'David Seymour': [{ t: 'The French, for instance, love the coq.', src: "https://www.rnz.co.nz/news/political/284435/david-seymour-on-this-week's-coq-ups" }],
+  'Chris Hipkins': [{ t: 'Bread and butter issues!', src: 'https://interest.co.nz/public-policy/119318/pm-elect-chris-hipkins-says-first-news-conference-he-wants-ditch-unnecessary' }],
+  'Winston Peters': [{ t: "Don't come and ask a silly question like that.", src: 'https://www.nzherald.co.nz/nz/watch-winston-peters-greatest-hits-v-the-media/ZJ5DSQYPAMDRDJWDUREXA5WEDY/' },
+                     { t: "You don't know what I know, and I know that's a fact!", src: 'https://m.scoop.co.nz/stories/HL0802/S00330/peters-fights-with-media-28-february-2008.htm' }],
+};
+const SIDELINE_QUOTES = {
+  'Nicola Willis': [{ t: 'No BS in here.', src: 'https://thespinoff.co.nz/politics/22-05-2025/budget-day-2025-arrives-with-cuts-cookies-and-promises-of-no-bs' },
+                    { t: 'No rainbows and unicorns either.', src: 'https://thespinoff.co.nz/politics/22-05-2025/budget-day-2025-arrives-with-cuts-cookies-and-promises-of-no-bs' },
+                    { t: 'No lolly scramble!', src: 'https://www.odt.co.nz/news/national/no-sugar-hits-as-willis-battles-to-balance-books-j9nh54xs' },
+                    { t: 'No sugar hits!', src: 'https://www.odt.co.nz/news/national/no-sugar-hits-as-willis-battles-to-balance-books-j9nh54xs' }],
+  'Chris Bishop': [{ t: 'What a lot of crap!', src: 'https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance' }],
+};
+const HOUSE = ['Point of order!', 'Mr Speaker!', 'Shame!', 'I seek leave!', 'Withdraw and apologise!', 'Hear, hear!', 'Order, order!', 'I move the question be put!', 'That is out of order!'];
+// The browser's own speech voice reads the lines aloud. It is a generic voice at a silly pitch, not an impression of anyone.
+const Voice = {
+  say(text, seed, force) {
+    if (Snd.muted || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+    const ss = window.speechSynthesis;
+    if (ss.speaking || ss.pending) { if (!force) return; ss.cancel(); }
+    const u = new SpeechSynthesisUtterance(text.replace(/\bBS\b/g, 'B S').replace('coq', 'cock'));
+    const all = ss.getVoices().filter(v => /^en/i.test(v.lang)), local = all.filter(v => /en[-_](NZ|AU|GB)/i.test(v.lang)), pool = local.length ? local : all;
+    if (pool.length) u.voice = pool[seed % pool.length];
+    u.pitch = 0.6 + ((seed >>> 3) % 10) / 10; u.rate = 1.05 + ((seed >>> 7) % 10) / 40; u.volume = 0.85;
+    ss.speak(u);
+  },
+};
+function exclaim(m) {   // a poked MP blurts something
+  const own = QUOTES[m.name], t = own ? pick(own).t : pick(HOUSE);
+  m.say = t; m.sayT = 2.1; Voice.say(t, hash(m.name), true);
+}
+function sideSay(c, name, t, force) { c.say = t; c.sayT = 2; Voice.say(t, hash(name), force); }
+const HECKLES = ['What a lot of crap!', 'Keep left!', 'Call that a tackle?', 'Merge like a zip!', 'Traffic is backing up!', 'Move it, Taggers!', 'Eyes on the road!', 'That lane is closed!', 'Faster! Faster!'];
 function tossSheet(n) {
   for (let i = 0; i < n; i++) G.flying.push({ x0: cam.nicola.x, y0: cam.nicola.y, x1: rand(8, W - 8), y1: rand(ZN + 6, ZS - 6), t: -i * 0.15, rot: rand(TAU) });
-  cam.nicola.toss = 0.6;
+  cam.nicola.toss = 0.6; sideSay(cam.nicola, 'Nicola Willis', pick(SIDELINE_QUOTES['Nicola Willis']).t, n > 1);
 }
 function shockwave() {
   G.waves.push({ x: cam.gerry.x, y: cam.gerry.y, r: 0, hit: new Set() });
-  Snd.whistle(1.1); cam.gerry.blow = 1.3; cam.gerry.order = 1.6; G.shake = 0.5;
+  Snd.gavel(3); sideSay(cam.gerry, 'Gerry Brownlee', 'Order! Order!', true); cam.gerry.blow = 1.3; cam.gerry.order = 1.6; G.shake = 0.5;
 }
 function updateCameos(dt) {
   const g = cam.gerry, n = cam.nicola, b = cam.bishop, go = cam.gold, pk = cam.penk, run = G.phase === 'run';
   g.cd = Math.max(0, g.cd - dt); g.blow = Math.max(0, g.blow - dt); g.order = Math.max(0, g.order - dt); g.orderCd = Math.max(0, g.orderCd - dt);
-  n.cd = Math.max(0, n.cd - dt); n.toss = Math.max(0, n.toss - dt);
+  n.cd = Math.max(0, n.cd - dt); n.toss = Math.max(0, n.toss - dt); n.sayT = Math.max(0, (n.sayT || 0) - dt); g.sayT = Math.max(0, (g.sayT || 0) - dt);
   if (run) {
     n.auto -= dt; if (n.auto <= 0) { n.auto = rand(4, 7); tossSheet(1); }
     if (g.orderCd <= 0) {   // pile-up check
@@ -535,6 +573,7 @@ function separate(dt) {
     p.x -= dx * f; p.y -= dy * f; q.x += dx * f; q.y += dy * f; }
 }
 function body(m, dt) {
+  if (m.sayT > 0) m.sayT -= dt;
   m.x += m.vx * dt; m.y += m.vy * dt;
   m.x = clamp(m.x, 1.5, W - 1.5); m.y = clamp(m.y, 1, L - 1);
   if (m.role === 'tagger' && G.phase === 'run') m.y = clamp(m.y, ZN + 1, ZS - 1);
@@ -560,7 +599,7 @@ function endRound() {
   G.round++; G.dir *= -1; G.phase = 'between'; G.t = 0; formation(false); hud();
 }
 function gameOver(last) {
-  G.phase = 'over'; Snd.stopMusic(); Snd.cheer(0.4, 3); Snd.whistle(0.9); Snd.win();
+  G.phase = 'over'; Snd.stopMusic(); Snd.cheer(0.4, 3); Snd.gavel(3); Snd.win();
   const t1 = D.parties.filter(p => G.assign[p.id] === 1).map(p => p.name).join(' + '), t2 = D.parties.filter(p => G.assign[p.id] === 2).map(p => p.name).join(' + ');
   const c = $('ovC'), g = c.getContext('2d'); g.clearRect(0, 0, 160, 160);
   if (last) { g.drawImage(sprites[last.name], 0, 0); c.style.borderColor = last.party.color;
@@ -730,7 +769,8 @@ const drawCam = {
     const hx = p.x + q.hR[0], hy = p.y - seat + 8 * U + q.hR[1];
     ctx.save(); ctx.translate(hx, hy); ctx.rotate(up ? Math.sin(G.time * 16) * 0.3 + 0.3 : 0.5); ctx.fillStyle = '#8b5a2b'; ctx.fillRect(-2 * U, -16 * U, 4 * U, 18 * U); ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 2; ell(0, -30 * U, 20 * U, 15 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#b3261e'; ctx.font = `900 ${10 * U}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('ORDER!', 0, -30 * U); ctx.restore();
     if (c.blow > 0) { ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 2; for (let i = 0; i < 3; i++) { const r = (10 + i * 9 + (G.time * 60) % 9) * U; ctx.beginPath(); ctx.arc(p.x + 12 * U, p.y - seat - 44 * U, r, -0.6, 0.6); ctx.stroke(); } }
-    tapTag(p.x, p.y + 10 * U, U, c.cd, 12, 'TAP: WHISTLE'); c.hit = [p.x, p.y - seat - 20 * U, 46 * U];
+    if (c.sayT > 0) bubble(p.x + 34 * U, p.y - seat - 62 * U, c.say, U);
+    tapTag(p.x, p.y + 10 * U, U, c.cd, 12, ''); c.hit = [p.x, p.y - seat - 20 * U, 46 * U];
   },
   nicola() { const c = cam.nicola, p = proj(c.x, c.y), U = p.s * 1.1;
     ctx.fillStyle = '#7a5230'; ctx.strokeStyle = INK; ctx.lineWidth = 2; rr(p.x - 30 * U, p.y - 13 * U, 60 * U, 5 * U, 2 * U); ctx.fill(); ctx.stroke(); ctx.fillRect(p.x - 26 * U, p.y - 8 * U, 4 * U, 8 * U); ctx.fillRect(p.x + 22 * U, p.y - 8 * U, 4 * U, 8 * U);
@@ -741,7 +781,8 @@ const drawCam = {
     // giant calculator
     const cx = p.x - 24 * U, cy = p.y - 4 * U; ctx.save(); ctx.translate(cx, cy); ctx.rotate(-0.12); ctx.fillStyle = '#3a3f47'; ctx.strokeStyle = INK; ctx.lineWidth = 2; rr(-11 * U, -36 * U, 22 * U, 34 * U, 3 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#bfe6b0'; ctx.fillRect(-8 * U, -33 * U, 16 * U, 7 * U); ctx.fillStyle = INK; ctx.font = `800 ${5 * U}px monospace`; ctx.textAlign = 'right'; ctx.fillText('-9.8b', 7 * U, -29 * U);
     for (let i = 0; i < 12; i++) { ctx.fillStyle = i === 11 ? '#e2562e' : '#d9d9d9'; ctx.fillRect((-8 + (i % 3) * 5.7) * U, (-23 + Math.floor(i / 3) * 5) * U, 4.4 * U, 3.6 * U); } ctx.restore();
-    tapTag(p.x, p.y + 12 * U, U, c.cd, 8, 'TAP: BUDGET'); c.hit = [p.x, p.y - 26 * U, 44 * U];
+    if (c.sayT > 0) bubble(p.x, p.y - 66 * U, c.say, U);
+    tapTag(p.x, p.y + 12 * U, U, c.cd, 8, ''); c.hit = [p.x, p.y - 26 * U, 44 * U];
   },
   bishop() { const c = cam.bishop, p = proj(c.x, c.y), U = p.s * 1.1;
     for (let i = 0; i < 2; i++) { const bx = p.x - 34 * U + i * 46 * U, by = p.y + 4 * U; ctx.strokeStyle = INK; ctx.lineWidth = 1.5; for (let k = 0; k < 6; k++) { ctx.fillStyle = k % 2 ? '#fff' : '#ff6a13'; ctx.fillRect(bx + k * 6 * U, by - 14 * U, 6 * U, 6 * U); } ctx.strokeRect(bx, by - 14 * U, 36 * U, 6 * U); ctx.fillStyle = '#444'; ctx.fillRect(bx + 3 * U, by - 8 * U, 2.5 * U, 8 * U); ctx.fillRect(bx + 30 * U, by - 8 * U, 2.5 * U, 8 * U); }
@@ -824,7 +865,7 @@ function drawHand() {
   G.boops = G.boops.filter(b => G.time - b.t < 0.32);
   if (G.phase === 'builder' || G.phase === 'over' || !(hand.mouse || since < 0.8)) return;
   if (!hand.sprite) hand.sprite = makeHand();
-  const jab = since < 0.2 ? Math.sin(since / 0.2 * Math.PI) : 0, back = 12 - jab * 12, k = clamp(K * 0.95, 0.6, 1.5);
+  const jab = since < 0.2 ? Math.sin(since / 0.2 * Math.PI) : 0, back = 12 - jab * 12, k = clamp(K * 0.42, 0.3, 0.7);
   ctx.save(); ctx.translate(hand.x, hand.y); ctx.rotate(0.62); ctx.scale(k, k);
   ctx.shadowColor = 'rgba(10,20,30,.4)'; ctx.shadowBlur = 12; ctx.shadowOffsetX = 5; ctx.shadowOffsetY = 12 - jab * 7;
   ctx.drawImage(hand.sprite, -14 + back, -70, 280, 130);
@@ -851,6 +892,7 @@ function draw() {
   for (const k of ['gerry', 'nicola', 'bishop', 'gold', 'penk']) items.push({ z: depth(cam[k]), f: drawCam[k] });
   for (const m of G.mps) items.push({ z: depth(m), f: () => drawMP(m) });
   items.sort((a, b) => a.z - b.z); for (const it of items) it.f();
+  for (const m of G.mps) if (m.sayT > 0) bubble(m.sx, m.sy - (m.state === 'down' ? 96 : 116) * m.U, m.say, m.U * 1.1);
   for (const s of G.flying) if (s.t > 0) { const x = lerp(s.x0, s.x1, s.t), y = lerp(s.y0, s.y1, s.t), p = proj(x, y); drawSheet(p.x, p.y, s.rot + s.t * 9, p.s, (Math.sin(s.t * Math.PI) * 90 + 30 * (1 - s.t)) * p.s); }
   for (const f of G.fx) { const p = proj(f.x, f.y), al = clamp((1.3 - f.t) * 2.5, 0, 1), pop = 1 + Math.max(0, 0.22 - f.t) * 2.6, fs = 15 * p.s * f.size * pop;
     ctx.save(); ctx.globalAlpha = al; ctx.translate(p.x, p.y - (64 + f.t * 30) * p.s); ctx.rotate(((f.x * 7 + f.y * 3) % 9 - 4) * 0.022);
@@ -877,8 +919,8 @@ cv.addEventListener('pointerdown', e => {
   const list = G.mps.slice().sort((a, b) => depth(b) - depth(a));
   for (const m of list) { const U = m.U, onHead = Math.hypot(x - m.sx, y - (m.sy - 50 * U)) < 21 * U, onBody = Math.abs(x - m.sx) < 12 * U && y < m.sy + 4 * U && y > m.sy - 36 * U;
     if (!onHead && !onBody) continue; if (m.safe || m.conv || m.state === 'down') continue;
-    if (m.role === 'runner') { knock(m, 1.15, 'stumble'); bump(m, rand(-6, 6), 16, rand(-16, 16)); m.vx *= 0.2; m.vy *= 0.2; fx(m.x, m.y - 10, 'BONK!', GOLD, 1.25); Snd.bonk(); }
-    else { knock(m, 1.4); bump(m, rand(-8, 8), -10, rand(-14, 14)); fx(m.x, m.y - 10, 'TRIPPED!', '#8EC5E8', 1.15); Snd.trip(); }
+    if (m.role === 'runner') { knock(m, 1.15, 'stumble'); bump(m, rand(-6, 6), 16, rand(-16, 16)); m.vx *= 0.2; m.vy *= 0.2; fx(m.x, m.y - 10, 'BONK!', GOLD, 1.25); Snd.bonk(); exclaim(m); }
+    else { knock(m, 1.4); bump(m, rand(-8, 8), -10, rand(-14, 14)); fx(m.x, m.y - 10, 'TRIPPED!', '#8EC5E8', 1.15); Snd.trip(); exclaim(m); }
     return; }
 });
 
@@ -932,6 +974,7 @@ $('cred').onclick = () => {
   $('credIn').innerHTML = `<p><b>Backdrop:</b> ${esc(bg.title)}, ${esc(bg.by)} · ${esc(bg.lic)}${link(bg)}</p>` +
     D.parties.map(p => `<h3 style="margin:.6em 0 .2em">${esc(p.name)}</h3><ul style="margin:0;padding-left:18px">${p.members.map(m => row(m.name, hasPhoto[m.name] ? m.credit : null)).join('')}</ul>`).join('') +
     `<h3 style="margin:.6em 0 .2em">Sideline</h3><ul style="margin:0;padding-left:18px">${D.departed.map(m => row(m.name, hasPhoto[m.name] ? m.credit : null)).join('')}</ul>` +
+    `<h3 style="margin:.6em 0 .2em">Things they really said</h3><ul style="margin:0;padding-left:18px">${Object.entries({ ...QUOTES, ...SIDELINE_QUOTES }).map(([n, q]) => q.map(x => `<li><b>${esc(n)}</b>: “${esc(x.t)}” · <a href="${esc(x.src)}" target="_blank" rel="noopener">source</a></li>`).join('')).join('')}</ul><p>Everyone else calls out stock phrases of the House. Lines are read by your browser's built-in voice, not by the people quoted.</p>` +
     `<p>Photos are cropped and cut out by the game for the bobbleheads (or shown as face discs). Music and sound effects are synthesised in the browser. This is a parody; it is not affiliated with any party or with Parliament.</p>`;
   $('credits').classList.remove('hidden');
 };
