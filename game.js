@@ -438,9 +438,11 @@ const Voice = {
     const ss = window.speechSynthesis;
     if (ss.speaking || ss.pending) { if (!force) return; ss.cancel(); }
     const u = new SpeechSynthesisUtterance(text.replace(/\bBS\b/g, 'B S').replace('coq', 'cock'));
-    const all = ss.getVoices().filter(v => /^en/i.test(v.lang)), local = all.filter(v => /en[-_](NZ|AU|GB)/i.test(v.lang)), pool = local.length ? local : all;
+    // Prefer the browser's natural-sounding voices (Edge's online voices, Chrome's Google voices), New Zealand accent first, and leave the pitch alone.
+    const rank = v => (/natural|online|neural|google/i.test(v.name) ? 10 : 0) + (/en[-_]NZ/i.test(v.lang) ? 4 : /en[-_]AU/i.test(v.lang) ? 3 : /en[-_]GB/i.test(v.lang) ? 2 : 1);
+    const all = ss.getVoices().filter(v => /^en/i.test(v.lang)).sort((a, b) => rank(b) - rank(a)), pool = all.filter(v => rank(v) >= rank(all[0]) - 1);
     if (pool.length) u.voice = pool[seed % pool.length];
-    u.pitch = 0.6 + ((seed >>> 3) % 10) / 10; u.rate = 1.05 + ((seed >>> 7) % 10) / 40; u.volume = 0.85;
+    u.pitch = 0.94 + ((seed >>> 3) % 10) / 80; u.rate = 1 + ((seed >>> 7) % 10) / 100; u.volume = 0.9;
     ss.speak(u);
   },
 };
