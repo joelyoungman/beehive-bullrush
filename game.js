@@ -34,7 +34,9 @@ function resize() {
   K = clamp(Math.min(VH / 720, VW / 1150), 0.42, 1.7);
   document.documentElement.style.setProperty('--ui', clamp(K, 0.75, 1.6).toFixed(2));
 }
-window.addEventListener('resize', resize); resize();
+window.addEventListener('resize', resize); window.addEventListener('orientationchange', () => setTimeout(resize, 150));
+if (window.visualViewport) visualViewport.addEventListener('resize', resize);
+resize();
 function proj(x, y) {
   const a = HZ ? y / L : x / W, d = HZ ? x / W : y / L, farY = VH * V.farY, nearY = VH * V.nearY;
   const half = lerp(VW * V.farH, VW * V.nearH, d);
@@ -120,68 +122,27 @@ function photoSprite(raw) {       // the round face disc
 let BOBBLE = true;
 try { const q = new URLSearchParams(location.search).get('bobble'); if (q !== null) BOBBLE = q !== '0'; else if (localStorage.getItem('bullrush.bobble') === '0') BOBBLE = false; } catch (e) {}
 const bobbles = {};      // name -> 200px cut-out head canvas (transparent background)
-function eggMask(N) {
-  // 1 inside a head-shaped egg (wide crown, narrower jaw), feathered over ~3px.
-  const a = new Float32Array(N * N), cx = N / 2, cy = N * 0.47, rx = N * 0.4, ryT = N * 0.46, ryB = N * 0.45;
-  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-    const dy = y - cy, ny = dy / (dy < 0 ? ryT : ryB), t = Math.max(0, ny);
-    const rxy = rx * (1 - 0.28 * t * t), nx = (x - cx) / rxy, d = Math.sqrt(nx * nx + ny * ny);
-    a[y * N + x] = clamp((1 - d) * Math.min(rxy, ryB) / 3 + 0.5, 0, 1);
-  }
-  return a;
+function eggPath(g, N, ox, oy, grow) {   // wide crown, narrower jaw
+  const cx = N / 2, cy = N * 0.47, rx = N * 0.4 + grow, ryT = N * 0.46 + grow, ryB = N * 0.45 + grow;
+  g.beginPath(); for (let i = 0; i <= 80; i++) { const th = i / 80 * TAU, ny = Math.sin(th), t = Math.max(0, ny); g.lineTo(ox + cx + Math.cos(th) * rx * (1 - 0.28 * t * t), oy + cy + ny * (ny < 0 ? ryT : ryB)); } g.closePath();
 }
-let EGG = null;
-function cutHead(src) {
-  // src: 160px square crop (same framing as the disc). Returns a 200px canvas, or null if unreadable.
-  const N = 160, w = document.createElement('canvas'); w.width = w.height = N; const g = w.getContext('2d', { willReadFrequently: true });
-  g.drawImage(src, 0, 0);
-  let id; try { id = g.getImageData(0, 0, N, N); } catch (e) { return null; }
-  const px = id.data; EGG = EGG || eggMask(N);
-  // background colours: sample the top edge and the upper part of both sides
-  const bg = [];
-  for (let i = 0; i < N; i += 6) {
-    bg.push(i * 4);
-    if (i < N * 0.62) bg.push((i * N + 1) * 4, (i * N + N - 2) * 4);
-  }
-  const cols = bg.map(o => [px[o], px[o + 1], px[o + 2]]);
-  const near = o => { const r = px[o], gg = px[o + 1], b = px[o + 2]; for (const c of cols) { if ((r - c[0]) ** 2 + (gg - c[1]) ** 2 + (b - c[2]) ** 2 < 900) return true; } return false; };
-  // flood from the border through background-coloured pixels; never into the protected face core
-  const gone = new Uint8Array(N * N), seen = new Uint8Array(N * N), stack = [];
-  const core = (x, y) => ((x - 80) / 40) ** 2 + ((y - 78) / 50) ** 2 < 1;
-  for (let i = 0; i < N; i++) stack.push(i, 0, 0, i, N - 1, i);
-  while (stack.length) {
-    const y = stack.pop(), x = stack.pop();
-    if (x < 0 || y < 0 || x >= N || y >= N) continue;
-    const k = y * N + x; if (seen[k]) continue; seen[k] = 1;
-    if (core(x, y) || !near(k * 4)) continue;
-    gone[k] = 1; stack.push(x + 1, y, x - 1, y, x, y + 1, x, y - 1);
-  }
-  let inEgg = 0, cut = 0; for (let k = 0; k < N * N; k++) if (EGG[k] > 0.5) { inEgg++; if (gone[k]) cut++; }
-  const useFill = cut / inEgg < 0.42;   // it ate too much: skin or hair matches the backdrop, so trust the egg alone
-  // Heads have no holes in them: keep every pixel between the outermost kept pixels on each row, which
-  // closes notches the flood bit into bald heads and sky-coloured shirts. Then smooth the outline.
-  let keep = new Float32Array(N * N);
-  for (let y = 0; y < N; y++) {
-    let a = -1, b = -1;
-    for (let x = 0; x < N; x++) if (!(useFill && gone[y * N + x]) && EGG[y * N + x] > 0.5) { if (a < 0) a = x; b = x; }
-    for (let x = 0; x < N; x++) keep[y * N + x] = !useFill || (a >= 0 && x >= a - 2 && x <= b + 2) ? 1 : 0;
-  }
-  const box = (m, r) => { const o = new Float32Array(N * N); for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { let t = 0, n = 0; for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) { const xx = x + i, yy = y + j; if (xx >= 0 && yy >= 0 && xx < N && yy < N) { t += m[yy * N + xx]; n++; } } o[y * N + x] = t / n; } return o; };
-  if (useFill) { keep = box(keep, 3); for (let k = 0; k < N * N; k++) keep[k] = keep[k] > 0.5 ? 1 : 0; keep = box(keep, 1); }
-  // print finish on the whole crop first, then cut it to the head shape
-  g.drawImage(src, 0, 0); gloss(g);
-  const fin = g.getImageData(0, 0, N, N), fp = fin.data;
-  for (let k = 0; k < N * N; k++) fp[k * 4 + 3] = Math.round(255 * EGG[k] * keep[k]);
-  g.clearRect(0, 0, N, N); g.putImageData(fin, 0, 0);
-  // compose like a cut-out sticker: ink outline, cream paper edge, then the head
-  const M = 200, out = document.createElement('canvas'); out.width = out.height = M; const o = out.getContext('2d');
-  const stamp = (col, r) => { const sil = document.createElement('canvas'); sil.width = sil.height = N; const sg = sil.getContext('2d');
-    sg.drawImage(w, 0, 0); sg.globalCompositeOperation = 'source-in'; sg.fillStyle = col; sg.fillRect(0, 0, N, N);
-    for (let a = 0; a < TAU; a += TAU / 20) o.drawImage(sil, off + Math.cos(a) * r, off + Math.sin(a) * r); };
-  const off = (M - N) / 2;
-  stamp(INK, 9); stamp('#FBF6EA', 6.5);
-  o.drawImage(w, off, off);
-  out.dataset.cut = useFill ? 'fill' : 'egg';
+function eggHead(raw) {
+  // Every head gets the same silhouette and the same lighting, so a mixed bag of photos reads as one set of toys.
+  // Uses a clip path, not pixel access, so it works for every photo.
+  const N = 160, M = 200, off = (M - N) / 2, out = document.createElement('canvas'); out.width = out.height = M; const o = out.getContext('2d');
+  eggPath(o, N, off, off, 5); o.fillStyle = INK; o.fill();
+  o.save(); eggPath(o, N, off, off, 0); o.clip();
+  o.drawImage(raw, off, off);
+  o.globalCompositeOperation = 'saturation'; o.fillStyle = 'rgba(128,128,128,.12)'; o.fillRect(0, 0, M, M);
+  o.globalCompositeOperation = 'multiply'; o.fillStyle = 'rgba(246,230,200,.4)'; o.fillRect(0, 0, M, M);
+  o.globalCompositeOperation = 'source-over';
+  let r = o.createRadialGradient(M * 0.5, M * 0.45, N * 0.22, M * 0.5, M * 0.47, N * 0.52);   // edges fall away
+  r.addColorStop(0, 'rgba(0,0,0,0)'); r.addColorStop(0.72, 'rgba(40,25,10,.12)'); r.addColorStop(1, 'rgba(40,25,10,.55)'); o.fillStyle = r; o.fillRect(0, 0, M, M);
+  const ch = o.createLinearGradient(0, M * 0.6, 0, M * 0.93); ch.addColorStop(0, 'rgba(40,20,0,0)'); ch.addColorStop(1, 'rgba(40,20,0,.34)'); o.fillStyle = ch; o.fillRect(0, 0, M, M);   // under the chin
+  r = o.createRadialGradient(M * 0.36, M * 0.25, 2, M * 0.36, M * 0.25, M * 0.36);                 // key light, top left
+  r.addColorStop(0, 'rgba(255,255,255,.4)'); r.addColorStop(0.4, 'rgba(255,255,255,.1)'); r.addColorStop(1, 'rgba(255,255,255,0)'); o.fillStyle = r; o.fillRect(0, 0, M, M);
+  o.fillStyle = 'rgba(255,255,255,.42)'; o.beginPath(); o.ellipse(M * 0.34, M * 0.2, 15, 5, -0.6, 0, TAU); o.fill();                        // glaze
+  o.restore();
   return out;
 }
 const headSprite = name => (BOBBLE && bobbles[name]) || sprites[name];
@@ -199,7 +160,7 @@ function pump() {
 function loadPortrait(p, color) {
   sprites[p.name] = standIn(p, color);
   if (!p.img) return;
-  const ok = img => { const raw = rawCrop(img, p.name); sprites[p.name] = photoSprite(raw); hasPhoto[p.name] = true; const b = cutHead(raw); if (b) bobbles[p.name] = b; listeners.forEach(f => f(p.name)); };
+  const ok = img => { const raw = rawCrop(img, p.name); sprites[p.name] = photoSprite(raw); hasPhoto[p.name] = true; bobbles[p.name] = eggHead(raw); listeners.forEach(f => f(p.name)); };
   // Try the CORS-enabled thumbnail first (needed for the cut-out); fall back to the plain photo URL.
   if (p.cors) queue.push({ url: p.cors, cors: true, label: p.name, tries: 1, ok, fail: () => queue.push({ url: p.img, label: p.name, tries: 0, ok }) });
   else queue.push({ url: p.img, label: p.name, tries: 0, ok });
@@ -260,9 +221,10 @@ const Snd = {
   pop(when = 0, fq = 520, vol = 0.25) { this.v(fq, { d: 0.09, to: fq * 0.35, vol, when }); },
   thump(when = 0, vol = 0.28) { this.v(92, { d: 0.22, to: 52, vol, when }); },
   ui() { this.init(); this.pop(0, 680 + Math.random() * 140, 0.11); this.pluck(this.scale(5 + Math.floor(Math.random() * 5)), 0.06, 0.01); },
-  go() { for (let i = 0; i < 6; i++) this.pluck(this.scale(i + 3), 0.15, i * 0.07); this.n({ d: 0.55, vol: 0.05, f: 1200, to: 5200, q: 0.8, rev: 0.3 }); },
+  go() { for (let i = 0; i < 6; i++) this.pluck(this.scale(i + 3), 0.15, i * 0.07); },
+  boop() { if (!this.ok('boop', 40)) return; this.v(820, { d: 0.1, to: 1240, glide: 0.06, vol: 0.085, rev: 0.25 }); this.pop(0, 560, 0.07); },
   boing() { if (!this.ok('boing', 70)) return; const fq = 170 + Math.random() * 50; this.v(fq, { d: 0.34, to: fq * 2.2, glide: 0.1, vol: 0.18, lp: 1400, rev: 0.2 }); this.v(fq * 2.2, { d: 0.3, to: fq * 1.2, vol: 0.1, when: 0.09, lp: 1600 }); this.pop(0, 300, 0.14); },
-  juke() { if (!this.ok('juke', 60)) return; this.n({ d: 0.22, vol: 0.06, f: 900, to: 3200, q: 1.2, rev: 0.2 }); this.pluck(this.scale(7 + Math.floor(Math.random() * 3)), 0.08, 0.03); },
+  juke() { if (!this.ok('juke', 60)) return; this.pop(0, 740, 0.09); this.pluck(this.scale(7 + Math.floor(Math.random() * 3)), 0.08, 0.03); },
   tag() { if (!this.ok('tag', 70)) return; this.pop(0, 420, 0.26); this.n({ d: 0.12, vol: 0.08, f: 500, q: 0.7 }); this.thump(0, 0.26); this.pluck(67, 0.11, 0.06); this.pluck(60, 0.13, 0.17); },
   safe() {   // each Runner home in quick succession climbs the scale
     if (!this.ok('safe', 45)) return; const now = performance.now(); if (now - this.lastSafe > 2600) this.combo = 0; this.lastSafe = now;
@@ -273,16 +235,16 @@ const Snd = {
   slip() { this.trip(); },
   groan() {},
   paper() { if (!this.ok('paper', 120)) return; for (let i = 0; i < 4; i++) this.n({ d: 0.05 + Math.random() * 0.05, vol: 0.045, f: 3500 + Math.random() * 2500, q: 0.6, when: i * 0.07 + Math.random() * 0.03 }); this.pluck(64, 0.07, 0.32); this.pluck(62, 0.07, 0.47); },
-  toss() { this.n({ d: 0.35, vol: 0.07, f: 1500, to: 4500, q: 0.9, rev: 0.2 }); for (let i = 0; i < 5; i++) this.n({ d: 0.04, vol: 0.035, f: 4000 + Math.random() * 2000, q: 0.7, when: 0.08 + i * 0.06 }); },
-  whistle(len = 0.7) {   // a pea whistle heard across a field, not in your ear
+  toss() { for (let i = 0; i < 6; i++) this.n({ d: 0.04 + Math.random() * 0.03, vol: 0.035, f: 3800 + Math.random() * 2200, q: 0.7, when: i * 0.06 + Math.random() * 0.02 }); this.pluck(69, 0.06, 0.05); },
+  whistle(len = 0.7) {   // a mellow toot from across the lawn: one rounded note with a little flutter
     if (!this.ac) return; const ac = this.ac, t = ac.currentTime;
-    for (const fq of [2250, 2330]) {
-      const o = ac.createOscillator(), g = ac.createGain(), l = ac.createOscillator(), lg = ac.createGain();
-      o.type = 'sine'; o.frequency.value = fq; l.frequency.value = 27; lg.gain.value = 0.025; l.connect(lg); lg.connect(g.gain);
-      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.04, t + 0.03); g.gain.setValueAtTime(0.04, t + len - 0.08); g.gain.linearRampToValueAtTime(0.0001, t + len);
-      o.connect(g); this.wire(g, 0.6); o.start(t); l.start(t); o.stop(t + len + 0.05); l.stop(t + len + 0.05);
-    }
-    this.n({ d: len, vol: 0.01, f: 4200, q: 2 });
+    const o = ac.createOscillator(), g = ac.createGain(), l = ac.createOscillator(), lg = ac.createGain(), fl = ac.createBiquadFilter();
+    o.type = 'sine'; o.frequency.setValueAtTime(1380, t); o.frequency.exponentialRampToValueAtTime(1560, t + 0.09);
+    l.frequency.value = 17; lg.gain.value = 0.012; l.connect(lg); lg.connect(g.gain);
+    fl.type = 'lowpass'; fl.frequency.value = 2400;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.032, t + 0.07); g.gain.setValueAtTime(0.032, t + len - 0.14); g.gain.linearRampToValueAtTime(0.0001, t + len);
+    o.connect(fl); fl.connect(g); this.wire(g, 0.7); o.start(t); l.start(t); o.stop(t + len + 0.05); l.stop(t + len + 0.05);
+    this.n({ d: len, vol: 0.004, f: 2400, q: 1.5 });
   },
   cheer(v = 0.25, dur = 1.6) { this.n({ d: dur, vol: v * 0.3, f: 1000, q: 0.4, swell: true, rev: 0.4 }); this.n({ d: dur, vol: v * 0.16, f: 2600, q: 0.6, swell: true, when: 0.05 }); },
   win() { [0, 2, 4, 5, 7, 9].forEach((st, i) => this.pluck(this.scale(st + 2), 0.19, i * 0.11)); [72, 76, 79, 84].forEach(m => this.v(this.hz(m), { d: 2, vol: 0.045, when: 0.7, rev: 0.7, a: 0.06 })); },
@@ -315,7 +277,7 @@ const Snd = {
 };
 
 /* ---------- game state ---------- */
-const G = { phase: 'builder', dir: 1, round: 0, t: 0, time: 0, mps: [], sheets: [], flying: [], fx: [], waves: [], puffs: [], init: 0, shake: 0, endT: 0, assign: {} };
+const G = { phase: 'builder', dir: 1, round: 0, t: 0, time: 0, mps: [], sheets: [], flying: [], fx: [], waves: [], puffs: [], boops: [], init: 0, shake: 0, endT: 0, assign: {} };
 const partyOf = id => D.parties.find(p => p.id === id);
 
 function makeMP(m, party, team) {
@@ -708,9 +670,9 @@ function flag(x, y, ph) {
 }
 function tapTag(x, y, U, cd, max, label) {
   const ready = cd <= 0; ctx.save(); ctx.translate(x, y);
-  ctx.fillStyle = ready ? GOLD : 'rgba(20,20,20,.7)'; ctx.strokeStyle = INK; ctx.lineWidth = 2; const w = 54 * U, h = 16 * U; rr(-w / 2, -h / 2, w, h, 8 * U); ctx.fill(); ctx.stroke();
-  if (!ready) { ctx.fillStyle = GOLD; rr(-w / 2, -h / 2, w * (1 - cd / max), h, 8 * U); ctx.fill(); }
-  ctx.fillStyle = INK; ctx.font = `900 ${Math.max(8, 9.5 * U)}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(ready ? label : '…', 0, 0.5); ctx.restore();
+  ctx.fillStyle = ready ? GOLD : 'rgba(20,20,20,.7)'; ctx.strokeStyle = INK; ctx.lineWidth = 2; const w = 24 * U, h = 6 * U; rr(-w / 2, -h / 2, w, h, 3 * U); ctx.fill(); ctx.stroke();
+  if (!ready) { ctx.fillStyle = GOLD; rr(-w / 2, -h / 2, w * (1 - cd / max), h, 3 * U); ctx.fill(); }
+   ctx.restore();
 }
 const drawCam = {
   gerry() { const c = cam.gerry, p = proj(c.x, c.y), U = p.s * 1.12, seat = 44 * U;
@@ -777,6 +739,52 @@ function drawBackground() {
   for (const f of G.puffs) { const p = proj(f.x, f.y), t = f.t / 0.55; ctx.fillStyle = `rgba(235,245,225,${0.5 * (1 - t)})`; ell(p.x, p.y - t * 7 * p.s, (3 + t * 8) * p.s, (2 + t * 5) * p.s); ctx.fill(); }
 }
 let grain = null;
+const hand = { x: -999, y: -999, mouse: false, pokeT: -9, sprite: null };
+function makeHand() {
+  // A painted hand with one finger out, drawn once. Fingertip sits at (14,70) of a 280x130 sprite, pointing left.
+  const c = document.createElement('canvas'); c.width = 560; c.height = 260; const g = c.getContext('2d'); g.scale(2, 2); g.translate(14, 70);
+  const edge = '#8E5A45';
+  const skin = (y0, y1) => { const l = g.createLinearGradient(0, y0, 0, y1); l.addColorStop(0, '#F5D0B7'); l.addColorStop(0.5, '#E3AE90'); l.addColorStop(1, '#B77D63'); return l; };
+  const cap = (x0, y0, x1, y1, r0, r1, fill) => { const a = Math.atan2(y1 - y0, x1 - x0); g.beginPath(); g.arc(x0, y0, r0, a + Math.PI / 2, a + Math.PI * 1.5); g.arc(x1, y1, r1, a - Math.PI / 2, a + Math.PI / 2); g.closePath(); g.fillStyle = fill; g.fill(); g.strokeStyle = edge; g.lineWidth = 0.9; g.stroke(); };
+  // jacket sleeve and shirt cuff
+  let l = g.createLinearGradient(0, -26, 0, 46); l.addColorStop(0, '#2C4162'); l.addColorStop(1, '#131D2E'); g.fillStyle = l; g.strokeStyle = '#0C1420'; g.lineWidth = 1.2;
+  g.beginPath(); g.moveTo(148, -21); g.lineTo(264, -30); g.lineTo(264, 50); g.lineTo(148, 35); g.closePath(); g.fill(); g.stroke();
+  l = g.createLinearGradient(0, -20, 0, 34); l.addColorStop(0, '#FFFFFF'); l.addColorStop(1, '#CFC8BA'); g.fillStyle = l; g.strokeStyle = '#9A9486';
+  g.beginPath(); g.moveTo(134, -19); g.lineTo(152, -20.5); g.lineTo(152, 34.5); g.lineTo(134, 32); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = '#F2B134'; g.strokeStyle = '#8A6410'; g.beginPath(); g.arc(143, 22, 2.6, 0, TAU); g.fill(); g.stroke();
+  // wrist and the back of the hand
+  cap(96, 6, 138, 7, 23, 24, skin(-18, 32));
+  g.beginPath(); g.ellipse(90, 9, 31, 29, 0, 0, TAU); g.fillStyle = skin(-22, 40); g.fill(); g.strokeStyle = edge; g.lineWidth = 0.9; g.stroke();
+  // three curled fingers
+  cap(62, 17, 92, 15, 9, 10, skin(6, 27)); cap(64, 31, 92, 28, 8.5, 9.5, skin(21, 41)); cap(69, 43, 94, 39, 7.5, 8.5, skin(34, 52));
+  g.strokeStyle = 'rgba(142,90,69,.75)'; g.lineWidth = 1; for (const [x, y] of [[70, 17], [72, 31], [76, 43]]) { g.beginPath(); g.arc(x + 6, y, 7, Math.PI * 0.8, Math.PI * 1.2); g.stroke(); }
+  // the pointing finger
+  cap(7, 0, 72, -5, 7, 9.8, skin(-12, 9));
+  g.strokeStyle = 'rgba(142,90,69,.6)'; g.lineWidth = 0.9; for (const x of [26, 29, 47, 50]) { g.beginPath(); g.moveTo(x, -7.6 - x * 0.03); g.quadraticCurveTo(x + 1.6, -3, x, 1.5); g.stroke(); }
+  l = g.createLinearGradient(0, -8, 0, -1); l.addColorStop(0, '#FBE6DC'); l.addColorStop(1, '#EBC0AE'); g.fillStyle = l; g.strokeStyle = '#C3907C'; g.lineWidth = 0.8;
+  g.beginPath(); g.moveTo(3, -4.5); g.quadraticCurveTo(3.5, -7.6, 8, -7.4); g.lineTo(16.5, -7.9); g.quadraticCurveTo(17.5, -5, 16.5, -2.6); g.lineTo(6, -2.2); g.quadraticCurveTo(3, -2.4, 3, -4.5); g.closePath(); g.fill(); g.stroke();
+  g.strokeStyle = 'rgba(255,255,255,.75)'; g.lineWidth = 1; g.beginPath(); g.moveTo(6, -6); g.lineTo(14, -6.4); g.stroke();
+  // thumb resting over the curled fingers
+  cap(58, 9, 98, -3, 7.4, 10.5, skin(-10, 18));
+  g.fillStyle = '#F3D5C8'; g.strokeStyle = '#C3907C'; g.lineWidth = 0.8; g.beginPath(); g.ellipse(60, 6.5, 5.6, 3.6, -0.3, 0, TAU); g.fill(); g.stroke();
+  // form and a little skin grain, only where paint already is
+  g.globalCompositeOperation = 'source-atop';
+  l = g.createLinearGradient(0, -30, 0, 52); l.addColorStop(0, 'rgba(255,240,225,.16)'); l.addColorStop(0.45, 'rgba(0,0,0,0)'); l.addColorStop(1, 'rgba(60,25,10,.26)'); g.fillStyle = l; g.fillRect(-14, -70, 280, 130);
+  for (let i = 0; i < 1400; i++) { g.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,.035)' : 'rgba(80,40,20,.04)'; g.fillRect(-14 + Math.random() * 280, -70 + Math.random() * 130, 1, 1); }
+  return c;
+}
+function drawHand() {
+  const since = G.time - hand.pokeT;
+  for (const b of G.boops) { const t = (G.time - b.t) / 0.32; if (t >= 1) continue; ctx.strokeStyle = `rgba(242,177,52,${1 - t})`; ctx.lineWidth = 4 * (1 - t) + 1; ctx.beginPath(); ctx.arc(b.x, b.y, 6 + t * 26 * K, 0, TAU); ctx.stroke(); }
+  G.boops = G.boops.filter(b => G.time - b.t < 0.32);
+  if (G.phase === 'builder' || G.phase === 'over' || !(hand.mouse || since < 0.8)) return;
+  if (!hand.sprite) hand.sprite = makeHand();
+  const jab = since < 0.2 ? Math.sin(since / 0.2 * Math.PI) : 0, back = 12 - jab * 12, k = clamp(K * 0.95, 0.6, 1.5);
+  ctx.save(); ctx.translate(hand.x, hand.y); ctx.rotate(0.62); ctx.scale(k, k);
+  ctx.shadowColor = 'rgba(10,20,30,.4)'; ctx.shadowBlur = 12; ctx.shadowOffsetX = 5; ctx.shadowOffsetY = 12 - jab * 7;
+  ctx.drawImage(hand.sprite, -14 + back, -70, 280, 130);
+  ctx.restore();
+}
 function drawSheet(x, y, rot, s, lift = 0) {
   ctx.save(); ctx.translate(x, y - lift); ctx.scale(1, lift ? 1 : 0.55); ctx.rotate(rot);
   ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.fillRect(-9 * s, -12 * s, 18 * s, 24 * s); ctx.strokeRect(-9 * s, -12 * s, 18 * s, 24 * s);
@@ -806,6 +814,7 @@ function draw() {
     ctx.fillStyle = 'rgba(27,42,65,.5)'; rr(-w / 2 + 3, -hh / 2 + 3, w, hh, 3); ctx.fill();
     ctx.fillStyle = f.color; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; rr(-w / 2, -hh / 2, w, hh, 3); ctx.fill(); ctx.stroke();
     ctx.fillStyle = INK; ctx.fillText(f.text, 0, fs * 0.06); ctx.restore(); }
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); drawHand();
   if (!grain) { const c = document.createElement('canvas'); c.width = c.height = 160; const d = c.getContext('2d'); d.fillStyle = '#fff'; d.fillRect(0, 0, 160, 160);
     for (let i = 0; i < 2600; i++) { d.fillStyle = `rgba(60,45,20,${Math.random() * 0.16})`; d.fillRect(Math.random() * 160, Math.random() * 160, 1.3, 1.3); } grain = ctx.createPattern(c, 'repeat'); }
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = grain; ctx.fillRect(0, 0, VW, VH); ctx.globalCompositeOperation = 'source-over';
@@ -815,6 +824,7 @@ function draw() {
 cv.addEventListener('pointerdown', e => {
   const x = e.clientX, y = e.clientY; Snd.init();
   if (G.phase === 'builder') return;
+  hand.x = x; hand.y = y; hand.pokeT = G.time; G.boops.push({ x, y, t: G.time }); Snd.boop();
   const g = cam.gerry, n = cam.nicola, inHit = h => h && Math.hypot(x - h[0], y - h[1]) < h[2];
   if (inHit(g.hit)) { if (g.cd <= 0 && G.phase !== 'over') { g.cd = 12; shockwave(); } return; }
   if (inHit(n.hit)) { if (n.cd <= 0 && G.phase !== 'over') { n.cd = 8; tossSheet(4); Snd.toss(); } return; }
@@ -826,6 +836,9 @@ cv.addEventListener('pointerdown', e => {
     else { knock(m, 1.4); bump(m, rand(-8, 8), -10, rand(-14, 14)); fx(m.x, m.y - 10, 'TRIPPED!', '#8EC5E8', 1.15); Snd.trip(); }
     return; }
 });
+
+cv.addEventListener('pointermove', e => { hand.x = e.clientX; hand.y = e.clientY; hand.mouse = e.pointerType === 'mouse'; });
+cv.addEventListener('pointerleave', () => { hand.mouse = false; });
 
 /* ---------- coalition builder ---------- */
 const paintAvatar = (c, name) => { const g = c.getContext('2d'), sp = headSprite(name); g.clearRect(0, 0, 52, 52); if (sp.width === 200) g.drawImage(sp, -6, -5, 64, 64); else g.drawImage(sp, 0, 0, 52, 52); };
@@ -889,5 +902,5 @@ function frame(now) {
   draw(); requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-window.__bullrush = { G, cam, sprites, bobbles, hasPhoto, Snd, update, person, ctx };   // handy for debugging in the console
+window.__bullrush = { G, cam, sprites, bobbles, hasPhoto, Snd, update, person, ctx, hand, makeHand };   // handy for debugging in the console
 })();
