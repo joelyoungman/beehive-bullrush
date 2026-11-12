@@ -15,6 +15,7 @@ window.BULLRUSH_DATA = {
      "name": "Chris Hipkins",
      "short": "Hipkins",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Chris_Hipkins_NZ_Labour_(2).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Chris_Hipkins_NZ_Labour_(2).jpg/250px-Chris_Hipkins_NZ_Labour_(2).jpg",
      "status": true,
      "leader": true,
      "credit": {
@@ -27,6 +28,7 @@ window.BULLRUSH_DATA = {
      "name": "Carmel Sepuloni",
      "short": "Sepuloni",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Profile--carmelsepuloni-390x2-UNC.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Profile--carmelsepuloni-390x2-UNC.jpg/250px-Profile--carmelsepuloni-390x2-UNC.jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -39,6 +41,7 @@ window.BULLRUSH_DATA = {
      "name": "Kieran McAnulty",
      "short": "McAnulty",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Profile--kieranmcanulty-2-390x2-UNC.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Profile--kieranmcanulty-2-390x2-UNC.jpg/250px-Profile--kieranmcanulty-2-390x2-UNC.jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -51,6 +54,7 @@ window.BULLRUSH_DATA = {
      "name": "Barbara Edmonds",
      "short": "Edmonds",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Profile--barbaraedmonds-2-390x2-UNC.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Profile--barbaraedmonds-2-390x2-UNC.jpg/250px-Profile--barbaraedmonds-2-390x2-UNC.jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -63,6 +67,7 @@ window.BULLRUSH_DATA = {
      "name": "Willie Jackson",
      "short": "Jackson",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Willie_Jackson.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Willie_Jackson.jpg/250px-Willie_Jackson.jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -75,6 +80,7 @@ window.BULLRUSH_DATA = {
      "name": "Ayesha Verrall",
      "short": "Verrall",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Profile--ayeshaverrall-390x2-UNC.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Profile--ayeshaverrall-390x2-UNC.jpg/250px-Profile--ayeshaverrall-390x2-UNC.jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -87,6 +93,7 @@ window.BULLRUSH_DATA = {
      "name": "Megan Woods",
      "short": "Woods",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Profile--meganwoods-390x2-UNC.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Profile--meganwoods-390x2-UNC.jpg/250px-Profile--meganwoods-390x2-UNC.jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -99,6 +106,7 @@ window.BULLRUSH_DATA = {
      "name": "Ginny Andersen",
      "short": "Andersen",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Profile--ginnyandersen-3-390x2-UNC.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Profile--ginnyandersen-3-390x2-UNC.jpg/250px-Profile--ginnyandersen-3-390x2-UNC.jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -111,6 +119,7 @@ window.BULLRUSH_DATA = {
      "name": "Cushla Tangaere-Manuel",
      "short": "Tangaere-Manuel",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Profile--cushlatangaeremanuel-390x2-UNC.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Profile--cushlatangaeremanuel-390x2-UNC.jpg/250px-Profile--cushlatangaeremanuel-390x2-UNC.jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -123,6 +132,7 @@ window.BULLRUSH_DATA = {
      "name": "Craig Renney",
      "short": "Renney",
      "img": null,
+     "cors": null,
      "status": true,
      "leader": false,
      "credit": null
@@ -143,6 +153,7 @@ window.BULLRUSH_DATA = {
      "name": "Christopher Luxon",
      "short": "Luxon",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/LUXON,_Christopher_-_Botany_(cropped).png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/LUXON,_Christopher_-_Botany_(cropped).png/250px-LUXON,_Christopher_-_Botany_(cropped).png",
      "status": true,
      "leader": true,
      "credit": {
@@ -155,6 +166,7 @@ window.BULLRUSH_DATA = {
      "name": "Simeon Brown",
      "short": "Brown",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/BROWN,_Simeon_-_Pakuranga_(cropped).png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/BROWN,_Simeon_-_Pakuranga_(cropped).png/250px-BROWN,_Simeon_-_Pakuranga_(cropped).png",
      "status": true,
      "leader": false,
      "credit": {
@@ -167,6 +179,7 @@ window.BULLRUSH_DATA = {
      "name": "Erica Stanford",
      "short": "Stanford",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/STANFORD,_Erica_-_East_Coast_Bays_(cropped_alt).png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/STANFORD,_Erica_-_East_Coast_Bays_(cropped_alt).png/250px-STANFORD,_Erica_-_East_Coast_Bays_(cropped_alt).png",
      "status": "unverified",
      "leader": false,
      "credit": {
@@ -179,6 +192,7 @@ window.BULLRUSH_DATA = {
      "name": "Louise Upston",
      "short": "Upston",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/UPSTON,_Louise_-_Taupo_(cropped).png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/UPSTON,_Louise_-_Taupo_(cropped).png/250px-UPSTON,_Louise_-_Taupo_(cropped).png",
      "status": "unverified",
      "leader": false,
      "credit": {
@@ -191,6 +205,7 @@ window.BULLRUSH_DATA = {
      "name": "Mark Mitchell",
      "short": "Mitchell",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/MITCHELL,_Mark_-_Whangaparaoa_(cropped).png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/MITCHELL,_Mark_-_Whangaparaoa_(cropped).png/250px-MITCHELL,_Mark_-_Whangaparaoa_(cropped).png",
      "status": "unverified",
      "leader": false,
      "credit": {
@@ -203,6 +218,7 @@ window.BULLRUSH_DATA = {
      "name": "Tama Potaka",
      "short": "Potaka",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/POTAKA,_Tama_-_Hamilton_West_(cropped).png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/POTAKA,_Tama_-_Hamilton_West_(cropped).png/250px-POTAKA,_Tama_-_Hamilton_West_(cropped).png",
      "status": "unverified",
      "leader": false,
      "credit": {
@@ -215,6 +231,7 @@ window.BULLRUSH_DATA = {
      "name": "Simon Watts",
      "short": "Watts",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/WATTS,_Simon_-_North_Shore_(cropped).png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/WATTS,_Simon_-_North_Shore_(cropped).png/250px-WATTS,_Simon_-_North_Shore_(cropped).png",
      "status": true,
      "leader": false,
      "credit": {
@@ -227,6 +244,7 @@ window.BULLRUSH_DATA = {
      "name": "Todd McClay",
      "short": "McClay",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/2025_Todd_McClay_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/2025_Todd_McClay_(cropped).jpg/250px-2025_Todd_McClay_(cropped).jpg",
      "status": "unverified",
      "leader": false,
      "credit": {
@@ -239,6 +257,7 @@ window.BULLRUSH_DATA = {
      "name": "Matt Doocey",
      "short": "Doocey",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/DOOCEY,_Matt_-_Waimakariri_(cropped).png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/DOOCEY,_Matt_-_Waimakariri_(cropped).png/250px-DOOCEY,_Matt_-_Waimakariri_(cropped).png",
      "status": true,
      "leader": false,
      "credit": {
@@ -251,6 +270,7 @@ window.BULLRUSH_DATA = {
      "name": "Mahesh Muralidhar",
      "short": "Muralidhar",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/MURALIDHAR,_Mahesh_-_Auckland_Central_(cropped).png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/MURALIDHAR,_Mahesh_-_Auckland_Central_(cropped).png/250px-MURALIDHAR,_Mahesh_-_Auckland_Central_(cropped).png",
      "status": true,
      "leader": false,
      "credit": {
@@ -263,6 +283,7 @@ window.BULLRUSH_DATA = {
      "name": "Jessica Rowe",
      "short": "Rowe",
      "img": null,
+     "cors": null,
      "status": true,
      "leader": false,
      "credit": null
@@ -283,6 +304,7 @@ window.BULLRUSH_DATA = {
      "name": "Chlöe Swarbrick",
      "short": "Swarbrick",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Chl%C3%B6e_Swarbrick_headshot.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Chl%C3%B6e_Swarbrick_headshot.jpg/250px-Chl%C3%B6e_Swarbrick_headshot.jpg",
      "status": true,
      "leader": true,
      "credit": {
@@ -295,6 +317,7 @@ window.BULLRUSH_DATA = {
      "name": "Marama Davidson",
      "short": "Davidson",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Marama_Davidson_2_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Marama_Davidson_2_(cropped).jpg/250px-Marama_Davidson_2_(cropped).jpg",
      "status": true,
      "leader": true,
      "credit": {
@@ -307,6 +330,7 @@ window.BULLRUSH_DATA = {
      "name": "Julie Anne Genter",
      "short": "Genter",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Julie_Anne_Genter_3_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Julie_Anne_Genter_3_(cropped).jpg/250px-Julie_Anne_Genter_3_(cropped).jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -319,6 +343,7 @@ window.BULLRUSH_DATA = {
      "name": "Tamatha Paul",
      "short": "Paul",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Tamatha_Paul_NB_4-3_ver_2_(1)_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Tamatha_Paul_NB_4-3_ver_2_(1)_(cropped).jpg/250px-Tamatha_Paul_NB_4-3_ver_2_(1)_(cropped).jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -331,6 +356,7 @@ window.BULLRUSH_DATA = {
      "name": "Ricardo Menéndez March",
      "short": "Menéndez March",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Ricardo_Men%C3%A9ndez_March_4_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Ricardo_Men%C3%A9ndez_March_4_(cropped).jpg/250px-Ricardo_Men%C3%A9ndez_March_4_(cropped).jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -343,6 +369,7 @@ window.BULLRUSH_DATA = {
      "name": "Teanau Tuiono",
      "short": "Tuiono",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Teanau_Tuiono_4_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Teanau_Tuiono_4_(cropped).jpg/250px-Teanau_Tuiono_4_(cropped).jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -355,6 +382,7 @@ window.BULLRUSH_DATA = {
      "name": "Hūhana Lyndon",
      "short": "Lyndon",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/H%C5%ABhana_Lyndon_8_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/H%C5%ABhana_Lyndon_8_(cropped).jpg/250px-H%C5%ABhana_Lyndon_8_(cropped).jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -367,6 +395,7 @@ window.BULLRUSH_DATA = {
      "name": "Lan Pham",
      "short": "Pham",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Lan_Pham1_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Lan_Pham1_(cropped).jpg/250px-Lan_Pham1_(cropped).jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -379,6 +408,7 @@ window.BULLRUSH_DATA = {
      "name": "Steve Abel",
      "short": "Abel",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Steve_Abel_4_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Steve_Abel_4_(cropped).jpg/250px-Steve_Abel_4_(cropped).jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -403,6 +433,7 @@ window.BULLRUSH_DATA = {
      "name": "David Seymour",
      "short": "Seymour",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/David_Seymour_2023_(cropped)_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/David_Seymour_2023_(cropped)_(cropped).jpg/250px-David_Seymour_2023_(cropped)_(cropped).jpg",
      "status": "unverified",
      "leader": true,
      "credit": {
@@ -415,6 +446,7 @@ window.BULLRUSH_DATA = {
      "name": "Nicole McKee",
      "short": "McKee",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Nicole_McKee_2025_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Nicole_McKee_2025_(cropped).jpg/250px-Nicole_McKee_2025_(cropped).jpg",
      "status": "unverified",
      "leader": false,
      "credit": {
@@ -427,6 +459,7 @@ window.BULLRUSH_DATA = {
      "name": "Karen Chhour",
      "short": "Chhour",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Karen_Chhour_2023_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Karen_Chhour_2023_(cropped).jpg/250px-Karen_Chhour_2023_(cropped).jpg",
      "status": "unverified",
      "leader": false,
      "credit": {
@@ -439,6 +472,7 @@ window.BULLRUSH_DATA = {
      "name": "Simon Court",
      "short": "Court",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Simon_Court,_2025.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Simon_Court,_2025.jpg/250px-Simon_Court,_2025.jpg",
      "status": "unverified",
      "leader": false,
      "credit": {
@@ -451,6 +485,7 @@ window.BULLRUSH_DATA = {
      "name": "Todd Stephenson",
      "short": "Stephenson",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Todd_Stephenson.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Todd_Stephenson.jpg/250px-Todd_Stephenson.jpg",
      "status": "unverified",
      "leader": false,
      "credit": {
@@ -463,6 +498,7 @@ window.BULLRUSH_DATA = {
      "name": "Andrew Hoggard",
      "short": "Hoggard",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Andrew_Hoggard_drinking_2024_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Andrew_Hoggard_drinking_2024_(cropped).jpg/250px-Andrew_Hoggard_drinking_2024_(cropped).jpg",
      "status": "unverified",
      "leader": false,
      "credit": {
@@ -475,6 +511,7 @@ window.BULLRUSH_DATA = {
      "name": "Parmjeet Parmar",
      "short": "Parmar",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Parmjeet_Parmar.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Parmjeet_Parmar.jpg/250px-Parmjeet_Parmar.jpg",
      "status": "unverified",
      "leader": false,
      "credit": {
@@ -487,6 +524,7 @@ window.BULLRUSH_DATA = {
      "name": "Paul Henry",
      "short": "Henry",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Paul_Henry_2008.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Paul_Henry_2008.jpg/250px-Paul_Henry_2008.jpg",
      "status": "true",
      "leader": false,
      "credit": {
@@ -499,6 +537,7 @@ window.BULLRUSH_DATA = {
      "name": "James Christmas",
      "short": "Christmas",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/CHRISTMAS_James_-_List_(cropped).png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/CHRISTMAS_James_-_List_(cropped).png/250px-CHRISTMAS_James_-_List_(cropped).png",
      "status": "true",
      "leader": false,
      "credit": {
@@ -523,6 +562,7 @@ window.BULLRUSH_DATA = {
      "name": "Winston Peters",
      "short": "Peters",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Winston_Peters_2024_US_Deputy_Secretary_visit_(further_crop).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Winston_Peters_2024_US_Deputy_Secretary_visit_(further_crop).jpg/250px-Winston_Peters_2024_US_Deputy_Secretary_visit_(further_crop).jpg",
      "status": true,
      "leader": true,
      "credit": {
@@ -535,6 +575,7 @@ window.BULLRUSH_DATA = {
      "name": "Shane Jones",
      "short": "Jones",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Shane_Jones_2018_5.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Shane_Jones_2018_5.jpg/250px-Shane_Jones_2018_5.jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -547,6 +588,7 @@ window.BULLRUSH_DATA = {
      "name": "Casey Costello",
      "short": "Costello",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Casey_Costello_November_2024.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Casey_Costello_November_2024.jpg/250px-Casey_Costello_November_2024.jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -559,6 +601,7 @@ window.BULLRUSH_DATA = {
      "name": "Andy Foster",
      "short": "Foster",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Official_photo_of_Andy_Foster.png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Official_photo_of_Andy_Foster.png/250px-Official_photo_of_Andy_Foster.png",
      "status": true,
      "leader": false,
      "credit": {
@@ -571,6 +614,7 @@ window.BULLRUSH_DATA = {
      "name": "Jenny Marcroft",
      "short": "Marcroft",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Jenny_Marcroft_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Jenny_Marcroft_(cropped).jpg/250px-Jenny_Marcroft_(cropped).jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -583,6 +627,7 @@ window.BULLRUSH_DATA = {
      "name": "Taine Randell",
      "short": "Randell",
      "img": null,
+     "cors": null,
      "status": true,
      "leader": false,
      "credit": null
@@ -591,6 +636,7 @@ window.BULLRUSH_DATA = {
      "name": "Craig Stobo",
      "short": "Stobo",
      "img": null,
+     "cors": null,
      "status": true,
      "leader": false,
      "credit": null
@@ -599,6 +645,7 @@ window.BULLRUSH_DATA = {
      "name": "Harete Hipango",
      "short": "Hipango",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/HIPANGO,_Harete_-_Te_Tai_Hauauru_(cropped).png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/HIPANGO,_Harete_-_Te_Tai_Hauauru_(cropped).png/250px-HIPANGO,_Harete_-_Te_Tai_Hauauru_(cropped).png",
      "status": true,
      "leader": false,
      "credit": {
@@ -611,6 +658,7 @@ window.BULLRUSH_DATA = {
      "name": "Michael Laws",
      "short": "Laws",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Michael_Laws_on_the_Platform_21_October_2022_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Michael_Laws_on_the_Platform_21_October_2022_(cropped).jpg/250px-Michael_Laws_on_the_Platform_21_October_2022_(cropped).jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -635,6 +683,7 @@ window.BULLRUSH_DATA = {
      "name": "Qiulae Wong",
      "short": "Wong",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Qiulae-wong-opportunity-party.png?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Qiulae-wong-opportunity-party.png/250px-Qiulae-wong-opportunity-party.png",
      "status": true,
      "leader": true,
      "credit": {
@@ -647,6 +696,7 @@ window.BULLRUSH_DATA = {
      "name": "Daniel Eb",
      "short": "Eb",
      "img": null,
+     "cors": null,
      "status": true,
      "leader": false,
      "credit": null
@@ -654,23 +704,34 @@ window.BULLRUSH_DATA = {
     {
      "name": "Jessica Hammond",
      "short": "Hammond",
-     "img": null,
+     "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Jessica_Hammond_2026.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Jessica_Hammond_2026.jpg/250px-Jessica_Hammond_2026.jpg",
      "status": true,
      "leader": false,
-     "credit": null
+     "credit": {
+      "by": "Nil NZ",
+      "lic": "CC BY-SA 4.0",
+      "src": "https://commons.wikimedia.org/wiki/File:Jessica_Hammond_2026.jpg"
+     }
     },
     {
      "name": "Kayla Kingdon-Bebb",
      "short": "Kingdon-Bebb",
-     "img": null,
+     "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Kayla_Kingdon-Bebb_2026_(further_crop).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Kayla_Kingdon-Bebb_2026_(further_crop).jpg/250px-Kayla_Kingdon-Bebb_2026_(further_crop).jpg",
      "status": true,
      "leader": false,
-     "credit": null
+     "credit": {
+      "by": "Government House, Department of the Prime Minister and Cabinet",
+      "lic": "CC0",
+      "src": "https://commons.wikimedia.org/wiki/File:Kayla_Kingdon-Bebb_2026_(further_crop).jpg"
+     }
     },
     {
      "name": "Eden Skipper",
      "short": "Skipper",
      "img": null,
+     "cors": null,
      "status": true,
      "leader": false,
      "credit": null
@@ -678,15 +739,21 @@ window.BULLRUSH_DATA = {
     {
      "name": "Jodie Kuntzsch",
      "short": "Kuntzsch",
-     "img": null,
+     "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Jodie_Kuntzsch_06_(cropped).jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Jodie_Kuntzsch_06_(cropped).jpg/250px-Jodie_Kuntzsch_06_(cropped).jpg",
      "status": true,
      "leader": false,
-     "credit": null
+     "credit": {
+      "by": "Schwede66",
+      "lic": "CC BY-SA 4.0",
+      "src": "https://commons.wikimedia.org/wiki/File:Jodie_Kuntzsch_06_(cropped).jpg"
+     }
     },
     {
      "name": "Sarah Lucas",
      "short": "Lucas",
      "img": null,
+     "cors": null,
      "status": true,
      "leader": false,
      "credit": null
@@ -707,6 +774,7 @@ window.BULLRUSH_DATA = {
      "name": "Rawiri Waititi",
      "short": "Waititi",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Rawiri%20Waititi%20August%202025.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Rawiri_Waititi_August_2025.jpg/250px-Rawiri_Waititi_August_2025.jpg",
      "status": true,
      "leader": true,
      "credit": {
@@ -719,6 +787,7 @@ window.BULLRUSH_DATA = {
      "name": "Debbie Ngarewa-Packer",
      "short": "Ngarewa-Packer",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Debbie%20Ngarewa-Packer%20August%202025.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Debbie_Ngarewa-Packer_August_2025.jpg/250px-Debbie_Ngarewa-Packer_August_2025.jpg",
      "status": true,
      "leader": true,
      "credit": {
@@ -731,6 +800,7 @@ window.BULLRUSH_DATA = {
      "name": "Hana-Rawhiti Maipi-Clarke",
      "short": "Maipi-Clarke",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Hana-Rawhiti%20Maipi-Clarke%20%28cropped%20half-shot%29.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Hana-Rawhiti_Maipi-Clarke_(cropped_half-shot).jpg/250px-Hana-Rawhiti_Maipi-Clarke_(cropped_half-shot).jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -743,6 +813,7 @@ window.BULLRUSH_DATA = {
      "name": "Oriini Kaipara",
      "short": "Kaipara",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Oriini%20Kaipara%2C%20December%202022%20%28cropped%29.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Oriini_Kaipara,_December_2022_(cropped).jpg/250px-Oriini_Kaipara,_December_2022_(cropped).jpg",
      "status": true,
      "leader": false,
      "credit": {
@@ -755,6 +826,7 @@ window.BULLRUSH_DATA = {
      "name": "Aperahama Edwards",
      "short": "Edwards",
      "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Aperahama%20Edwards%202026%20%28cropped%29.jpg?width=250",
+     "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Aperahama_Edwards_2026_(cropped).jpg/250px-Aperahama_Edwards_2026_(cropped).jpg",
      "status": "unverified",
      "leader": false,
      "credit": {
@@ -771,6 +843,7 @@ window.BULLRUSH_DATA = {
    "name": "Gerry Brownlee",
    "short": "Brownlee",
    "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Speaker%20Gerry%20Brownlee%202025%20%28cropped%29.jpg?width=250",
+   "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Speaker_Gerry_Brownlee_2025_(cropped).jpg/250px-Speaker_Gerry_Brownlee_2025_(cropped).jpg",
    "status": true,
    "leader": false,
    "credit": {
@@ -783,6 +856,7 @@ window.BULLRUSH_DATA = {
    "name": "Nicola Willis",
    "short": "Willis",
    "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Nicola%20Willis%20in%20her%20office%2C%20Wellington%2C%20September%202026.jpg?width=250",
+   "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Nicola_Willis_in_her_office,_Wellington,_September_2026.jpg/250px-Nicola_Willis_in_her_office,_Wellington,_September_2026.jpg",
    "status": true,
    "leader": false,
    "credit": {
@@ -795,6 +869,7 @@ window.BULLRUSH_DATA = {
    "name": "Chris Bishop",
    "short": "Bishop",
    "img": "https://commons.wikimedia.org/wiki/Special:FilePath/BISHOP%2C%20Chris%20-%20Hutt%20South%20%28cropped%29.png?width=250",
+   "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/BISHOP,_Chris_-_Hutt_South_(cropped).png/250px-BISHOP,_Chris_-_Hutt_South_(cropped).png",
    "status": true,
    "leader": false,
    "credit": {
@@ -807,6 +882,7 @@ window.BULLRUSH_DATA = {
    "name": "Paul Goldsmith",
    "short": "Goldsmith",
    "img": "https://commons.wikimedia.org/wiki/Special:FilePath/GOLDSMITH%2C%20Paul%20-%20Epsom%20%28cropped%29.png?width=250",
+   "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/GOLDSMITH,_Paul_-_Epsom_(cropped).png/250px-GOLDSMITH,_Paul_-_Epsom_(cropped).png",
    "status": true,
    "leader": false,
    "credit": {
@@ -819,6 +895,7 @@ window.BULLRUSH_DATA = {
    "name": "Tākuta Ferris",
    "short": "Ferris",
    "img": "https://commons.wikimedia.org/wiki/Special:FilePath/T%C4%81kuta%20Ferris.jpg?width=250",
+   "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/T%C4%81kuta_Ferris.jpg/250px-T%C4%81kuta_Ferris.jpg",
    "status": true,
    "leader": false,
    "credit": {
@@ -831,6 +908,7 @@ window.BULLRUSH_DATA = {
    "name": "Mariameno Kapa-Kingi",
    "short": "Kapa-Kingi",
    "img": "https://commons.wikimedia.org/wiki/Special:FilePath/Mariameno%20Kapa-Kingi%202025.jpg?width=250",
+   "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Mariameno_Kapa-Kingi_2025.jpg/250px-Mariameno_Kapa-Kingi_2025.jpg",
    "status": true,
    "leader": false,
    "credit": {
@@ -843,6 +921,7 @@ window.BULLRUSH_DATA = {
    "name": "Chris Penk",
    "short": "Penk",
    "img": "https://commons.wikimedia.org/wiki/Special:FilePath/PENK%2C%20Chris%20-%20Kaipara%20ki%20Mahurangi%20%28cropped%29.png?width=250",
+   "cors": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/PENK,_Chris_-_Kaipara_ki_Mahurangi_(cropped).png/250px-PENK,_Chris_-_Kaipara_ki_Mahurangi_(cropped).png",
    "status": true,
    "leader": false,
    "credit": {

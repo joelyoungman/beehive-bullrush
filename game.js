@@ -79,21 +79,99 @@ function photoSprite(img, name) {
   g.drawImage(img, cx - s / 2, top, s, s, 0, 0, 160, 160);
   return c;
 }
+/* ---------- bobbleheads ---------- */
+// Bobble mode cuts each head out of its photo (egg-shaped mask plus a flood-fill of the plain background),
+// then bakes an outline and a glossy resin highlight into a 200px sprite. Falls back to the circle when
+// the photo's pixels can't be read.
+let BOBBLE = true;
+try { const q = new URLSearchParams(location.search).get('bobble'); if (q !== null) BOBBLE = q !== '0'; else if (localStorage.getItem('bullrush.bobble') === '0') BOBBLE = false; } catch (e) {}
+const bobbles = {};      // name -> 200px cut-out head canvas (transparent background)
+function eggMask(N) {
+  // 1 inside a head-shaped egg (wide crown, narrower jaw), feathered over ~3px.
+  const a = new Float32Array(N * N), cx = N / 2, cy = N * 0.47, rx = N * 0.4, ryT = N * 0.46, ryB = N * 0.45;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const dy = y - cy, ny = dy / (dy < 0 ? ryT : ryB), t = Math.max(0, ny);
+    const rxy = rx * (1 - 0.28 * t * t), nx = (x - cx) / rxy, d = Math.sqrt(nx * nx + ny * ny);
+    a[y * N + x] = clamp((1 - d) * Math.min(rxy, ryB) / 3 + 0.5, 0, 1);
+  }
+  return a;
+}
+let EGG = null;
+function cutHead(src) {
+  // src: 160px square crop (same framing as the circle). Returns a 200px canvas, or null if unreadable.
+  const N = 160, w = document.createElement('canvas'); w.width = w.height = N; const g = w.getContext('2d', { willReadFrequently: true });
+  g.drawImage(src, 0, 0);
+  let id; try { id = g.getImageData(0, 0, N, N); } catch (e) { return null; }
+  const px = id.data; EGG = EGG || eggMask(N);
+  // background colours: sample the top edge and the upper part of both sides
+  const bg = [];
+  for (let i = 0; i < N; i += 6) {
+    bg.push(i * 4);
+    if (i < N * 0.62) bg.push((i * N + 1) * 4, (i * N + N - 2) * 4);
+  }
+  const cols = bg.map(o => [px[o], px[o + 1], px[o + 2]]);
+  const near = o => { const r = px[o], gg = px[o + 1], b = px[o + 2]; for (const c of cols) { if ((r - c[0]) ** 2 + (gg - c[1]) ** 2 + (b - c[2]) ** 2 < 900) return true; } return false; };
+  // flood from the border through background-coloured pixels; never into the protected face core
+  const gone = new Uint8Array(N * N), seen = new Uint8Array(N * N), stack = [];
+  const core = (x, y) => ((x - 80) / 40) ** 2 + ((y - 78) / 50) ** 2 < 1;
+  for (let i = 0; i < N; i++) stack.push(i, 0, 0, i, N - 1, i);
+  while (stack.length) {
+    const y = stack.pop(), x = stack.pop();
+    if (x < 0 || y < 0 || x >= N || y >= N) continue;
+    const k = y * N + x; if (seen[k]) continue; seen[k] = 1;
+    if (core(x, y) || !near(k * 4)) continue;
+    gone[k] = 1; stack.push(x + 1, y, x - 1, y, x, y + 1, x, y - 1);
+  }
+  let inEgg = 0, cut = 0; for (let k = 0; k < N * N; k++) if (EGG[k] > 0.5) { inEgg++; if (gone[k]) cut++; }
+  const useFill = cut / inEgg < 0.42;   // it ate too much: skin or hair matches the backdrop, so trust the egg alone
+  // Heads have no holes in them: keep every pixel between the outermost kept pixels on each row, which
+  // closes notches the flood bit into bald heads and sky-coloured shirts. Then smooth the outline:
+  // blur, re-threshold, and a light final blur for anti-aliasing.
+  let keep = new Float32Array(N * N);
+  for (let y = 0; y < N; y++) {
+    let a = -1, b = -1;
+    for (let x = 0; x < N; x++) if (!(useFill && gone[y * N + x]) && EGG[y * N + x] > 0.5) { if (a < 0) a = x; b = x; }
+    for (let x = 0; x < N; x++) keep[y * N + x] = !useFill || (a >= 0 && x >= a - 2 && x <= b + 2) ? 1 : 0;
+  }
+  const box = (m, r) => { const o = new Float32Array(N * N); for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { let t = 0, n = 0; for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) { const xx = x + i, yy = y + j; if (xx >= 0 && yy >= 0 && xx < N && yy < N) { t += m[yy * N + xx]; n++; } } o[y * N + x] = t / n; } return o; };
+  if (useFill) { keep = box(keep, 3); for (let k = 0; k < N * N; k++) keep[k] = keep[k] > 0.5 ? 1 : 0; keep = box(keep, 1); }
+  for (let k = 0; k < N * N; k++) px[k * 4 + 3] = Math.round(255 * EGG[k] * keep[k]);
+  g.putImageData(id, 0, 0);
+  // compose: dark outline (silhouette stamped around), the head, then resin gloss and a little under-chin shade
+  const M = 200, out = document.createElement('canvas'); out.width = out.height = M; const o = out.getContext('2d');
+  const sil = document.createElement('canvas'); sil.width = sil.height = N; const sg = sil.getContext('2d');
+  sg.drawImage(w, 0, 0); sg.globalCompositeOperation = 'source-in'; sg.fillStyle = '#1a1a1a'; sg.fillRect(0, 0, N, N);
+  const off = (M - N) / 2;
+  for (let a = 0; a < TAU; a += TAU / 16) o.drawImage(sil, off + Math.cos(a) * 4, off + Math.sin(a) * 4);
+  o.drawImage(w, off, off);
+  o.globalCompositeOperation = 'source-atop';
+  const gl = o.createRadialGradient(M * 0.38, M * 0.26, 2, M * 0.38, M * 0.26, M * 0.32);
+  gl.addColorStop(0, 'rgba(255,255,255,.55)'); gl.addColorStop(0.35, 'rgba(255,255,255,.12)'); gl.addColorStop(1, 'rgba(255,255,255,0)');
+  o.fillStyle = gl; o.fillRect(0, 0, M, M);
+  const sh = o.createLinearGradient(0, M * 0.55, 0, M); sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(40,20,0,.28)');
+  o.fillStyle = sh; o.fillRect(0, 0, M, M);
+  out.dataset.cut = useFill ? 'fill' : 'egg';
+  return out;
+}
+const headSprite = name => (BOBBLE && bobbles[name]) || sprites[name];
 const queue = [];
 let loading = 0;
 function pump() {
   while (loading < 4 && queue.length) {
     const job = queue.shift(); loading++;
-    const img = new Image();
+    const img = new Image(); if (job.cors) img.crossOrigin = 'anonymous';
     img.onload = () => { loading--; job.ok(img); pump(); };
-    img.onerror = () => { loading--; if (job.tries++ < 1) setTimeout(() => { queue.push(job); pump(); }, 1800); else { console.warn('Bullrush: using a stand-in, photo did not load for', job.label); } pump(); };
+    img.onerror = () => { loading--; if (job.tries++ < 1) setTimeout(() => { queue.push(job); pump(); }, 1800); else if (job.fail) job.fail(); else { console.warn('Bullrush: using a stand-in, photo did not load for', job.label); } pump(); };
     img.src = job.url;
   }
 }
 function loadPortrait(p, color) {
   sprites[p.name] = standIn(p, color);
   if (!p.img) return;
-  queue.push({ url: p.img, label: p.name, tries: 0, ok: img => { sprites[p.name] = photoSprite(img, p.name); hasPhoto[p.name] = true; listeners.forEach(f => f(p.name)); } });
+  const ok = img => { sprites[p.name] = photoSprite(img, p.name); hasPhoto[p.name] = true; const b = cutHead(sprites[p.name]); if (b) bobbles[p.name] = b; listeners.forEach(f => f(p.name)); };
+  // Try the CORS-enabled thumbnail first (needed for the cut-out); fall back to the plain photo URL.
+  if (p.cors) queue.push({ url: p.cors, cors: true, label: p.name, tries: 1, ok, fail: () => queue.push({ url: p.img, label: p.name, tries: 0, ok }) });
+  else queue.push({ url: p.img, label: p.name, tries: 0, ok });
 }
 for (const pt of D.parties) for (const m of pt.members) loadPortrait(m, pt.color);
 for (const m of D.departed) loadPortrait(m, '#888888');
@@ -443,14 +521,24 @@ function person(x, y, U, o) {
   ctx.strokeStyle = trim; ctx.lineWidth = 2.2 * U; ctx.beginPath(); ctx.moveTo(-4.5 * U, shY + U); ctx.lineTo(-1.5 * U, shY + 12 * U); ctx.moveTo(4.5 * U, shY + U); ctx.lineTo(1.5 * U, shY + 12 * U); ctx.stroke();
   if (o.vest) { ctx.fillStyle = '#d8d8d8'; ctx.fillRect(-9 * U, shY + 9 * U, 18 * U, 2.4 * U); ctx.fillRect(-9 * U, shY + 14 * U, 18 * U, 2.4 * U); }
   // spring neck + head
-  const R = (o.headR || 15) * U, hx = hd.ox * R, hy = shY - R * 0.86 + hd.oy * R;
-  ctx.strokeStyle = '#8a8a8a'; ctx.lineWidth = 1.6 * U; ctx.beginPath(); ctx.moveTo(0, shY);
-  for (let i = 1; i <= 6; i++) ctx.lineTo(lerp(0, hx, i / 6) + (i % 2 ? 3 : -3) * U, lerp(shY, hy + R * 0.8, i / 6)); ctx.stroke();
+  const bh = !!(BOBBLE && o.sprite && o.sprite.width === 200);
+  const R = (o.headR || 15) * U * (bh ? 1.32 : 1), hx = hd.ox * R, hy = shY - R * (bh ? 0.95 : 0.86) + hd.oy * R;
+  if (bh) {
+    // a tight coil of springs between collar and chin
+    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.2;
+    for (let i = 0; i < 5; i++) { const t = i / 4; ctx.fillStyle = i % 2 ? '#d0d0d0' : '#8f8f8f'; ell(lerp(0, hx * 0.8, t), lerp(shY + U, hy + R * 0.72, t), 4.2 * U, 1.6 * U); ctx.fill(); ctx.stroke(); }
+  } else {
+    ctx.strokeStyle = '#8a8a8a'; ctx.lineWidth = 1.6 * U; ctx.beginPath(); ctx.moveTo(0, shY);
+    for (let i = 1; i <= 6; i++) ctx.lineTo(lerp(0, hx, i / 6) + (i % 2 ? 3 : -3) * U, lerp(shY, hy + R * 0.8, i / 6)); ctx.stroke();
+  }
   ctx.save(); ctx.translate(hx, hy); ctx.rotate(hd.a + (o.headRot || 0));
   const sq = clamp((hd.vy || 0) * 0.012, -0.16, 0.16); ctx.scale(1 - sq, 1 + sq);
-  ctx.fillStyle = suit; ell(0, 0, R + 3.4 * U, R + 3.4 * U); ctx.fill(); ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.8; ctx.stroke();
-  ctx.fillStyle = '#fff'; ell(0, 0, R + 1.3 * U, R + 1.3 * U); ctx.fill();
-  if (o.sprite) ctx.drawImage(o.sprite, -R, -R, R * 2, R * 2);
+  if (bh) { const S = R * 2 * 200 / 160; ctx.drawImage(o.sprite, -S / 2, -S / 2, S, S); }
+  else {
+    ctx.fillStyle = suit; ell(0, 0, R + 3.4 * U, R + 3.4 * U); ctx.fill(); ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.8; ctx.stroke();
+    ctx.fillStyle = '#fff'; ell(0, 0, R + 1.3 * U, R + 1.3 * U); ctx.fill();
+    if (o.sprite) ctx.drawImage(o.sprite, -R, -R, R * 2, R * 2);
+  }
   // reactions drawn over the photo
   if (st === 'down') { ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2.6 * U; ctx.lineCap = 'round'; for (const s of [-1, 1]) { const ex = s * R * 0.34, ey = -R * 0.12, q = R * 0.17; ctx.beginPath(); ctx.moveTo(ex - q, ey - q); ctx.lineTo(ex + q, ey + q); ctx.moveTo(ex + q, ey - q); ctx.lineTo(ex - q, ey + q); ctx.stroke(); } }
   else if (st === 'stumble') { ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.8 * U; for (const s of [-1, 1]) { ctx.beginPath(); for (let i = 0; i < 14; i++) { const a = i * 0.7 + G.time * 9 * s, r2 = i * R * 0.016; ctx.lineTo(s * R * 0.34 + Math.cos(a) * r2, -R * 0.12 + Math.sin(a) * r2); } ctx.stroke(); } }
@@ -467,7 +555,7 @@ function star(x, y, r, col) { ctx.fillStyle = col; ctx.strokeStyle = '#1a1a1a'; 
 function drawMP(m) {
   const p = proj(m.x, m.y), U = p.s; m.sx = p.x; m.sy = p.y; m.U = U;
   const sp = Math.hypot(m.vx, m.vy), tagger = m.role === 'tagger' || m.conv;
-  person(p.x, p.y, U, { party: m.party, sprite: sprites[m.name], hd: m.hd, moving: sp > 1.5 && m.state !== 'down', phase: m.phase, state: m.stun > 0 || m.state === 'down' ? m.state : 'idle', downT: 1, side: m.side, face: m.face,
+  person(p.x, p.y, U, { party: m.party, sprite: headSprite(m.name), hd: m.hd, moving: sp > 1.5 && m.state !== 'down', phase: m.phase, state: m.stun > 0 || m.state === 'down' ? m.state : 'idle', downT: 1, side: m.side, face: m.face,
     pose: m.pose, hop: m.hop, ring: G.phase === 'builder' ? null : tagger ? '#ff7a1a' : m.safe ? '#7dff7a' : '#ffffff', sweat: sp > 14 && m.stun <= 0, seed: m.jp });
   if (m.stun <= 0 || m.state !== 'down') { ctx.font = `800 ${Math.max(8, 9.5 * U)}px "Trebuchet MS", Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.75)'; ctx.strokeText(m.short, p.x, p.y + 4 * U); ctx.fillStyle = '#fff'; ctx.fillText(m.short, p.x, p.y + 4 * U); }
 }
@@ -476,7 +564,7 @@ function tree(x, y, seed, peek) {
   ctx.fillStyle = 'rgba(0,0,0,.25)'; ell(p.x, p.y, 46 * U, 9 * U); ctx.fill();
   if (peek) { const out = 0.55 + Math.sin(G.time * 0.8 + seed) * 0.3 + (peek.c.fist > 0 ? 0.35 : 0), px = p.x + peek.side * (8 + out * 20) * U;
     const lean = peek.side * 0.2, shaking = peek.c.fist > 0;
-    const q = person(px, p.y - 2 * U, U * 0.8, { suit: '#3b3b3b', trim: '#111', tie: '#d12c38', sprite: sprites[peek.name], binos: !shaking, headRot: lean, hd: { ox: 0, oy: shaking ? Math.sin(G.time * 30) * 0.05 : 0, a: 0 },
+    const q = person(px, p.y - 2 * U, U * 0.8, { suit: '#3b3b3b', trim: '#111', tie: '#d12c38', sprite: headSprite(peek.name), binos: !shaking, headRot: lean, hd: { ox: 0, oy: shaking ? Math.sin(G.time * 30) * 0.05 : 0, a: 0 },
       aL: shaking && peek.side < 0 ? 2.7 + Math.sin(G.time * 26) * 0.35 : 0.2, aR: shaking && peek.side > 0 ? 2.7 + Math.sin(G.time * 26) * 0.35 : 0.2 });
     if (shaking) bubble(px, p.y - 62 * U, pick2(seed, ['Oi!!', 'Hmph!', 'Unbelievable!']), U); }
   ctx.fillStyle = '#5a3d28'; ctx.strokeStyle = '#2b1a0f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(p.x - 9 * U, p.y); ctx.quadraticCurveTo(p.x - 4 * U, p.y - 30 * U, p.x - 14 * U, p.y - 62 * U); ctx.lineTo(p.x + 12 * U, p.y - 62 * U); ctx.quadraticCurveTo(p.x + 3 * U, p.y - 30 * U, p.x + 10 * U, p.y); ctx.closePath(); ctx.fill(); ctx.stroke();
@@ -506,7 +594,7 @@ const drawCam = {
     for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(p.x + s * 20 * U, p.y); ctx.lineTo(p.x + s * 12 * U, p.y - seat); ctx.stroke(); }
     for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(p.x - (20 - i * 2) * U, p.y - seat * i / 4); ctx.lineTo(p.x + (20 - i * 2) * U, p.y - seat * i / 4); ctx.stroke(); }
     ctx.fillStyle = '#f2f2f2'; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2; rr(p.x - 17 * U, p.y - seat - 3 * U, 34 * U, 6 * U, 2 * U); ctx.fill(); ctx.stroke(); rr(p.x - 17 * U, p.y - seat - 34 * U, 5 * U, 32 * U, 2 * U); ctx.fill(); ctx.stroke(); rr(p.x + 12 * U, p.y - seat - 34 * U, 5 * U, 32 * U, 2 * U); ctx.fill(); ctx.stroke();
-    const up = c.order > 0, q = person(p.x, p.y - seat + 8 * U, U, { suit: '#1d2a44', trim: '#0d1526', tie: '#b3261e', sprite: sprites[depName('Brownlee')], sit: true, face: 1, headR: 16,
+    const up = c.order > 0, q = person(p.x, p.y - seat + 8 * U, U, { suit: '#1d2a44', trim: '#0d1526', tie: '#b3261e', sprite: headSprite(depName('Brownlee')), sit: true, face: 1, headR: 16,
       hd: { ox: 0, oy: c.blow > 0 ? Math.sin(G.time * 40) * 0.04 : 0, a: 0 }, aR: up ? 2.5 + Math.sin(G.time * 16) * 0.4 : 0.5, aL: c.blow > 0 ? 2.2 : 0.4 });
     const hx = p.x + q.hR[0], hy = p.y - seat + 8 * U + q.hR[1];
     ctx.save(); ctx.translate(hx, hy); ctx.rotate(up ? Math.sin(G.time * 16) * 0.3 + 0.3 : 0.5); ctx.fillStyle = '#8b5a2b'; ctx.fillRect(-2 * U, -16 * U, 4 * U, 18 * U); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2; ell(0, -30 * U, 20 * U, 15 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#b3261e'; ctx.font = `900 ${10 * U}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('ORDER!', 0, -30 * U); ctx.restore();
@@ -518,7 +606,7 @@ const drawCam = {
     // cardboard box of office plants
     const bx = p.x + 30 * U, by = p.y + 2 * U; ctx.fillStyle = '#2f8f3e'; for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + (i - 3) * 0.33 + Math.sin(G.time * 2 + i) * 0.04; ctx.beginPath(); ctx.ellipse(bx + Math.cos(a) * 14 * U, by - 22 * U + Math.sin(a) * 14 * U, 9 * U, 3.2 * U, a, 0, TAU); ctx.fill(); }
     ctx.fillStyle = '#c69a5d'; ctx.strokeStyle = '#1a1a1a'; rr(bx - 13 * U, by - 20 * U, 26 * U, 20 * U, 2 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#7a5630'; ctx.font = `800 ${6 * U}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('DESK', bx, by - 10 * U);
-    person(p.x + 4 * U, p.y - 2 * U, U, { suit: '#0b4a8f', trim: '#06305e', tie: '#fff', sprite: sprites[depName('Willis')], sit: true, face: -1, aL: c.toss > 0 ? 2.4 - c.toss * 2 : 0.6, aR: 0.4, hd: { ox: 0, oy: 0, a: Math.sin(G.time * 1.3) * 0.05 } });
+    person(p.x + 4 * U, p.y - 2 * U, U, { suit: '#0b4a8f', trim: '#06305e', tie: '#fff', sprite: headSprite(depName('Willis')), sit: true, face: -1, aL: c.toss > 0 ? 2.4 - c.toss * 2 : 0.6, aR: 0.4, hd: { ox: 0, oy: 0, a: Math.sin(G.time * 1.3) * 0.05 } });
     // giant calculator
     const cx = p.x - 24 * U, cy = p.y - 4 * U; ctx.save(); ctx.translate(cx, cy); ctx.rotate(-0.12); ctx.fillStyle = '#3a3f47'; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2; rr(-11 * U, -36 * U, 22 * U, 34 * U, 3 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#bfe6b0'; ctx.fillRect(-8 * U, -33 * U, 16 * U, 7 * U); ctx.fillStyle = '#1a1a1a'; ctx.font = `800 ${5 * U}px monospace`; ctx.textAlign = 'right'; ctx.fillText('-9.8b', 7 * U, -29 * U);
     for (let i = 0; i < 12; i++) { ctx.fillStyle = i === 11 ? '#e2562e' : '#d9d9d9'; ctx.fillRect((-8 + (i % 3) * 5.7) * U, (-23 + Math.floor(i / 3) * 5) * U, 4.4 * U, 3.6 * U); } ctx.restore();
@@ -526,12 +614,12 @@ const drawCam = {
   },
   bishop() { const c = cam.bishop, p = proj(c.x, c.y), U = p.s * 1.1;
     for (let i = 0; i < 2; i++) { const bx = p.x - 34 * U + i * 46 * U, by = p.y + 4 * U; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; for (let k = 0; k < 6; k++) { ctx.fillStyle = k % 2 ? '#fff' : '#ff6a13'; ctx.fillRect(bx + k * 6 * U, by - 14 * U, 6 * U, 6 * U); } ctx.strokeRect(bx, by - 14 * U, 36 * U, 6 * U); ctx.fillStyle = '#444'; ctx.fillRect(bx + 3 * U, by - 8 * U, 2.5 * U, 8 * U); ctx.fillRect(bx + 30 * U, by - 8 * U, 2.5 * U, 8 * U); }
-    const q = person(p.x, p.y - 2 * U, U, { suit: '#ff8a1f', trim: '#2a2a2a', tie: '#00529f', vest: true, sprite: sprites[depName('Bishop')], face: -1, aL: 1.9 + Math.sin(G.time * 5) * 0.15, aR: 1.2 + Math.sin(G.time * 3.3) * 0.7, hd: { ox: 0, oy: c.sayT > 0 ? Math.sin(G.time * 28) * 0.05 : 0, a: 0 } });
+    const q = person(p.x, p.y - 2 * U, U, { suit: '#ff8a1f', trim: '#2a2a2a', tie: '#00529f', vest: true, sprite: headSprite(depName('Bishop')), face: -1, aL: 1.9 + Math.sin(G.time * 5) * 0.15, aR: 1.2 + Math.sin(G.time * 3.3) * 0.7, hd: { ox: 0, oy: c.sayT > 0 ? Math.sin(G.time * 28) * 0.05 : 0, a: 0 } });
     const mx = p.x + q.hL[0], my = p.y - 2 * U + q.hL[1]; ctx.fillStyle = '#e8e8e8'; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(mx + 3 * U, my - 3 * U); ctx.lineTo(mx - 20 * U, my - 13 * U); ctx.lineTo(mx - 20 * U, my + 9 * U); ctx.lineTo(mx + 3 * U, my + 3 * U); ctx.closePath(); ctx.fill(); ctx.stroke();
     if (c.sayT > 0) bubble(p.x - 30 * U, p.y - 74 * U, c.say, U);
   },
   gold() { const c = cam.gold, p = proj(c.x, c.y), U = p.s * 1.05, sh = c.shake > 0;
-    const q = person(p.x, p.y, U, { suit: '#33415c', trim: '#1a2233', tie: '#00529f', sprite: sprites[depName('Goldsmith')], moving: true, phase: G.time * 5, face: c.dir, aL: 1.0, aR: 1.0, headRot: sh ? Math.sin(G.time * 13) * 0.42 : 0, hd: { ox: 0, oy: 0, a: 0 } });
+    const q = person(p.x, p.y, U, { suit: '#33415c', trim: '#1a2233', tie: '#00529f', sprite: headSprite(depName('Goldsmith')), moving: true, phase: G.time * 5, face: c.dir, aL: 1.0, aR: 1.0, headRot: sh ? Math.sin(G.time * 13) * 0.42 : 0, hd: { ox: 0, oy: 0, a: 0 } });
     const cols = ['#7a1f1f', '#1f4d7a', '#3d6b2f', '#8a6a1f']; for (let i = 0; i < 4; i++) { ctx.fillStyle = cols[i]; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; rr(p.x - 11 * U + (i % 2) * 2 * U, p.y - 26 * U - i * 5 * U, 22 * U, 5 * U, 1); ctx.fill(); ctx.stroke(); }
     if (sh) bubble(p.x, p.y - 72 * U, 'Tsk. Not in the history books.', U);
   },
@@ -539,7 +627,7 @@ const drawCam = {
     ctx.strokeStyle = '#d9d9d9'; ctx.lineWidth = 3 * U; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p.x - 24 * U, p.y); ctx.lineTo(p.x + 6 * U, p.y - 16 * U); ctx.moveTo(p.x + 22 * U, p.y); ctx.lineTo(p.x - 6 * U, p.y - 16 * U); ctx.stroke();
     ctx.save(); ctx.translate(p.x, p.y - 12 * U); ctx.rotate(-0.5);
     for (let i = 0; i < 6; i++) { ctx.fillStyle = i % 2 ? '#fff' : '#2aa7c9'; ctx.fillRect(-26 * U + i * 9 * U, -4 * U, 9 * U, 7 * U); } ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; ctx.strokeRect(-26 * U, -4 * U, 54 * U, 7 * U);
-    const q = person(4 * U, 2 * U, U, { suit: '#5b6b7a', trim: '#2c3640', tie: '#ffc93c', sprite: sprites[depName('Penk')], sit: true, face: 1, shades: true, aL: 0.5, aR: c.sip > 0 ? 2.5 : 1.3, hd: { ox: 0, oy: 0, a: 0.25 } });
+    const q = person(4 * U, 2 * U, U, { suit: '#5b6b7a', trim: '#2c3640', tie: '#ffc93c', sprite: headSprite(depName('Penk')), sit: true, face: 1, shades: true, aL: 0.5, aR: c.sip > 0 ? 2.5 : 1.3, hd: { ox: 0, oy: 0, a: 0.25 } });
     const hx = 4 * U + q.hR[0], hy = 2 * U + q.hR[1]; ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; rr(hx - 3.5 * U, hy - 9 * U, 7 * U, 9 * U, 1.5); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#6b3f1d'; ctx.fillRect(hx - 3.5 * U, hy - 6 * U, 7 * U, 3 * U);
     ctx.restore();
     if ((G.time % 9) < 2.5 && G.phase === 'run') bubble(p.x + 6 * U, p.y - 78 * U, pick2(Math.floor(G.time / 9), ['Lovely day.', 'Not my problem.', 'Flat white, thanks.', 'Zzz…']), U);
@@ -603,8 +691,9 @@ cv.addEventListener('pointerdown', e => {
 });
 
 /* ---------- coalition builder ---------- */
-const avatar = name => { const c = document.createElement('canvas'); c.width = c.height = 52; c.dataset.n = name; c.title = name; c.getContext('2d').drawImage(sprites[name], 0, 0, 52, 52); return c; };
-listeners.push(name => document.querySelectorAll('.faces canvas').forEach(c => { if (c.dataset.n === name) { const g = c.getContext('2d'); g.clearRect(0, 0, 52, 52); g.drawImage(sprites[name], 0, 0, 52, 52); } }));
+const paintAvatar = (c, name) => { const g = c.getContext('2d'), sp = headSprite(name); g.clearRect(0, 0, 52, 52); if (sp.width === 200) g.drawImage(sp, -6, -5, 64, 64); else g.drawImage(sp, 0, 0, 52, 52); };
+const avatar = name => { const c = document.createElement('canvas'); c.width = c.height = 52; c.dataset.n = name; c.title = name; paintAvatar(c, name); return c; };
+listeners.push(name => document.querySelectorAll('.faces canvas').forEach(c => { if (c.dataset.n === name) paintAvatar(c, name); }));
 function renderBuilder() {
   for (const k of [0, 1, 2]) { const col = $('c' + k); col.querySelectorAll('.card').forEach(n => n.remove());
     for (const p of D.parties) { if ((G.assign[p.id] || 0) !== k) continue;
@@ -636,6 +725,9 @@ $('go').onclick = () => startMatch();
 $('again').onclick = () => startMatch();
 const toBuilder = () => { G.phase = 'builder'; G.mps = []; G.sheets = []; G.flying = []; Snd.stopMusic(); $('over').classList.add('hidden'); $('hud').classList.add('hidden'); $('menu').classList.add('hidden'); $('hint').classList.add('hidden'); $('builder').classList.remove('hidden'); renderBuilder(); };
 $('back').onclick = toBuilder; $('menu').onclick = toBuilder;
+const bobbleLabel = () => { $('bobble').textContent = BOBBLE ? '🎎 Bobbleheads' : '⚪ Face discs'; };
+$('bobble').onclick = () => { BOBBLE = !BOBBLE; try { localStorage.setItem('bullrush.bobble', BOBBLE ? '1' : '0'); } catch (e) {} bobbleLabel(); document.querySelectorAll('.faces canvas').forEach(c => paintAvatar(c, c.dataset.n)); };
+bobbleLabel();
 $('mute').onclick = () => { Snd.setMuted(!Snd.muted); $('mute').textContent = Snd.muted ? '🔇 Muted' : '🔊 Sound'; };
 $('cred').onclick = () => {
   const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -645,7 +737,7 @@ $('cred').onclick = () => {
   $('credIn').innerHTML = `<p><b>Backdrop:</b> ${esc(bg.title)}, ${esc(bg.by)} · ${esc(bg.lic)}${link(bg)}</p>` +
     D.parties.map(p => `<h3 style="margin:.6em 0 .2em">${esc(p.name)}</h3><ul style="margin:0;padding-left:18px">${p.members.map(m => row(m.name, hasPhoto[m.name] ? m.credit : null)).join('')}</ul>`).join('') +
     `<h3 style="margin:.6em 0 .2em">Sideline</h3><ul style="margin:0;padding-left:18px">${D.departed.map(m => row(m.name, hasPhoto[m.name] ? m.credit : null)).join('')}</ul>` +
-    `<p>Photos are cropped to a circle for the bobbleheads. Music and sound effects are synthesised in the browser. This is a parody; it is not affiliated with any party or with Parliament.</p>`;
+    `<p>Photos are cropped and cut out by the game for the bobbleheads (or shown as face discs). Music and sound effects are synthesised in the browser. This is a parody; it is not affiliated with any party or with Parliament.</p>`;
   $('credits').classList.remove('hidden');
 };
 $('credX').onclick = () => $('credits').classList.add('hidden');
@@ -659,5 +751,5 @@ function frame(now) {
   draw(); requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-window.__bullrush = { G, cam, sprites, hasPhoto, Snd, update };   // handy for debugging in the console
+window.__bullrush = { G, cam, sprites, bobbles, hasPhoto, Snd, update };   // handy for debugging in the console
 })();

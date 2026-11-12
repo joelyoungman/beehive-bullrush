@@ -13,11 +13,21 @@ const META = [
 ];
 const SHORT = { 'Julie Anne Genter': 'Genter', 'Ricardo Menéndez March': 'Menéndez March', 'Hana-Rawhiti Maipi-Clarke': 'Maipi-Clarke' };
 // Photos the agents flagged as not confirmed to be the right person: use a drawn stand-in instead.
-const NO_PHOTO = new Set(['Jessica Hammond']);
+const NO_PHOTO = new Set([]);
 const short = n => SHORT[n] || n.split(' ').slice(-1)[0];
+// Direct upload.wikimedia.org thumbnail for a Special:FilePath URL. Unlike the FilePath redirect it sends
+// CORS headers, so the game can read the pixels to cut the head out for the bobblehead look.
+const crypto = require('crypto');
+const corsThumb = url => {
+  const m = /Special:FilePath\/([^?]+)/.exec(url || ''); if (!m) return null;
+  const file = decodeURIComponent(m[1]).replace(/ /g, '_'), h = crypto.createHash('md5').update(file).digest('hex');
+  const enc = encodeURIComponent(file).replace(/%2C/g, ',');
+  return `https://upload.wikimedia.org/wikipedia/commons/thumb/${h[0]}/${h.slice(0, 2)}/${enc}/250px-${enc}${/\.(svg|tiff?)$/i.test(file) ? '.png' : ''}`;
+};
 const person = m => ({
   name: m.name, short: short(m.name),
   img: NO_PHOTO.has(m.name) ? null : (m.image_url ? m.image_url.replace(/width=\d+/, 'width=250') : null),
+  cors: NO_PHOTO.has(m.name) ? null : corsThumb(m.image_url),
   status: m.elected_2026 ?? m.departed_2026,
   leader: /leader/i.test(m.role || '') && !/deputy/i.test(m.role || ''),
   credit: m.image_url && !NO_PHOTO.has(m.name) ? { by: m.attribution, lic: m.license, src: m.source_page } : null,
