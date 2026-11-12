@@ -21,7 +21,9 @@ function resize() {
   cv.width = Math.round(VW * DPR); cv.height = Math.round(VH * DPR);
   K = clamp(Math.min(VH / 720, VW / 1150), 0.42, 1.7);
 }
-window.addEventListener('resize', resize); resize();
+window.addEventListener('resize', resize); window.addEventListener('orientationchange', () => setTimeout(resize, 150));
+if (window.visualViewport) visualViewport.addEventListener('resize', resize);
+resize();
 function proj(x, y) {
   const tt = y / L, farY = VH * 0.43, nearY = VH * 0.955;
   const half = lerp(VW * 0.30, VW * 0.415, tt);
