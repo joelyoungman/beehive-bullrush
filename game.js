@@ -2,6 +2,7 @@
    World: x 0..W across the lawn, y 0..L from the North End (far, by the Beehive) to the South End (near). */
 (() => {
 'use strict';
+window.__dodge = 0.62;   // chance a Runner slips a tackle on top of their stiff-arm strength
 const D = window.BULLRUSH_DATA;
 const W = 160, L = 100, ZN = 13, ZS = 87;
 const $ = id => document.getElementById(id);
@@ -293,10 +294,12 @@ function update(dt) {
     // contact
     for (const t of taggers) { if (t.stun > 0) continue;
       for (const r of live) { if (r.conv || r.safe) continue; const d = Math.hypot(t.x - r.x, t.y - r.y); if (d > 2.7) continue;
-        if (r.stun <= 0 && r.saCd <= 0 && rand() < r.str) {      // stiff-arm
+        const roll = rand(); if (r.imm > 0) continue;
+        if (r.stun <= 0 && roll < r.str + window.__dodge) {      // stiff-arm or sidestep
+          r.imm = 0.45; const stiff = roll < r.str;
           r.saCd = 2.2; r.pose = 'stiff'; r.poseT = 0.5; r.side = t.x > r.x ? 1 : -1;
           knock(t, 1.3); t.vx = (t.x - r.x) / (d || 1) * 14; t.vy = (t.y - r.y) / (d || 1) * 10; bump(t, rand(-8, 8), -9, rand(-12, 12));
-          fx(r.x, r.y - 8, 'STIFF-ARM!', '#fff'); Snd.boing();
+          fx(r.x, r.y - 8, stiff ? 'STIFF-ARM!' : pick(['JUKED!', 'SIDESTEP!', 'MISSED!']), '#fff'); Snd.boing();
         } else {                                                   // tackled
           r.conv = true; knock(r, 2.2); r.vx = t.vx * 0.6; r.vy = t.vy * 0.6; bump(r, rand(-10, 10), -12, rand(-14, 14));
           knock(t, 0.55, 'stumble'); bump(t, 0, -6, rand(-6, 6)); t.tgt = null;
@@ -315,7 +318,7 @@ function update(dt) {
   for (const m of G.mps) body(m, dt);
 }
 function runnerAI(m, dt, taggers) {
-  m.saCd -= dt; m.poseT -= dt; if (m.poseT <= 0) m.pose = '';
+  m.saCd -= dt; m.imm = (m.imm || 0) - dt; m.poseT -= dt; if (m.poseT <= 0) m.pose = '';
   if (m.conv) { m.stun -= dt; m.vx *= 1 - Math.min(1, dt * 3); m.vy *= 1 - Math.min(1, dt * 3); if (m.stun <= 0) { m.state = 'idle'; m.pose = 'sad'; } return; }
   if (m.stun > 0) { m.stun -= dt; const f = m.state === 'down' ? 2.2 : 5; m.vx *= 1 - Math.min(1, dt * f); m.vy *= 1 - Math.min(1, dt * f); if (m.stun <= 0) m.state = 'run'; return; }
   const dir = G.dir;
