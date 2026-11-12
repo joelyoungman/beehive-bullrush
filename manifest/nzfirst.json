@@ -6,14 +6,113 @@
   "results_status": "preliminary",
   "results_note": "Election held 7 Nov 2026. NZ First: 12 list seats, 0 electorate seats, 9.78% party vote (236,630). Special votes (~399,000) not yet counted; official result due 27 Nov 2026. Presumed-elected list order per Wikipedia Results page: 1 Peters, 2 Jones, 3 Costello, 4 Mark Patterson, 5 Alfred Ngaro, 6 Laws, 7 Hipango, 8 Stobo, 9 Randell, 10 Marcroft, 11 Foster, 12 David Wilson. Marcroft/Foster/Wilson are near the cut-off (13th is Jamie Arbuckle), so special votes could change this.",
   "members": [
-    {"name":"Winston Peters","role":"Leader","elected_2026":true,"elected_note":"List rank 1; presumed elected on preliminary results (12 list seats). Not yet official.","elected_source":"https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election","image_url":"https://commons.wikimedia.org/wiki/Special:FilePath/Winston_Peters_2024_US_Deputy_Secretary_visit_(further_crop).jpg?width=400","url_verified":true,"source_page":"https://commons.wikimedia.org/wiki/File:Winston_Peters_2024_US_Deputy_Secretary_visit_(further_crop).jpg","license":"Public domain","attribution":"US Embassy New Zealand","face_box":null,"caricature":"Older man, silver-white swept-back hair, strong dark eyebrows, Pakeha/light skin, sharp suits with pocket square, typically a wry raised-eyebrow look."},
-    {"name":"Shane Jones","role":"Deputy Leader","elected_2026":true,"elected_note":"List rank 2; presumed elected on preliminary results. Not yet official.","elected_source":"https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election","image_url":"https://commons.wikimedia.org/wiki/Special:FilePath/Shane_Jones_2018_5.jpg?width=400","url_verified":true,"source_page":"https://commons.wikimedia.org/wiki/File:Shane_Jones_2018_5.jpg","license":"CC BY-SA 4.0","attribution":"Stuartyeates, own work","face_box":null,"caricature":"Big, broad-faced Maori man, dark short cropped hair greying, heavy jaw, booming-orator expression, dark suit, often a loud tie."},
-    {"name":"Casey Costello","role":"MP / Minister","elected_2026":true,"elected_note":"List rank 3; presumed elected on preliminary results. Not yet official.","elected_source":"https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election","image_url":"https://commons.wikimedia.org/wiki/Special:FilePath/Casey_Costello_November_2024.jpg?width=400","url_verified":true,"source_page":"https://commons.wikimedia.org/wiki/File:Casey_Costello_November_2024.jpg","license":"Public domain","attribution":"US Embassy NZ (via Instagram)","face_box":null,"caricature":"Woman with shoulder-length blonde-brown hair, light skin, composed businesslike expression, dark blazer. Low-resolution source (218x290)."},
-    {"name":"Andy Foster","role":"MP","elected_2026":true,"elected_note":"List rank 11; presumed elected on preliminary results but close to the cut-off (13th is Jamie Arbuckle); special votes could change this. Not yet official.","elected_source":"https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election","image_url":"https://commons.wikimedia.org/wiki/Special:FilePath/Official_photo_of_Andy_Foster.png?width=400","url_verified":true,"source_page":"https://commons.wikimedia.org/wiki/File:Official_photo_of_Andy_Foster.png","license":"CC BY 4.0","attribution":"Wellington City Council","face_box":null,"caricature":"Older man, thinning grey-white hair, light skin, glasses, friendly mild expression, dark jacket (former Wellington councillor/mayor)."},
-    {"name":"Jenny Marcroft","role":"MP","elected_2026":true,"elected_note":"List rank 10; presumed elected on preliminary results; near cut-off, special votes could change this. Not yet official.","elected_source":"https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election","image_url":"https://commons.wikimedia.org/wiki/Special:FilePath/Jenny_Marcroft_(cropped).jpg?width=400","url_verified":true,"source_page":"https://commons.wikimedia.org/wiki/File:Jenny_Marcroft_(cropped).jpg","license":"CC BY 4.0","attribution":"Office of the Clerk of the House of Representatives of New Zealand","face_box":null,"caricature":"Woman with short-to-mid blonde hair, light skin, warm smile, bright blazer. Low-resolution source (216x289)."},
-    {"name":"Taine Randell","role":"New candidate (former All Blacks captain)","elected_2026":true,"elected_note":"List rank 9; presumed elected on preliminary results (NZ Herald election-night piece had him at number nine, trailing in Tukituki, so seat depends on list). Not yet official.","elected_source":"https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election","image_url":null,"url_verified":false,"source_page":null,"license":null,"attribution":null,"face_box":null,"caricature":"Tall, athletic, broad-shouldered Maori/Pacific man in his 40s, short dark hair, strong jaw, rugby-captain build, perhaps a black NZ First-style suit or an All Blacks jersey. No Commons image found."},
-    {"name":"Craig Stobo","role":"New candidate (former FMA chair)","elected_2026":true,"elected_note":"List rank 8; presumed elected on preliminary results. Not yet official. Also NZ First candidate for Botany.","elected_source":"https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election","image_url":null,"url_verified":false,"source_page":null,"license":null,"attribution":null,"face_box":null,"caricature":"Older distinguished man, grey/silver short hair, light skin, corporate look, dark suit and tie, serious regulator expression. No Commons image found."},
-    {"name":"Harete Hipango","role":"Candidate (former National MP, Whanganui)","elected_2026":true,"elected_note":"List rank 7; presumed elected on preliminary results. Not yet official. Sources use 'Harete Hipango'; I did not find 'Hipango-Brownlie' in any source, so keep 'Harete Hipango' (check if the game wants a different spelling).","elected_source":"https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election","image_url":"https://commons.wikimedia.org/wiki/Special:FilePath/HIPANGO,_Harete_-_Te_Tai_Hauauru_(cropped).png?width=400","url_verified":true,"source_page":"https://commons.wikimedia.org/wiki/File:HIPANGO,_Harete_-_Te_Tai_Hauauru_(cropped).png","license":"CC BY-SA 4.0 (file metadata also notes a personality-rights restriction)","attribution":"New Zealand National Party","face_box":null,"caricature":"Maori woman, long dark hair, medium-brown skin, confident smile, dark blazer (photo is a 2023 National Party portrait)."},
-    {"name":"Michael Laws","role":"Candidate (broadcaster, former mayor/MP)","elected_2026":true,"elected_note":"List rank 6; presumed elected on preliminary results. Not yet official.","elected_source":"https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election","image_url":"https://commons.wikimedia.org/wiki/Special:FilePath/Michael_Laws_on_the_Platform_21_October_2022_(cropped).jpg?width=400","url_verified":true,"source_page":"https://commons.wikimedia.org/wiki/File:Michael_Laws_on_the_Platform_21_October_2022_(cropped).jpg","license":"CC BY 3.0","attribution":"The Platform NZ","face_box":null,"caricature":"Older man, receding grey-white hair, light skin, sharp combative expression, shirt and jacket, talkback-host energy."}
+    {
+      "name": "Winston Peters",
+      "role": "Leader",
+      "elected_2026": true,
+      "elected_note": "List rank 1; presumed elected on preliminary results (12 list seats). Not yet official.",
+      "elected_source": "https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Winston_Peters_2024_US_Deputy_Secretary_visit_(further_crop).jpg?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:Winston_Peters_2024_US_Deputy_Secretary_visit_(further_crop).jpg",
+      "license": "Public domain",
+      "attribution": "US Embassy New Zealand"
+    },
+    {
+      "name": "Shane Jones",
+      "role": "Deputy Leader",
+      "elected_2026": true,
+      "elected_note": "List rank 2; presumed elected on preliminary results. Not yet official.",
+      "elected_source": "https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Shane_Jones_2018_5.jpg?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:Shane_Jones_2018_5.jpg",
+      "license": "CC BY-SA 4.0",
+      "attribution": "Stuartyeates, own work"
+    },
+    {
+      "name": "Casey Costello",
+      "role": "MP / Minister",
+      "elected_2026": true,
+      "elected_note": "List rank 3; presumed elected on preliminary results. Not yet official.",
+      "elected_source": "https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Casey_Costello_November_2024.jpg?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:Casey_Costello_November_2024.jpg",
+      "license": "Public domain",
+      "attribution": "US Embassy NZ (via Instagram)"
+    },
+    {
+      "name": "Andy Foster",
+      "role": "MP",
+      "elected_2026": true,
+      "elected_note": "List rank 11; presumed elected on preliminary results but close to the cut-off (13th is Jamie Arbuckle); special votes could change this. Not yet official.",
+      "elected_source": "https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Official_photo_of_Andy_Foster.png?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:Official_photo_of_Andy_Foster.png",
+      "license": "CC BY 4.0",
+      "attribution": "Wellington City Council"
+    },
+    {
+      "name": "Jenny Marcroft",
+      "role": "MP",
+      "elected_2026": true,
+      "elected_note": "List rank 10; presumed elected on preliminary results; near cut-off, special votes could change this. Not yet official.",
+      "elected_source": "https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Jenny_Marcroft_(cropped).jpg?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:Jenny_Marcroft_(cropped).jpg",
+      "license": "CC BY 4.0",
+      "attribution": "Office of the Clerk of the House of Representatives of New Zealand"
+    },
+    {
+      "name": "Taine Randell",
+      "role": "New candidate (former All Blacks captain)",
+      "elected_2026": true,
+      "elected_note": "List rank 9; presumed elected on preliminary results (NZ Herald election-night piece had him at number nine, trailing in Tukituki, so seat depends on list). Not yet official.",
+      "elected_source": "https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election",
+      "image_url": null,
+      "url_verified": false,
+      "source_page": null,
+      "license": null,
+      "attribution": null
+    },
+    {
+      "name": "Craig Stobo",
+      "role": "New candidate (former FMA chair)",
+      "elected_2026": true,
+      "elected_note": "List rank 8; presumed elected on preliminary results. Not yet official. Also NZ First candidate for Botany.",
+      "elected_source": "https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election",
+      "image_url": null,
+      "url_verified": false,
+      "source_page": null,
+      "license": null,
+      "attribution": null
+    },
+    {
+      "name": "Harete Hipango",
+      "role": "Candidate (former National MP, Whanganui)",
+      "elected_2026": true,
+      "elected_note": "List rank 7; presumed elected on preliminary results. Not yet official. Sources use 'Harete Hipango'; I did not find 'Hipango-Brownlie' in any source, so keep 'Harete Hipango' (check if the game wants a different spelling).",
+      "elected_source": "https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/HIPANGO,_Harete_-_Te_Tai_Hauauru_(cropped).png?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:HIPANGO,_Harete_-_Te_Tai_Hauauru_(cropped).png",
+      "license": "CC BY-SA 4.0 (file metadata also notes a personality-rights restriction)",
+      "attribution": "New Zealand National Party"
+    },
+    {
+      "name": "Michael Laws",
+      "role": "Candidate (broadcaster, former mayor/MP)",
+      "elected_2026": true,
+      "elected_note": "List rank 6; presumed elected on preliminary results. Not yet official.",
+      "elected_source": "https://en.wikipedia.org/wiki/Results_of_the_2026_New_Zealand_general_election",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Michael_Laws_on_the_Platform_21_October_2022_(cropped).jpg?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:Michael_Laws_on_the_Platform_21_October_2022_(cropped).jpg",
+      "license": "CC BY 3.0",
+      "attribution": "The Platform NZ"
+    }
   ]
 }
