@@ -20,18 +20,25 @@ const EXTRA = {
   'Craig Renney': P('https://www.labour.org.nz/media/inok2c50/craig-renney.jpg?width=640&format=webp&quality=80', 'NZ Labour Party', 'https://www.labour.org.nz/2026-campaign/our-candidates/craig-renney/'),
   'Jessica Rowe': P('https://www.national.org.nz/_next/image?url=https%3A%2F%2Fassets.national.org.nz%2Fweb%2Fprod%2FCandidate-Jessica-Rowe-2026.jpg%3Fv%3D1789094360&w=828&q=75', 'NZ National Party', 'https://www.national.org.nz/team/jessicarowe'),
   'Daniel Eb': P('https://assets.nationbuilder.com/garethmorgan/pages/9874/meta_images/original/candidate-daniel-eb.jpg?1779966213', 'The Opportunity Party', 'https://www.opportunity.org.nz/candidate-daniel-eb'),
-  'Jessica Hammond': P('https://assets.nationbuilder.com/garethmorgan/pages/9867/meta_images/original/candidate-jessica-hammond.jpg?1779966258', 'The Opportunity Party', 'https://www.opportunity.org.nz/candidate-jessica-hammond'),
-  'Kayla Kingdon-Bebb': P('https://cdn.opportunity.org.nz/images/candidates/candidate-kayla-kingdon-hero-cutout.webp', 'The Opportunity Party', 'https://www.opportunity.org.nz/candidate-kayla-kingdon-bebb'),
   'Eden Skipper': P('https://assets.nationbuilder.com/garethmorgan/pages/9873/meta_images/original/candidate-eden-skipper.jpg?1779966000', 'The Opportunity Party', 'https://www.opportunity.org.nz/candidate-eden-skipper'),
-  'Jodie Kuntzsch': P('https://assets.nationbuilder.com/garethmorgan/pages/12698/meta_images/original/candidate-jodie-kuntsch.jpg?1779965955', 'The Opportunity Party', 'https://www.opportunity.org.nz/candidate-jodie-kuntzsch'),
   'Sarah Lucas': P('https://assets.nationbuilder.com/garethmorgan/pages/9872/meta_images/original/candidate-sarah-lucas.jpg?1779965809', 'The Opportunity Party', 'https://www.opportunity.org.nz/candidate-sarah-lucas'),
   'Taine Randell': P('https://assets.nationbuilder.com/nzfirst/pages/10724/features/original/Candidate_Headline_Images_%2874%29.png?1786247112', 'New Zealand First', 'https://www.nzfirst.nz/taine_randell'),
   'Craig Stobo': P('https://assets.nationbuilder.com/nzfirst/pages/12342/features/original/Candidate_Headline_Images_%282%29.png?1789341518', 'New Zealand First', 'https://www.nzfirst.nz/craig_stobo'),
 };
 const short = n => SHORT[n] || n.split(' ').slice(-1)[0];
+// Direct upload.wikimedia.org thumbnail for a Special:FilePath URL. Unlike the FilePath redirect it sends
+// CORS headers, so the game can read the pixels to cut the head out for the bobblehead look. (Sarah's idea.)
+const crypto = require('crypto');
+const corsThumb = url => {
+  const m = /Special:FilePath\/([^?]+)/.exec(url || ''); if (!m) return null;
+  const file = decodeURIComponent(m[1]).replace(/ /g, '_'), h = crypto.createHash('md5').update(file).digest('hex');
+  const enc = encodeURIComponent(file).replace(/%2C/g, ',');
+  return `https://upload.wikimedia.org/wikipedia/commons/thumb/${h[0]}/${h.slice(0, 2)}/${enc}/250px-${enc}${/\.(svg|tiff?)$/i.test(file) ? '.png' : ''}`;
+};
 const person = m0 => { const x = EXTRA[m0.name], m = x ? { ...m0, image_url: x.img, attribution: x.by, license: x.lic, source_page: x.src } : m0; return {
   name: m.name, short: short(m.name),
   img: NO_PHOTO.has(m.name) ? null : (m.image_url ? m.image_url.replace(/([?&])width=\d+(?=$)/, '$1width=250') : null),
+  cors: NO_PHOTO.has(m.name) ? null : corsThumb(m.image_url),
   status: m.elected_2026 ?? m.departed_2026,
   leader: /leader/i.test(m.role || '') && !/deputy/i.test(m.role || ''),
   credit: m.image_url && !NO_PHOTO.has(m.name) ? { by: m.attribution, lic: m.license, src: m.source_page } : null,
