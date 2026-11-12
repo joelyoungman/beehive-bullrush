@@ -49,6 +49,7 @@ const hasPhoto = {};
 const listeners = [];
 // Optional per-photo crop tweaks: centre x, centre y, size (fractions of image width/height/width).
 const CROP = {
+  'Mariameno Kapa-Kingi': { cx: 0.47, cy: 0.4, s: 0.25 },   // a wide shot of the debating chamber
   'Craig Renney': { cx: 0.49, cy: 0.3, s: 0.5 }, 'Jessica Rowe': { cx: 0.52, cy: 0.31, s: 0.26 }, 'Daniel Eb': { cx: 0.49, cy: 0.28, s: 0.3 },
   'Eden Skipper': { cx: 0.5, cy: 0.32, s: 0.27 },
   'Sarah Lucas': { cx: 0.51, cy: 0.29, s: 0.25 }, 'Taine Randell': { cx: 0.757, cy: 0.34, s: 0.11 }, 'Craig Stobo': { cx: 0.735, cy: 0.31, s: 0.11 },
@@ -99,11 +100,55 @@ function standIn(p, color) {
   gloss(g);
   return c;
 }
+// Framing nudges on top of the crop: [shift right, shift down, zoom out], as fractions of the crop size.
+const ADJ = {
+  "Christopher Luxon": [0, -0.05, 1.25],
+  "Simeon Brown": [0, -0.02, 1.15],
+  "Erica Stanford": [0, 0, 1.1],
+  "Louise Upston": [0, -0.03, 1.15],
+  "Mark Mitchell": [0, -0.04, 1.3],
+  "Tama Potaka": [0, -0.02, 1.25],
+  "Simon Watts": [0, -0.02, 1.2],
+  "Todd McClay": [0, -0.02, 1.35],
+  "Matt Doocey": [0, -0.02, 1.25],
+  "Mahesh Muralidhar": [0, 0, 1.15],
+  "Jessica Rowe": [0, 0, 1.2],
+  "Marama Davidson": [0, 0, 1.15],
+  "Lan Pham": [0, 0, 1.08],
+  "Karen Chhour": [0, 0, 1.1],
+  "Simon Court": [0.14, 0.05, 1],
+  "Todd Stephenson": [0, 0, 1.2],
+  "Andrew Hoggard": [-0.08, -0.12, 0.85],
+  "Paul Henry": [0.12, 0, 1.15],
+  "James Christmas": [0, 0, 1.1],
+  "Winston Peters": [0.05, 0, 1],
+  "Shane Jones": [0.05, 0.08, 0.75],
+  "Casey Costello": [0, 0, 1.1],
+  "Jenny Marcroft": [0, 0.04, 1],
+  "Taine Randell": [-0.15, 0, 1.15],
+  "Craig Stobo": [0, 0, 1.1],
+  "Michael Laws": [-0.05, 0, 1],
+  "Daniel Eb": [-0.06, 0, 1.1],
+  "Jessica Hammond": [-0.035, -0.08, 0.75],
+  "Kayla Kingdon-Bebb": [-0.05, 0, 1.15],
+  "Jodie Kuntzsch": [0, 0.03, 0.85],
+  "Sarah Lucas": [0, 0, 1.15],
+  "Hana-Rawhiti Maipi-Clarke": [0, -0.02, 0.75],
+  "Oriini Kaipara": [0, 0, 1.15],
+  "Aperahama Edwards": [0, 0.03, 1],
+  "Gerry Brownlee": [0, 0, 1.1],
+  "Nicola Willis": [0, 0, 0.85],
+  "Chris Bishop": [0, -0.03, 1.3],
+  "Paul Goldsmith": [0, -0.02, 1.3],
+  "Tākuta Ferris": [0, 0.12, 1],
+  "Chris Penk": [0, -0.02, 1.25],
+};
 function rawCrop(img, name) {   // the square head crop, unclipped
   const c = document.createElement('canvas'); c.width = c.height = 160; const g = c.getContext('2d');
   const w = img.naturalWidth, h = img.naturalHeight, o = CROP[name];
   let s = Math.min(w, h * 0.8) * 0.86, cx = w / 2, top = Math.max(0, h * 0.36 - s / 2);
   if (o) { s = o.s * w; cx = o.cx * w; top = Math.max(0, o.cy * h - s / 2); }
+  const j = ADJ[name]; if (j) { const my = top + s / 2 + j[1] * s; cx += j[0] * s; s *= j[2]; top = my - s / 2; }
   g.fillStyle = '#ccc'; g.fillRect(0, 0, 160, 160);
   g.drawImage(img, cx - s / 2, top, s, s, 0, 0, 160, 160);
   return c;
