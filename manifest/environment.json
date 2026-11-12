@@ -1,0 +1,155 @@
+{
+  "backgrounds": [
+    {
+      "title": "Parliament and Bowen House (Aidan, 2011)",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Parliament%20and%20Bowen%20House.jpg?width=1920",
+      "width": 2450,
+      "height": 1837,
+      "description": "Parliament House, the Beehive and Bowen House across open grass.",
+      "view_notes": "Clear daytime, bright blue sky, wide flat lawn fills the foreground, both buildings visible. Best lawn-and-both-buildings composition.",
+      "license": "CC BY 2.0",
+      "attribution": "Aidan (via Wikimedia Commons)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Parliament_and_Bowen_House.jpg",
+      "file_name": "Parliament and Bowen House.jpg",
+      "url_verified": true
+    },
+    {
+      "title": "NZ Parliament Buildings 2020-06-26",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/NZ%20Parliament%20Buildings%202020-06-26.jpg?width=1920",
+      "width": 8422,
+      "height": 2787,
+      "description": "Ultra-wide panorama from Parliament Lawn: Bowen House, Beehive, Parliament House, Library.",
+      "view_notes": "Daytime late afternoon with warm cloudy sky, about 3:0 aspect; lawn in foreground. Good for scrolling or letterboxed banner.",
+      "license": "CC BY-SA 4.0",
+      "attribution": "Tom Ackroyd (via Wikimedia Commons)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:NZ_Parliament_Buildings_2020-06-26.jpg",
+      "file_name": "NZ Parliament Buildings 2020-06-26.jpg",
+      "url_verified": true
+    },
+    {
+      "title": "Parliament House, Beehive, Bowen House (Lange, 2010)",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Parliament%20House%2C%20Beehive%2C%20Bowen%20House%2C%20Wellington.jpg?width=1920",
+      "width": 2048,
+      "height": 1536,
+      "description": "Both buildings with a paved path and grass in the foreground.",
+      "view_notes": "Sunny blue sky, lawn on left, path through middle, trees along front. 2048 px wide is the minimum for 1920 use.",
+      "license": "CC BY-SA 3.0",
+      "attribution": "Ulrich Lange, Bochum, Germany (via Wikimedia Commons)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Parliament_House,_Beehive,_Bowen_House,_Wellington.jpg",
+      "file_name": "Parliament House, Beehive, Bowen House, Wellington.jpg",
+      "url_verified": true
+    },
+    {
+      "title": "The Beehive and Parliament House, May 2026",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/The%20Beehive%20and%20Parliament%20House%2C%20May%202026.jpg?width=1920",
+      "width": 4096,
+      "height": 3072,
+      "description": "Recent photo of Beehive and Parliament House with grass in foreground.",
+      "view_notes": "Bright daylight, saturated blue sky, 4:3; lawn strip at bottom, buildings dominate.",
+      "license": "CC BY 4.0",
+      "attribution": "Jakob (TheLoyalOrder) (via Wikimedia Commons)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:The_Beehive_and_Parliament_House,_May_2026.jpg",
+      "file_name": "The Beehive and Parliament House, May 2026.jpg",
+      "url_verified": true
+    },
+    {
+      "title": "Parliament House and the Beehive June 2012",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Parliament%20House%20and%20the%20Beehive%20June%202012.JPG?width=1920",
+      "width": 4000,
+      "height": 3000,
+      "description": "Beehive (left) and Parliament House from the forecourt.",
+      "view_notes": "Daytime blue sky, mostly paved forecourt, little lawn; usable with lawn overlaid.",
+      "license": "CC BY-SA 3.0",
+      "attribution": "Nick-D (via Wikimedia Commons)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Parliament_House_and_the_Beehive_June_2012.JPG",
+      "file_name": "Parliament House and the Beehive June 2012.JPG",
+      "url_verified": true
+    },
+    {
+      "title": "Parliament buildings with flags at half-mast (2022)",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/New%20Zealand%20Parliament%20buildings%20with%20flags%20at%20half-mast.jpg?width=1920",
+      "width": 4032,
+      "height": 3024,
+      "description": "Beehive and Parliament House with flagpoles at half-mast.",
+      "view_notes": "Sunny daytime, 4:3; flags at half-mast so avoid if mood should be festive.",
+      "license": "CC BY-SA 4.0",
+      "attribution": "Tom Ackroyd (via Wikimedia Commons)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:New_Zealand_Parliament_buildings_with_flags_at_half-mast.jpg",
+      "file_name": "New Zealand Parliament buildings with flags at half-mast.jpg",
+      "url_verified": true
+    }
+  ],
+  "decor": [
+    {
+      "title": "Pohutukawa in flower, Cornwallis Beach",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/PohutukawaCornwallis.jpg?width=1920",
+      "width": 3872,
+      "height": 2592,
+      "description": "Two large pohutukawa in full red bloom on grass, sea behind.",
+      "view_notes": "Ideal perimeter tree: grass base, full flower, clear sky. Public domain.",
+      "license": "Public domain",
+      "attribution": "Ed323 at English Wikipedia (via Wikimedia Commons)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:PohutukawaCornwallis.jpg",
+      "file_name": "PohutukawaCornwallis.jpg",
+      "url_verified": true,
+      "kind": "pohutukawa"
+    },
+    {
+      "title": "Pohutukawa in flower, Hahei",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Metrosideros%20excelsa%20kz13.jpg?width=1920",
+      "width": 3779,
+      "height": 2834,
+      "description": "Flowering pohutukawa tree against blue sky with foliage.",
+      "view_notes": "Dense red flowers and foliage, good for corner or edge decoration.",
+      "license": "CC BY-SA 4.0",
+      "attribution": "Krzysztof Ziarnek, Kenraiz (via Wikimedia Commons)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Metrosideros_excelsa_kz13.jpg",
+      "file_name": "Metrosideros excelsa kz13.jpg",
+      "url_verified": true,
+      "kind": "pohutukawa"
+    },
+    {
+      "title": "NZ flag flying at Auckland Airport",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/New%20Zealand%20flag%20at%20Auckland%20Airport.jpg?width=1920",
+      "width": 2304,
+      "height": 1728,
+      "description": "New Zealand flag fully flying on a pole, close view.",
+      "view_notes": "Flag clearly flying and fully legible against sky. Public domain.",
+      "license": "Public domain",
+      "attribution": "Jayswipe (via Wikimedia Commons)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:New_Zealand_flag_at_Auckland_Airport.jpg",
+      "file_name": "New Zealand flag at Auckland Airport.jpg",
+      "url_verified": true,
+      "kind": "flag"
+    },
+    {
+      "title": "NZ flag on Savoy Building, Dunedin",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/New%20Zealand%20Flag%2C%20Savoy%20Building%2C%20Dunedin.JPG?width=1920",
+      "width": 1536,
+      "height": 2048,
+      "description": "NZ flag flying from a tall pole against blue sky.",
+      "view_notes": "Portrait orientation, flag small against plain blue sky, easy to cut out.",
+      "license": "CC BY-SA 3.0",
+      "attribution": "Benchill (via Wikimedia Commons)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:New_Zealand_Flag,_Savoy_Building,_Dunedin.JPG",
+      "file_name": "New Zealand Flag, Savoy Building, Dunedin.JPG",
+      "url_verified": true,
+      "kind": "flag"
+    }
+  ],
+  "bullrush_reference": [
+    {
+      "url": "https://mrfunology.com/2015/09/15/bull-rush/",
+      "summary": "Bull Rush: players line up at one end of the field, a catcher (or catchers) stands in the middle; runners cross to the far side without being tagged, and anyone caught joins the catchers. Last runner wins."
+    },
+    {
+      "url": "https://teara.govt.nz/en/childhood/2/5/4",
+      "summary": "Te Ara (NZ encyclopedia) childhood games page, surfaced by search as covering Bullrush; page content not read (site returned 403 to curl), so treat as a pointer only."
+    },
+    {
+      "url": "https://play.pise.ca/games/british-bulldog/",
+      "summary": "British Bulldog: two safe zones at opposite ends of the field, one or two bulldogs in the middle; the rest run between the zones and any tagged become bulldogs. The two-zone layout is from British Bulldog, which Bullrush closely mirrors."
+    }
+  ],
+  "recommended_background": "Parliament and Bowen House (Aidan, 2011): clear blue daytime sky, broad flat lawn in the foreground and both Parliament House and the Beehive in frame, 2450 px wide, CC BY 2.0."
+}

@@ -1,0 +1,213 @@
+{
+  "party": "National",
+  "color": "#00529F",
+  "seats_2026": 42,
+  "results_source": "https://en.wikipedia.org/wiki/2026_New_Zealand_general_election",
+  "results_status": "preliminary",
+  "members": [
+    {
+      "name": "Christopher Luxon",
+      "role": "Leader / Prime Minister",
+      "elected_2026": true,
+      "elected_note": "Botany; Wikipedia lists him as MP for Botany 2026-present and still PM and leader. Margin not labelled as 2026; official results due 27 Nov 2026.",
+      "elected_source": "https://en.wikipedia.org/wiki/Christopher_Luxon",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/LUXON,_Christopher_-_Botany_(cropped).png?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:LUXON,_Christopher_-_Botany_(cropped).png",
+      "license": "CC BY-SA 4.0",
+      "attribution": "New Zealand National Party (via Wikimedia Commons)",
+      "face_box": {
+        "x": 0.15,
+        "y": 0.03,
+        "w": 0.7,
+        "h": 0.5
+      },
+      "caricature": "Silver-white short neat hair, clean-shaven, pale skin, broad smile, dark suit and tie; corporate airline-CEO look (from general knowledge, image not viewed)."
+    },
+    {
+      "name": "Simeon Brown",
+      "role": "Minister",
+      "elected_2026": true,
+      "elected_note": "Pakuranga; Wikipedia reports retained by 13,691 votes on preliminary count (7 Nov 2026).",
+      "elected_source": "https://en.wikipedia.org/wiki/Simeon_Brown",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/BROWN,_Simeon_-_Pakuranga_(cropped).png?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:BROWN,_Simeon_-_Pakuranga_(cropped).png",
+      "license": "CC BY-SA 4.0",
+      "attribution": "New Zealand National Party (via Wikimedia Commons)",
+      "face_box": {
+        "x": 0.15,
+        "y": 0.03,
+        "w": 0.7,
+        "h": 0.5
+      },
+      "caricature": "Young-looking, short dark brown hair swept up, clean-shaven, light skin, earnest expression, dark suit (from general knowledge)."
+    },
+    {
+      "name": "Erica Stanford",
+      "role": "Minister",
+      "elected_2026": "unverified",
+      "elected_note": "Contested electorate for National; no source I could read reports the 2026 result. National reportedly won 42 seats on preliminary results (5-7 overhang, zero list MPs), which suggests electorate winners, but this was not confirmed for this person. Contested East Coast Bays, list rank 5.",
+      "elected_source": "https://en.wikipedia.org/wiki/Erica_Stanford",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/STANFORD,_Erica_-_East_Coast_Bays_(cropped_alt).png?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:STANFORD,_Erica_-_East_Coast_Bays_(cropped_alt).png",
+      "license": "CC BY-SA 4.0",
+      "attribution": "New Zealand National Party (via Wikimedia Commons)",
+      "face_box": {
+        "x": 0.15,
+        "y": 0.03,
+        "w": 0.7,
+        "h": 0.5
+      },
+      "caricature": "Shoulder-length straight brown hair with side part, light skin, composed expression, dark blazer (from general knowledge)."
+    },
+    {
+      "name": "Louise Upston",
+      "role": "Minister",
+      "elected_2026": "unverified",
+      "elected_note": "Contested electorate for National; no source I could read reports the 2026 result. National reportedly won 42 seats on preliminary results (5-7 overhang, zero list MPs), which suggests electorate winners, but this was not confirmed for this person. Contested Taupo, list rank 7.",
+      "elected_source": "https://en.wikipedia.org/wiki/Louise_Upston",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/UPSTON,_Louise_-_Taupo_(cropped).png?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:UPSTON,_Louise_-_Taupo_(cropped).png",
+      "license": "CC BY-SA 4.0",
+      "attribution": "New Zealand National Party (via Wikimedia Commons)",
+      "face_box": {
+        "x": 0.15,
+        "y": 0.03,
+        "w": 0.7,
+        "h": 0.5
+      },
+      "caricature": "Short blonde bob, light skin, bright smile, bold-coloured jacket (from general knowledge)."
+    },
+    {
+      "name": "Mark Mitchell",
+      "role": "Minister",
+      "elected_2026": "unverified",
+      "elected_note": "Contested electorate for National; no source I could read reports the 2026 result. National reportedly won 42 seats on preliminary results (5-7 overhang, zero list MPs), which suggests electorate winners, but this was not confirmed for this person. Contested Whangaparaoa, list rank 8.",
+      "elected_source": "https://en.wikipedia.org/wiki/Mark_Mitchell_(New_Zealand_politician)",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/MITCHELL,_Mark_-_Whangaparaoa_(cropped).png?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:MITCHELL,_Mark_-_Whangaparaoa_(cropped).png",
+      "license": "CC BY-SA 4.0",
+      "attribution": "New Zealand National Party (via Wikimedia Commons)",
+      "face_box": {
+        "x": 0.15,
+        "y": 0.03,
+        "w": 0.7,
+        "h": 0.5
+      },
+      "caricature": "Stocky, very short cropped greying hair, clean-shaven, light skin, stern ex-security-contractor look, dark suit (from general knowledge)."
+    },
+    {
+      "name": "Tama Potaka",
+      "role": "Minister",
+      "elected_2026": "unverified",
+      "elected_note": "Contested electorate for National; no source I could read reports the 2026 result. National reportedly won 42 seats on preliminary results (5-7 overhang, zero list MPs), which suggests electorate winners, but this was not confirmed for this person. Contested Hamilton West, list rank 11.",
+      "elected_source": "https://en.wikipedia.org/wiki/Tama_Potaka",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/POTAKA,_Tama_-_Hamilton_West_(cropped).png?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:POTAKA,_Tama_-_Hamilton_West_(cropped).png",
+      "license": "CC BY-SA 4.0",
+      "attribution": "New Zealand National Party (via Wikimedia Commons)",
+      "face_box": {
+        "x": 0.15,
+        "y": 0.03,
+        "w": 0.7,
+        "h": 0.5
+      },
+      "caricature": "Maori man, short dark hair, trimmed beard/stubble, medium-brown skin, warm smile, dark suit (from general knowledge)."
+    },
+    {
+      "name": "Simon Watts",
+      "role": "Minister",
+      "elected_2026": true,
+      "elected_note": "North Shore (not Tamaki); Wikipedia reports retained by 11,151 votes on preliminary results.",
+      "elected_source": "https://en.wikipedia.org/wiki/Simon_Watts",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/WATTS,_Simon_-_North_Shore_(cropped).png?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:WATTS,_Simon_-_North_Shore_(cropped).png",
+      "license": "CC BY-SA 4.0",
+      "attribution": "New Zealand National Party (via Wikimedia Commons)",
+      "face_box": {
+        "x": 0.15,
+        "y": 0.03,
+        "w": 0.7,
+        "h": 0.5
+      },
+      "caricature": "Short dark brown hair neatly parted, clean-shaven, light skin, friendly open face, dark suit (from general knowledge)."
+    },
+    {
+      "name": "Todd McClay",
+      "role": "Minister",
+      "elected_2026": "unverified",
+      "elected_note": "Contested electorate for National; no source I could read reports the 2026 result. National reportedly won 42 seats on preliminary results (5-7 overhang, zero list MPs), which suggests electorate winners, but this was not confirmed for this person. Contested Rotorua, list rank 10.",
+      "elected_source": "https://en.wikipedia.org/wiki/Todd_McClay",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/2025_Todd_McClay_(cropped).jpg?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:2025_Todd_McClay_(cropped).jpg",
+      "license": "Public domain",
+      "attribution": "USDAgov (via Wikimedia Commons)",
+      "face_box": {
+        "x": 0.15,
+        "y": 0.03,
+        "w": 0.7,
+        "h": 0.5
+      },
+      "caricature": "Balding with short grey-brown hair, light skin, broad grin, dark suit; image is a USDA public-domain photo, not a party portrait (from general knowledge)."
+    },
+    {
+      "name": "Matt Doocey",
+      "role": "Minister",
+      "elected_2026": true,
+      "elected_note": "Waimakariri; Wikipedia reports retained by 11,283 votes, citing Electoral Commission preliminary count (retrieved 12 Nov 2026).",
+      "elected_source": "https://en.wikipedia.org/wiki/Matt_Doocey",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/DOOCEY,_Matt_-_Waimakariri_(cropped).png?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:DOOCEY,_Matt_-_Waimakariri_(cropped).png",
+      "license": "CC BY-SA 4.0",
+      "attribution": "New Zealand National Party (via Wikimedia Commons)",
+      "face_box": {
+        "x": 0.15,
+        "y": 0.03,
+        "w": 0.7,
+        "h": 0.5
+      },
+      "caricature": "Short dark hair with some grey, clean-shaven, light skin, friendly everyman face, dark suit (from general knowledge)."
+    },
+    {
+      "name": "Mahesh Muralidhar",
+      "role": "MP",
+      "elected_2026": true,
+      "elected_note": "Tamaki (Wikipedia lists him MP for Tamaki from 7 Nov 2026; cites RNZ 8 Nov 'Mahesh Muralidhar makes history as National takes back Tamaki'). List rank 23. Preliminary status not stated.",
+      "elected_source": "https://en.wikipedia.org/wiki/Mahesh_Muralidhar",
+      "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/MURALIDHAR,_Mahesh_-_Auckland_Central_(cropped).png?width=400",
+      "url_verified": true,
+      "source_page": "https://commons.wikimedia.org/wiki/File:MURALIDHAR,_Mahesh_-_Auckland_Central_(cropped).png",
+      "license": "CC BY-SA 4.0",
+      "attribution": "New Zealand National Party (via Wikimedia Commons)",
+      "face_box": {
+        "x": 0.15,
+        "y": 0.03,
+        "w": 0.7,
+        "h": 0.5
+      },
+      "caricature": "Indian-New Zealander, short black hair, neat dark moustache/stubble possible, brown skin, smiling, dark suit (from general knowledge; unsure of facial hair)."
+    },
+    {
+      "name": "Jessica Rowe",
+      "role": "MP",
+      "elected_2026": true,
+      "elected_note": "Kaipara ki Mahurangi (replaced Chris Penk, who withdrew); Wikipedia says elected, margin 12,592 on preliminary results. List rank 68.",
+      "elected_source": "https://en.wikipedia.org/wiki/Jessica_Rowe_(politician)",
+      "image_url": null,
+      "url_verified": false,
+      "source_page": null,
+      "license": null,
+      "attribution": null,
+      "face_box": null,
+      "caricature": "No portrait found on Commons. Generic: woman, shoulder-length hair (colour unknown), blue National-style blazer; draw as a cartoon."
+    }
+  ]
+}

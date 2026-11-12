@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Bullrush on the Parliament Lawn</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23098137'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='Arial' font-weight='900'%3EB%3C/text%3E%3C/svg%3E">
+<style>
+  :root { --ink:#14201a; --paper:#fbf7ec; --grass:#2f8f3e; --gold:#ffc93c; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; overflow:hidden; background:#1d3b24; font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif; color:var(--ink); -webkit-user-select:none; user-select:none; touch-action:manipulation; }
+  canvas#cv { position:fixed; inset:0; display:block; cursor:crosshair; }
+  .hidden { display:none !important; }
+
+  /* Scoreboard */
+  #hud { position:fixed; top:0; left:0; right:0; display:flex; align-items:stretch; gap:8px; padding:6px 8px; pointer-events:none; z-index:5; }
+  .side { flex:1; min-width:0; background:rgba(15,25,18,.82); color:#fff; border-radius:12px; padding:5px 10px; display:flex; align-items:center; gap:10px; border:2px solid rgba(255,255,255,.18); }
+  .side.r { flex-direction:row-reverse; text-align:right; }
+  .side .big { font:900 30px/1 "Arial Black", Impact, sans-serif; min-width:1.4em; text-align:center; }
+  .side .lbl { font-size:10px; letter-spacing:.14em; text-transform:uppercase; opacity:.8; white-space:nowrap; }
+  .side .who { font-weight:800; font-size:13px; white-space:nowrap; }
+  .badges { display:flex; flex-wrap:wrap; gap:3px; min-width:0; }
+  .side.r .badges { justify-content:flex-end; }
+  .badge { font-size:11px; font-weight:800; padding:2px 6px; border-radius:99px; border:1.5px solid rgba(255,255,255,.75); white-space:nowrap; }
+  #mid { background:var(--gold); border-radius:12px; padding:4px 12px; text-align:center; display:flex; flex-direction:column; justify-content:center; border:2px solid #1a1a1a; }
+  #mid b { font:900 15px/1.1 "Arial Black", Impact, sans-serif; white-space:nowrap; }
+  #mid span { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+  #tools { position:fixed; right:8px; bottom:8px; display:flex; gap:6px; z-index:6; }
+  button { font:inherit; cursor:pointer; }
+  .tool { background:rgba(15,25,18,.82); color:#fff; border:2px solid rgba(255,255,255,.3); border-radius:10px; padding:7px 10px; font-weight:700; font-size:12px; }
+  #hint { position:fixed; left:8px; bottom:8px; background:rgba(15,25,18,.78); color:#fff; font-size:12px; padding:6px 10px; border-radius:10px; z-index:5; pointer-events:none; max-width:60vw; }
+
+  /* Banner */
+  #banner { position:fixed; left:0; right:0; top:34%; text-align:center; z-index:7; pointer-events:none; font:900 min(17vw,150px)/1 Impact, "Arial Black", sans-serif; color:var(--gold); letter-spacing:.02em; -webkit-text-stroke: 5px #1a1a1a; paint-order: stroke fill; text-shadow: 0 8px 0 #b3261e, 0 14px 22px rgba(0,0,0,.45); opacity:0; }
+  #banner.go { animation: shout 1.5s cubic-bezier(.2,1.6,.4,1) both; }
+  #banner small { display:block; font:800 min(3.4vw,24px)/1.3 "Trebuchet MS", sans-serif; color:#fff; -webkit-text-stroke:0; text-shadow:0 2px 6px #000; letter-spacing:.06em; }
+  @keyframes shout { 0%{opacity:0; transform:scale(.2) rotate(-8deg)} 18%{opacity:1; transform:scale(1.12) rotate(2deg)} 30%{transform:scale(1) rotate(-1deg)} 80%{opacity:1; transform:scale(1.02)} 100%{opacity:0; transform:scale(1.5)} }
+
+  /* Overlays */
+  .overlay { position:fixed; inset:0; z-index:10; display:flex; align-items:center; justify-content:center; background:linear-gradient(rgba(12,30,18,.72), rgba(12,30,18,.9)); padding:10px; }
+  .panel { background:var(--paper); border-radius:18px; border:4px solid #1a1a1a; box-shadow:0 12px 0 rgba(0,0,0,.35); width:min(1080px,100%); max-height:100%; display:flex; flex-direction:column; overflow:hidden; }
+  .panel header { background:var(--grass); color:#fff; padding:10px 16px; border-bottom:4px solid #1a1a1a; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .panel h1 { margin:0; font:900 clamp(22px,4.2vw,40px)/1 Impact, "Arial Black", sans-serif; letter-spacing:.03em; color:var(--gold); -webkit-text-stroke:1.5px #1a1a1a; paint-order:stroke fill; }
+  .panel header p { margin:0; font-size:13px; font-weight:600; }
+  .cols { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; padding:10px; overflow:auto; flex:1; }
+  .col { border-radius:12px; padding:8px; min-height:150px; border:3px dashed rgba(0,0,0,.3); display:flex; flex-direction:column; gap:6px; }
+  .col h2 { margin:0; font:900 15px/1.1 "Arial Black", sans-serif; text-transform:uppercase; letter-spacing:.04em; }
+  .col h2 small { display:block; font:600 11px/1.3 "Trebuchet MS", sans-serif; text-transform:none; letter-spacing:0; opacity:.75; }
+  #c1 { background:#e8f4ff; } #c0 { background:#efeadb; } #c2 { background:#ffe9e2; }
+  .card { background:#fff; border:2.5px solid #1a1a1a; border-radius:10px; overflow:hidden; display:flex; align-items:stretch; }
+  .card .mv { border:0; width:34px; font:900 18px/1 "Arial Black", sans-serif; background:#1a1a1a; color:#fff; }
+  .card .mv:disabled { opacity:.15; cursor:default; }
+  .card .body { flex:1; min-width:0; padding:5px 7px; }
+  .card .nm { font-weight:900; font-size:14px; display:flex; align-items:center; gap:6px; }
+  .card .dot { width:14px; height:14px; border-radius:50%; border:2px solid #1a1a1a; flex:none; }
+  .card .cnt { font-weight:600; font-size:11px; opacity:.7; }
+  .faces { display:flex; margin-top:3px; padding-left:6px; }
+  .faces canvas { width:26px; height:26px; border-radius:50%; border:1.5px solid #1a1a1a; margin-left:-6px; background:#ddd; }
+  .foot { padding:8px 12px 12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; border-top:3px solid #1a1a1a; background:#f0ead8; }
+  .preset { background:#fff; border:2px solid #1a1a1a; border-radius:99px; padding:6px 11px; font-weight:800; font-size:12px; }
+  #go { margin-left:auto; background:#d82a20; color:#fff; border:4px solid #1a1a1a; border-radius:14px; padding:10px 26px; font:900 24px/1 Impact, "Arial Black", sans-serif; letter-spacing:.05em; box-shadow:0 5px 0 #1a1a1a; }
+  #go:disabled { background:#999; box-shadow:none; cursor:not-allowed; }
+  #go:not(:disabled):active { transform:translateY(4px); box-shadow:0 1px 0 #1a1a1a; }
+  .note { font-size:11px; opacity:.8; flex-basis:100%; }
+  .note a { color:inherit; }
+  #over .panel, #credits .panel { width:min(620px,100%); }
+  #over .in { padding:18px; text-align:center; overflow:auto; }
+  #over h2 { font:900 clamp(24px,5vw,40px)/1.05 Impact, "Arial Black", sans-serif; margin:.2em 0; }
+  #over canvas { width:120px; height:120px; border-radius:50%; border:5px solid #1a1a1a; }
+  #credits .in { padding:12px 16px; overflow:auto; font-size:12px; }
+  #credits li { margin-bottom:3px; }
+  @media (max-width:720px) {
+    .cols { grid-template-columns:1fr; }
+    .side .who, .side .lbl { display:none; } .side .big { font-size:22px; }
+    #hint { display:none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="hud" class="hidden">
+  <div class="side l"><div class="big" id="n1">0</div><div><div class="lbl">Team 1 · Runners left</div><div class="badges" id="b1"></div></div></div>
+  <div id="mid"><b id="rnd">Round 1</b><span id="dir">to the South End</span></div>
+  <div class="side r"><div class="big" id="n2">0</div><div><div class="lbl">Team 2 · Taggers</div><div class="badges" id="b2"></div></div></div>
+</div>
+<div id="banner"></div>
+<div id="hint" class="hidden">Tap a Runner to bonk them · tap a Tagger to trip them · tap Gerry (whistle) or Nicola (spreadsheets)</div>
+<div id="tools">
+  <button class="tool" id="mute">🔊 Sound</button>
+  <button class="tool hidden" id="menu">↩ Coalitions</button>
+  <button class="tool" id="cred">Credits</button>
+</div>
+
+<div class="overlay" id="builder">
+  <div class="panel">
+    <header><h1>BULLRUSH!</h1><p>The 2026 Parliament, set loose on the front lawn. Build two coalitions, then let them run.</p></header>
+    <div class="cols">
+      <div class="col" id="c1"><h2>Team 1 · Runners<small>Start in the North End and sprint for it</small></h2></div>
+      <div class="col" id="c0"><h2>Crossbench<small>Sitting this one out</small></h2></div>
+      <div class="col" id="c2"><h2>Team 2 · Taggers<small>Wait in the middle and tackle</small></h2></div>
+    </div>
+    <div class="foot">
+      <button class="preset" data-p="blocs">Left bloc v Right bloc</button>
+      <button class="preset" data-p="govt">Old Government v Opposition</button>
+      <button class="preset" data-p="rumble">1 v 6 royal rumble</button>
+      <button class="preset" data-p="shuffle">Shuffle</button>
+      <button class="preset" data-p="clear">Clear</button>
+      <button id="go" disabled>SET LOOSE!</button>
+      <div class="note" id="note"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="over">
+  <div class="panel"><header><h1 id="ovT">FULL TIME</h1></header>
+    <div class="in"><canvas id="ovC" width="160" height="160"></canvas><h2 id="ovH"></h2><p id="ovP"></p>
+      <p><button class="preset" id="again">Rematch</button> <button class="preset" id="back">New coalitions</button></p></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="credits">
+  <div class="panel"><header><h1>CREDITS</h1><p>Photos are hot-linked from Wikimedia Commons under their own licences.</p></header>
+    <div class="in" id="credIn"></div>
+    <div class="foot"><button class="preset" id="credX">Close</button></div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
