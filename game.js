@@ -396,21 +396,39 @@ function placeCameos() {
 }
 // Things these people are on record as saying, each with its source. Everyone else gets stock phrases of the House.
 const QUOTES = {
-  'Shane Jones': [{ t: 'Goodbye, Freddie!', src: 'https://thespinoff.co.nz/opinion/21-12-2023/shane-jones-versus-the-frog' }],
-  'Christopher Luxon': [{ t: "I'm wealthy, I'm, you know, sorted.", src: 'https://www.odt.co.nz/node/3238011' }],
-  'Chlöe Swarbrick': [{ t: 'OK, boomer.', src: 'https://www.1news.co.nz/2019/11/05/chloe-swarbrick-quips-ok-boomer-at-national-mp-during-climate-speech' }],
-  'Rawiri Waititi': [{ t: 'Colonial noose!', src: 'https://www.1news.co.nz/2020/12/08/colonial-noose-maori-partys-rawiri-waititi-takes-stand-against-parliament-tie-rules' }],
-  'David Seymour': [{ t: 'The French, for instance, love the coq.', src: "https://www.rnz.co.nz/news/political/284435/david-seymour-on-this-week's-coq-ups" }],
-  'Chris Hipkins': [{ t: 'Bread and butter issues!', src: 'https://interest.co.nz/public-policy/119318/pm-elect-chris-hipkins-says-first-news-conference-he-wants-ditch-unnecessary' }],
-  'Winston Peters': [{ t: "Don't come and ask a silly question like that.", src: 'https://www.nzherald.co.nz/nz/watch-winston-peters-greatest-hits-v-the-media/ZJ5DSQYPAMDRDJWDUREXA5WEDY/' },
-                     { t: "You don't know what I know, and I know that's a fact!", src: 'https://m.scoop.co.nz/stories/HL0802/S00330/peters-fights-with-media-28-february-2008.htm' }],
+  "Christopher Luxon": [{ t: "I'm wealthy, I'm, you know, sorted.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
+    { t: "Go make a Marmite sandwich and put an apple in a bag.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
+    { t: "Have more babies if you wish, that would be helpful.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
+  "Winston Peters": [{ t: "I know he's the Prime Minister, I made him the Prime Minister.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
+    { t: "Don't come and ask a silly question like that.", src: "https://www.nzherald.co.nz/nz/watch-winston-peters-greatest-hits-v-the-media/ZJ5DSQYPAMDRDJWDUREXA5WEDY/" },
+    { t: "You don't know what I know, and I know that's a fact!", src: "https://m.scoop.co.nz/stories/HL0802/S00330/peters-fights-with-media-28-february-2008.htm" }],
+  "David Seymour": [{ t: "The French, for instance, love the coq.", src: "https://www.rnz.co.nz/news/political/284435/david-seymour-on-this-week's-coq-ups" },
+    { t: "We've got an economy that's running on a sugar hit.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
+    { t: "I quite like knowing who the idiots in society are.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
+  "Shane Jones": [{ t: "Goodbye, Freddie!", src: "https://thespinoff.co.nz/opinion/21-12-2023/shane-jones-versus-the-frog" },
+    { t: "Some sort of demonic eggbeater!", src: "https://thespinoff.co.nz/politics/26-11-2025/demonic-eggbeater-shane-jones-has-a-normal-one-on-rnz" },
+    { t: "Woke, riddled munchkins who want to fry eggs on solar panels!", src: "https://thespinoff.co.nz/politics/26-11-2025/demonic-eggbeater-shane-jones-has-a-normal-one-on-rnz" }],
+  "Chris Hipkins": [{ t: "Bread and butter issues!", src: "https://interest.co.nz/public-policy/119318/pm-elect-chris-hipkins-says-first-news-conference-he-wants-ditch-unnecessary" },
+    { t: "Get outside and spread their legs.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
+    { t: "Pashing on a dance floor.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
+  "Chlöe Swarbrick": [{ t: "OK, boomer.", src: "https://www.1news.co.nz/2019/11/05/chloe-swarbrick-quips-ok-boomer-at-national-mp-during-climate-speech" },
+    { t: "Six of 68 Government MPs with a spine.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
+  "Rawiri Waititi": [{ t: "Colonial noose!", src: "https://www.1news.co.nz/2020/12/08/colonial-noose-maori-partys-rawiri-waititi-takes-stand-against-parliament-tie-rules" },
+    { t: "A pebble in your shoe.", src: "https://www.nzherald.co.nz/rotorua-daily-post/news/a-pebble-in-your-shoe-maori-partys-rawiri-waititis-promise-to-be-unapologetic-voice-for-maori/HTE3ZYUI7FJAUWANYTQ4AIQQDY" }],
+  "Hana-Rawhiti Maipi-Clarke": [{ t: "Kāwana!", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
+  "Kieran McAnulty": [{ t: "He ended up in jail.", src: "https://www.nzherald.co.nz/the-country/news/labour-mp-sells-iconic-ute-that-he-once-fought-over-with-a-car-thief-he-ended-up-in-jail/LTG6L7KURPXYEU2IJ6GIFZG2UY" }],
+  "Willie Jackson": [{ t: "You don't walk over our kaupapa.", src: "https://www.1news.co.nz/2025/05/15/labours-willie-jackson-booted-from-house/" }],
+  "Paul Henry": [{ t: "New Zealand has extraordinary potential, but we are not living up to it.", src: "https://www.act.org.nz/news/paul-henry-to-stand-for-act-in-2026-election" }],
 };
 const SIDELINE_QUOTES = {
-  'Nicola Willis': [{ t: 'No BS in here.', src: 'https://thespinoff.co.nz/politics/22-05-2025/budget-day-2025-arrives-with-cuts-cookies-and-promises-of-no-bs' },
-                    { t: 'No rainbows and unicorns either.', src: 'https://thespinoff.co.nz/politics/22-05-2025/budget-day-2025-arrives-with-cuts-cookies-and-promises-of-no-bs' },
-                    { t: 'No lolly scramble!', src: 'https://www.odt.co.nz/news/national/no-sugar-hits-as-willis-battles-to-balance-books-j9nh54xs' },
-                    { t: 'No sugar hits!', src: 'https://www.odt.co.nz/news/national/no-sugar-hits-as-willis-battles-to-balance-books-j9nh54xs' }],
-  'Chris Bishop': [{ t: 'What a lot of crap!', src: 'https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance' }],
+  "Nicola Willis": [{ t: "No BS in here.", src: "https://thespinoff.co.nz/politics/22-05-2025/budget-day-2025-arrives-with-cuts-cookies-and-promises-of-no-bs" },
+    { t: "No rainbows and unicorns either.", src: "https://thespinoff.co.nz/politics/22-05-2025/budget-day-2025-arrives-with-cuts-cookies-and-promises-of-no-bs" },
+    { t: "No lolly scramble!", src: "https://www.odt.co.nz/news/national/no-sugar-hits-as-willis-battles-to-balance-books-j9nh54xs" },
+    { t: "No sugar hits!", src: "https://www.odt.co.nz/news/national/no-sugar-hits-as-willis-battles-to-balance-books-j9nh54xs" },
+    { t: "How big is his hole?", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
+    { t: "Don an adult nappy and chain yourself to a door.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
+  "Chris Bishop": [{ t: "What a lot of crap!", src: "https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance" }],
+  "Gerry Brownlee": [{ t: "No, don't do that.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
 };
 const HOUSE = ['Point of order!', 'Mr Speaker!', 'Shame!', 'I seek leave!', 'Withdraw and apologise!', 'Hear, hear!', 'Order, order!', 'I move the question be put!', 'That is out of order!'];
 // The browser's own speech voice reads the lines aloud. It is a generic voice at a silly pitch, not an impression of anyone.
@@ -438,7 +456,7 @@ function tossSheet(n) {
 }
 function shockwave() {
   G.waves.push({ x: cam.gerry.x, y: cam.gerry.y, r: 0, hit: new Set() });
-  Snd.gavel(3); sideSay(cam.gerry, 'Gerry Brownlee', 'Order! Order!', true); cam.gerry.blow = 1.3; cam.gerry.order = 1.6; G.shake = 0.5;
+  Snd.gavel(3); sideSay(cam.gerry, 'Gerry Brownlee', rand() < 0.4 ? "No, don't do that." : 'Order! Order!', true); cam.gerry.blow = 1.3; cam.gerry.order = 1.6; G.shake = 0.5;
 }
 function updateCameos(dt) {
   const g = cam.gerry, n = cam.nicola, b = cam.bishop, go = cam.gold, pk = cam.penk, run = G.phase === 'run';
