@@ -13,15 +13,29 @@ const META = [
 ];
 const SHORT = { 'Julie Anne Genter': 'Genter', 'Ricardo Menéndez March': 'Menéndez March', 'Hana-Rawhiti Maipi-Clarke': 'Maipi-Clarke' };
 // Photos the agents flagged as not confirmed to be the right person: use a drawn stand-in instead.
-const NO_PHOTO = new Set(['Jessica Hammond']);
+const NO_PHOTO = new Set();
+// Party-site campaign portraits for MPs with no free-licence photo. These are the parties' own copyright, hot-linked for parody.
+const P = (img, by, src) => ({ img, by, lic: '© ' + by + ' (campaign photo, not free-licensed)', src });
+const EXTRA = {
+  'Craig Renney': P('https://www.labour.org.nz/media/inok2c50/craig-renney.jpg?width=640&format=webp&quality=80', 'NZ Labour Party', 'https://www.labour.org.nz/2026-campaign/our-candidates/craig-renney/'),
+  'Jessica Rowe': P('https://www.national.org.nz/_next/image?url=https%3A%2F%2Fassets.national.org.nz%2Fweb%2Fprod%2FCandidate-Jessica-Rowe-2026.jpg%3Fv%3D1789094360&w=828&q=75', 'NZ National Party', 'https://www.national.org.nz/team/jessicarowe'),
+  'Daniel Eb': P('https://assets.nationbuilder.com/garethmorgan/pages/9874/meta_images/original/candidate-daniel-eb.jpg?1779966213', 'The Opportunity Party', 'https://www.opportunity.org.nz/candidate-daniel-eb'),
+  'Jessica Hammond': P('https://assets.nationbuilder.com/garethmorgan/pages/9867/meta_images/original/candidate-jessica-hammond.jpg?1779966258', 'The Opportunity Party', 'https://www.opportunity.org.nz/candidate-jessica-hammond'),
+  'Kayla Kingdon-Bebb': P('https://cdn.opportunity.org.nz/images/candidates/candidate-kayla-kingdon-hero-cutout.webp', 'The Opportunity Party', 'https://www.opportunity.org.nz/candidate-kayla-kingdon-bebb'),
+  'Eden Skipper': P('https://assets.nationbuilder.com/garethmorgan/pages/9873/meta_images/original/candidate-eden-skipper.jpg?1779966000', 'The Opportunity Party', 'https://www.opportunity.org.nz/candidate-eden-skipper'),
+  'Jodie Kuntzsch': P('https://assets.nationbuilder.com/garethmorgan/pages/12698/meta_images/original/candidate-jodie-kuntsch.jpg?1779965955', 'The Opportunity Party', 'https://www.opportunity.org.nz/candidate-jodie-kuntzsch'),
+  'Sarah Lucas': P('https://assets.nationbuilder.com/garethmorgan/pages/9872/meta_images/original/candidate-sarah-lucas.jpg?1779965809', 'The Opportunity Party', 'https://www.opportunity.org.nz/candidate-sarah-lucas'),
+  'Taine Randell': P('https://assets.nationbuilder.com/nzfirst/pages/10724/features/original/Candidate_Headline_Images_%2874%29.png?1786247112', 'New Zealand First', 'https://www.nzfirst.nz/taine_randell'),
+  'Craig Stobo': P('https://assets.nationbuilder.com/nzfirst/pages/12342/features/original/Candidate_Headline_Images_%282%29.png?1789341518', 'New Zealand First', 'https://www.nzfirst.nz/craig_stobo'),
+};
 const short = n => SHORT[n] || n.split(' ').slice(-1)[0];
-const person = m => ({
+const person = m0 => { const x = EXTRA[m0.name], m = x ? { ...m0, image_url: x.img, attribution: x.by, license: x.lic, source_page: x.src } : m0; return {
   name: m.name, short: short(m.name),
-  img: NO_PHOTO.has(m.name) ? null : (m.image_url ? m.image_url.replace(/width=\d+/, 'width=250') : null),
+  img: NO_PHOTO.has(m.name) ? null : (m.image_url ? m.image_url.replace(/([?&])width=\d+(?=$)/, '$1width=250') : null),
   status: m.elected_2026 ?? m.departed_2026,
   leader: /leader/i.test(m.role || '') && !/deputy/i.test(m.role || ''),
   credit: m.image_url && !NO_PHOTO.has(m.name) ? { by: m.attribution, lic: m.license, src: m.source_page } : null,
-});
+}; };
 const out = { parties: [], departed: [], env: null, dropped: [] };
 for (const [id, file, name, color, trim, text, tie] of META) {
   const j = rd(file);
