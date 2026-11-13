@@ -21,7 +21,7 @@
   button { font:inherit; cursor:pointer; color:var(--ink); }
 
   /* Chrome scales with the canvas so it reads on big screens */
-  #hud, #tools, #hint, .panel { zoom:var(--ui, 1); }
+  #hud, #tools, #hint, #ticker, .panel { zoom:var(--ui, 1); }
 
   /* Scoreboard */
   #hud { position:fixed; top:0; left:0; right:0; display:flex; align-items:stretch; gap:8px; padding:8px; pointer-events:none; z-index:5; }
@@ -75,7 +75,32 @@
   #go:not(:disabled):active { transform:translate(4px,4px); box-shadow:1px 1px 0 var(--ink); }
   .note { font-size:15px; flex-basis:100%; }
   .note a { color:inherit; }
-  #over .panel, #credits .panel { width:min(640px,100%); }
+  /* Commentary ticker */
+  #ticker { position:fixed; left:50%; transform:translateX(-50%); bottom:52px; max-width:calc(100vw - 16px); display:flex; align-items:stretch; background:var(--paper-hi); color:var(--ink); border:3px solid var(--ink); border-radius:6px; box-shadow:4px 4px 0 rgba(27,42,65,.55); font-size:17px; font-weight:700; z-index:5; pointer-events:none; overflow:hidden; white-space:nowrap; }
+  #ticker .live { background:var(--red); color:#fff; padding:3px 12px; letter-spacing:.1em; font-size:15px; display:flex; align-items:center; gap:6px; }
+  #ticker .live::before { content:''; width:10px; height:10px; border-radius:50%; background:#fff; animation:blink 1s steps(2) infinite; }
+  #ticker span { padding:3px 12px; border-left:2px solid var(--ink); overflow:hidden; text-overflow:ellipsis; }
+  #ticker span:first-of-type { border-left:0; }
+  #ticker i { font-style:normal; color:var(--red); margin-right:4px; }
+  @keyframes blink { 50% { opacity:.25; } }
+  /* Full-time front page */
+  #over .panel { width:min(720px,100%); background:var(--paper-hi); border:3px solid var(--ink); transform:rotate(-.6deg); }
+  #over .paper { padding:10px 22px 16px; text-align:left; overflow:auto; max-height:92vh; }
+  #over .pm { display:flex; justify-content:space-between; gap:8px; font-size:13px; font-weight:700; letter-spacing:.08em; border-bottom:3px solid var(--ink); padding-bottom:3px; }
+  #over .pname { font:400 clamp(28px,6.4vw,54px)/1.05 var(--shout); text-align:center; margin:6px 0 4px; border-bottom:4px double var(--ink); padding-bottom:6px; }
+  #over h2 { font:400 clamp(28px,6vw,52px)/1.02 var(--shout); margin:.3em 0 .12em; color:var(--red); }
+  #over .psub { font-size:clamp(17px,3vw,22px); font-weight:700; margin:0 0 .6em; }
+  #over .pcols { display:grid; grid-template-columns:3fr 2fr; gap:18px; border-top:2px solid var(--ink); padding-top:10px; }
+  #over .pcols p { font-size:17px; margin:0 0 .55em; }
+  #over .pside { border-left:2px solid var(--ink); padding-left:16px; }
+  #over .pside h3 { font:400 17px/1.1 var(--shout); margin:0 0 .3em; }
+  #over .pside blockquote { margin:0; font-size:21px; font-style:italic; line-height:1.15; }
+  #over .pside cite { display:block; font-size:14px; font-weight:700; font-style:normal; margin:.3em 0 .9em; }
+  #over .pside p { font-weight:700; }
+  #over .pbtns { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:10px; }
+  @media (max-width:560px) { #ticker span:nth-of-type(n+2) { display:none; } #ticker span { flex:1; } }
+  @media (max-width:560px) { #over .pcols { grid-template-columns:1fr; } #over .pside { border-left:0; padding-left:0; border-top:2px solid var(--ink); padding-top:8px; } #over .pm span:nth-child(2) { display:none; } }
+  #credits .panel { width:min(640px,100%); }
   #over .in { padding:18px; text-align:center; overflow:auto; }
   #over h2 { font:400 clamp(24px,5vw,40px)/1.05 var(--shout); margin:.3em 0 .2em; color:var(--red); }
   #over p { font-size:19px; margin:.4em 0 .8em; }
@@ -131,11 +156,18 @@
   </div>
 </div>
 
+<div id="ticker" class="hidden"></div>
+
 <div class="overlay hidden" id="over">
-  <div class="panel"><header><h1 id="ovT">FULL TIME</h1></header>
-    <div class="in"><canvas id="ovC" width="160" height="160"></canvas><h2 id="ovH"></h2><p id="ovP"></p>
-      <p><button class="preset" id="again">Rematch</button> <button class="preset" id="back">New coalitions</button></p></div>
-  </div>
+  <div class="panel"><div class="paper">
+    <div class="pm"><span id="pDate"></span><span>LATE EDITION</span><span>PRICE: ONE SPECIAL VOTE</span></div>
+    <div class="pname">THE LAWN GAZETTE</div>
+    <h2 id="pHead"></h2><p class="psub" id="pSub"></p>
+    <div class="pcols"><div id="pBody"></div>
+      <div class="pside"><div id="pQuoteBox"><h3>QUOTE OF THE MATCH</h3><blockquote id="pQuote"></blockquote><cite id="pWho"></cite></div>
+        <h3 id="pStarL">STAR RUNNER</h3><p id="pStar"></p></div></div>
+    <div class="pbtns"><button class="preset" id="again">Rematch</button> <button class="preset" id="back">New coalitions</button> <button class="preset" id="share">Share front page</button></div>
+  </div></div>
 </div>
 
 <div class="overlay hidden" id="credits">

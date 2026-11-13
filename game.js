@@ -361,6 +361,7 @@ function startMatch() {
   G.mps = [];
   for (const p of D.parties) { const t = G.assign[p.id]; if (t) for (const m of p.members) G.mps.push(makeMP(m, p, t)); }
   G.sheets = []; G.flying = []; G.fx = []; G.waves = []; G.round = 1; G.dir = 1;
+  G.log = []; G.logT = -9; G.tickT = 0; G.stats = { pile: 0, papers: 0, tags: 0, dodges: 0, last: null };
   G.init = G.mps.filter(m => m.role === 'runner').length;
   formation(true); G.phase = 'call'; G.t = 0; callRound();
   $('builder').classList.add('hidden'); $('over').classList.add('hidden'); $('hud').classList.remove('hidden'); $('menu').classList.remove('hidden'); $('hint').classList.remove('hidden');
@@ -379,13 +380,26 @@ function formation(snap) {
   for (const m of G.mps) { m.safe = false; m.conv = false; m.joined = m.role === 'tagger'; if (snap) { m.x = m.tx; m.y = m.ty; m.vx = m.vy = 0; } m.state = 'idle'; m.stun = 0; }
 }
 function callRound() {
-  Snd.gavel(2); cam.gerry.blow = 1.2; cam.gerry.say = 'Order!'; cam.gerry.sayT = 2;
+  Snd.gavel(2); cam.gerry.blow = 1.2; cam.gerry.say = 'Order!'; cam.gerry.sayT = 2; note(`Round ${G.round}: Runners head for the ${G.dir > 0 ? 'South' : 'North'} End`, true);
   banner('BULLRUSH!', G.round === 1 ? 'Runners: get to the South End!' : `Round ${G.round} — back to the ${G.dir > 0 ? 'South' : 'North'} End!`);
   setTimeout(() => Snd.cheer(0.22, 1.8), 350);
   for (const m of G.mps) { m.delay = m.role === 'runner' ? rand(0, 0.9) : rand(0, 0.3); m.saCd = 0; m.tgt = null; }
   Snd.combo = 0;
 }
 function banner(big, small) { const b = $('banner'); b.innerHTML = big + (small ? `<small>${small}</small>` : ''); b.classList.remove('go'); void b.offsetWidth; b.classList.add('go'); }
+/* ---------- commentary ticker ---------- */
+// Plain descriptions of what just happened (never speech), newest first. Busy moments are thinned so it stays readable.
+function note(text, force) {
+  if (!G.log || (!force && G.time - G.logT < 0.8)) return;
+  G.logT = G.time; G.log.unshift({ t: G.time, text }); if (G.log.length > 40) G.log.pop(); G.tickT = 0;
+}
+function renderTicker() {
+  const el = $('ticker'), live = G.phase === 'call' || G.phase === 'run' || G.phase === 'between';
+  const items = live ? G.log.filter(e => G.time - e.t < 30).slice(0, 3) : [];
+  el.classList.toggle('hidden', !items.length);
+  if (items.length) el.innerHTML = '<b class="live">LIVE</b>' + items.map(e => `<span><i>${Math.max(1, Math.round(G.time - e.t))}s</i> ${esc(e.text)}</span>`).join('');
+}
+const esc = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 function fx(x, y, text, color = '#fff', size = 1) { G.fx.push({ x, y, text, color, size, t: 0 }); }
 function knock(m, t, state = 'down') { if (state === 'down' && m.state !== 'down') m.kt = G.time; m.stun = Math.max(m.stun, t); m.state = state; m.lunge = 0; }
 function bump(m, ix, iy, spin) { m.hd.vx += ix; m.hd.vy += iy; m.hd.va += spin; }
@@ -560,10 +574,12 @@ function exclaim(m) {   // a poked MP blurts something; the sideline hushes so t
 }
 function sideSay(c, name, t, force) { c.say = t; c.sayT = 2; Voice.say(t, hash(name), force, name); }
 function tossSheet(n) {
+  note(n > 1 ? 'Willis hurls a stack of budget papers onto the lawn' : 'Willis tosses a budget paper onto the lawn', n > 1);
   for (let i = 0; i < n; i++) G.flying.push({ x0: cam.nicola.x, y0: cam.nicola.y, x1: rand(8, W - 8), y1: rand(ZN + 6, ZS - 6), t: -i * 0.15, rot: rand(TAU) });
   cam.nicola.toss = 0.6; if (n > 1) sideSay(cam.nicola, 'Nicola Willis', pick(SIDELINE_QUOTES['Nicola Willis']).t, true);   // she only speaks when tapped
 }
 function shockwave() {
+  note('Gerry bangs the gavel for order', true);
   G.waves.push({ x: cam.gerry.x, y: cam.gerry.y, r: 0, hit: new Set() });
   Snd.gavel(3); sideSay(cam.gerry, 'Gerry Brownlee', rand() < 0.65 ? pick(SIDELINE_QUOTES['Gerry Brownlee']).t : 'Order! Order!', true); cam.gerry.blow = 1.3; cam.gerry.order = 1.6; G.shake = 0.5;
 }
@@ -575,7 +591,7 @@ function updateCameos(dt) {
     n.auto -= dt; if (n.auto <= 0) { n.auto = rand(4, 7); tossSheet(1); }
     if (g.orderCd <= 0) {   // pile-up check
       const down = G.mps.filter(m => m.state === 'down');
-      for (const a of down) { let c = 0; for (const o of down) if (Math.hypot(a.x - o.x, a.y - o.y) < 13) c++; if (c >= 4) { g.order = 2; g.orderCd = 5; fx(a.x, a.y - 6, 'PILE-UP!', GOLD, 1.3); break; } }
+      for (const a of down) { let c = 0; for (const o of down) if (Math.hypot(a.x - o.x, a.y - o.y) < 13) c++; if (c >= 4) { g.order = 2; g.orderCd = 5; fx(a.x, a.y - 6, 'PILE-UP!', GOLD, 1.3); G.stats.pile++; note('Pile-up on the lawn, Gerry calls for order', true); break; } }
     }
     b.next -= dt; if (b.next <= 0) { b.next = rand(5, 9); sideSay(b, 'Chris Bishop', pick(SIDELINE_QUOTES['Chris Bishop']).t, false); b.sayT = 2.4; }
   }
@@ -592,6 +608,7 @@ function updateCameos(dt) {
 function update(dt) {
   G.time += dt; G.t += dt; G.shake = Math.max(0, G.shake - dt);
   updateCameos(dt);
+  G.tickT -= dt; if (G.tickT <= 0 && G.log) { G.tickT = 0.5; renderTicker(); }
   for (const f of G.fx) f.t += dt; G.fx = G.fx.filter(f => f.t < 1.3);
   for (const f of G.puffs) f.t += dt; G.puffs = G.puffs.filter(f => f.t < 0.55);
   for (const s of G.flying) { s.t += dt / 0.8; if (s.t >= 1) G.sheets.push({ x: s.x1, y: s.y1, rot: s.rot, life: 16 }); }
@@ -633,18 +650,20 @@ function update(dt) {
           r.saCd = 2.2; r.pose = 'stiff'; r.poseT = 0.5; r.side = t.x > r.x ? 1 : -1;
           knock(t, 1.3); t.vx = (t.x - r.x) / (d || 1) * 14; t.vy = (t.y - r.y) / (d || 1) * 10; bump(t, rand(-8, 8), -9, rand(-12, 12));
           fx(r.x, r.y - 8, stiff ? 'STIFF-ARM!' : pick(['JUKED!', 'SIDESTEP!', 'MISSED!']), '#FBF6EA'); if (stiff) Snd.boing(); else Snd.juke();
+          r.dodges = (r.dodges || 0) + 1; G.stats.dodges++; note(stiff ? `${r.short} stiff-arms ${t.short}` : `${r.short} jinks past ${t.short}`);
         } else {                                                   // tackled
           r.conv = true; knock(r, 2.2); r.vx = t.vx * 0.6; r.vy = t.vy * 0.6; bump(r, rand(-10, 10), -12, rand(-14, 14));
           knock(t, 0.55, 'stumble'); bump(t, 0, -6, rand(-6, 6)); t.tgt = null;
           fx(r.x, r.y - 8, pick(['TAGGED!', 'TACKLED!', 'GOTCHA!', 'CONVERTED!']), RED, 1.15);
           if (rand() < 0.2) { const t = pick(CROWD); setTimeout(() => fx(r.x, r.y - 2, t, GOLD, 0.75), 300); Voice.say(t, hash(t) + (rand() < 0.5 ? 1 : 0), false, null); }
+          t.tags = (t.tags || 0) + 1; G.stats.tags++; G.stats.last = r; const left = live.filter(o => !o.conv).length; note(`${t.short} tags ${r.short}` + (left <= 4 ? ` (${left} Runner${left === 1 ? '' : 's'} left)` : ''), left <= 4);
           Snd.tag(); hud();
         }
         break; } }
     // spreadsheets
     for (const s of G.sheets) for (const m of G.mps) if (m.stun <= 0 && !m.safe && Math.hypot(m.vx, m.vy) > 5 && Math.hypot(m.x - s.x, m.y - s.y) < 2.7) {
       s.life = 0; knock(m, 2.8, 'read'); m.vx = m.vy = 0; bump(m, 0, 6, 0);   // sits down to read the budget
-      fx(m.x, m.y - 8, pick(['READS THE BUDGET', 'OOH, A SPREADSHEET', 'CHECKS THE NUMBERS', 'JUST A QUICK LOOK']), '#8EC5E8'); Snd.paper(); break; }
+      fx(m.x, m.y - 8, pick(['READS THE BUDGET', 'OOH, A SPREADSHEET', 'CHECKS THE NUMBERS', 'JUST A QUICK LOOK']), '#8EC5E8'); Snd.paper(); G.stats.papers++; note(`${m.short} sits down to read Willis's papers`); break; }
     if (!live.length && !G.endT) G.endT = 1.4;
     if (G.t > (HZ ? 36 : 24) && !G.endT) { for (const r of live) { r.conv = true; knock(r, 1.5); } G.endT = 1.2; hud(); }
     if (G.endT) { G.endT -= dt; if (G.endT <= 0) { G.endT = 0; endRound(); } }
@@ -668,7 +687,7 @@ function runnerAI(m, dt, taggers) {
   const n = Math.hypot(dx, dy), near = dir > 0 ? ZS - m.y : m.y - ZN, sp = m.spd * (near < 14 ? 1.15 : 1);
   m.vx = lerp(m.vx, dx / n * sp, Math.min(1, dt * 7)); m.vy = lerp(m.vy, dy / n * sp, Math.min(1, dt * 7)); m.state = 'run';
   if (dir > 0 ? m.y >= ZS + 1 : m.y <= ZN - 1) {
-    m.safe = true; fx(m.x, m.y - 8, 'SAFE!', GOLD); Snd.safe(); bump(m, 0, -8, 0);
+    m.safe = true; fx(m.x, m.y - 8, 'SAFE!', GOLD); Snd.safe(); bump(m, 0, -8, 0); note(`${m.short} is safe at the ${G.dir > 0 ? 'South' : 'North'} End`);
     if (m.party.id === 'tpm') { cam.ferris.fist = 2.2; cam.kapa.fist = 2.2; cam.ferris.say = pick(SIDELINE_QUOTES['Tākuta Ferris']).t; cam.kapa.say = pick(SIDELINE_QUOTES['Mariameno Kapa-Kingi']).t;
       const [who, c] = rand() < 0.5 ? ['Tākuta Ferris', cam.ferris] : ['Mariameno Kapa-Kingi', cam.kapa]; Voice.say(c.say, hash(who), false, who); }
   }
@@ -727,15 +746,58 @@ function endRound() {
   if (left.length === 1 && (G.init > 1 || G.round >= 5)) return gameOver(left[0]);
   G.round++; G.dir *= -1; G.phase = 'between'; G.t = 0; formation(false); hud();
 }
+const NUM = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+let paper = null;   // what the front page currently says, so it can be saved as an image
+function frontPage(last, t1, t2) {
+  const n = G.round, rounds = (n < NUM.length ? NUM[n] : String(n)).toUpperCase() + (n === 1 ? ' ROUND' : ' ROUNDS'), S = G.stats;
+  const players = G.mps.slice(), starRun = players.filter(m => m.dodges).sort((a, b) => b.dodges - a.dodges)[0], starTag = players.filter(m => m.tags).sort((a, b) => b.tags - a.tags)[0];
+  const quoted = players.filter(m => QUOTES[m.name]), q = quoted.length ? pick(quoted) : null, qt = q ? pick(QUOTES[q.name]) : null;
+  let head, sub;
+  if (last) { head = `LAST ${last.party.name.toUpperCase()} STANDING`; sub = `${last.name} outlasts the field to take the lawn for ${t1}`; }
+  else { head = n <= 2 ? `HOUSE FALLS IN ${rounds}` : n >= 7 ? 'LONG HAUL ENDS: HOUSE SWALLOWED' : `HOUSE SWALLOWED IN ${rounds}`; sub = `${t2} tag every last Runner from ${t1}`; }
+  const body = [];
+  body.push(`Spectators on the Parliament lawn saw ${last ? `${t1} hold out` : `the Taggers' coalition (${t2}) close in`} over ${n} round${n === 1 ? '' : 's'}, with ${S.tags} tag${S.tags === 1 ? '' : 's'} and ${S.dodges} sidestep${S.dodges === 1 ? '' : 's'} on the day.`);
+  if (S.pile) body.push(`${S.pile === 1 ? 'A pile-up' : `${S.pile} pile-ups`} brought the Speaker to his feet.`);
+  if (S.papers) body.push(`Willis's budget papers claimed ${S.papers} Runner${S.papers === 1 ? '' : 's'}, who sat down to read them.`);
+  if (last) body.push(`${last.name} (${last.party.name}) stayed upright while everyone else was converted.`);
+  else if (S.last) body.push(`${S.last.name}, the last Runner standing for ${S.last.party.name}, was tagged in round ${n}.`);
+  const star = starRun ? `${starRun.short}, ${starRun.dodges} sidestep${starRun.dodges === 1 ? '' : 's'}` : starTag ? `${starTag.short} the Tagger, ${starTag.tags} tag${starTag.tags === 1 ? '' : 's'}` : 'nobody, a quiet day';
+  const date = new Date().toLocaleDateString('en-NZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+  paper = { date, head, sub, body, quote: qt ? qt.t : '', who: q ? q.name : '', src: qt ? qt.src : '', star, starLabel: starRun ? 'STAR RUNNER' : 'STAR TAGGER' };
+  $('pDate').textContent = date; $('pHead').textContent = head; $('pSub').textContent = sub;
+  $('pBody').innerHTML = body.map(b => `<p>${esc(b)}</p>`).join('');
+  $('pQuoteBox').classList.toggle('hidden', !qt);
+  if (qt) { $('pQuote').textContent = `“${qt.t}”`; $('pWho').innerHTML = `${esc(q.name)} · <a href="${esc(qt.src)}" target="_blank" rel="noopener">source</a>`; }
+  $('pStarL').textContent = paper.starLabel; $('pStar').textContent = star;
+}
+function sharePaper() {   // draw the front page to a canvas and save or share it as a picture
+  if (!paper) return;
+  const W2 = 1080, H2 = 1350, c = document.createElement('canvas'); c.width = W2; c.height = H2; const g = c.getContext('2d'), P = 70;
+  const wrap = (txt, x, y, w, lh) => { const words = txt.split(' '); let line = ''; for (const wd of words) { const t = line ? line + ' ' + wd : wd; if (g.measureText(t).width > w && line) { g.fillText(line, x, y); y += lh; line = wd; } else line = t; } if (line) { g.fillText(line, x, y); y += lh; } return y; };
+  g.fillStyle = '#FBF6EA'; g.fillRect(0, 0, W2, H2); g.strokeStyle = INK; g.lineWidth = 8; g.strokeRect(24, 24, W2 - 48, H2 - 48);
+  g.fillStyle = INK; g.textBaseline = 'alphabetic'; g.font = `700 24px ${LABEL}`; g.textAlign = 'left'; g.fillText(paper.date, P, 90); g.textAlign = 'center'; g.fillText('LATE EDITION', W2 / 2, 90); g.textAlign = 'right'; g.fillText('PRICE: ONE SPECIAL VOTE', W2 - P, 90);
+  g.fillRect(P, 104, W2 - 2 * P, 4); g.textAlign = 'center'; g.font = `400 92px ${SHOUT}`; g.fillText('THE LAWN GAZETTE', W2 / 2, 210); g.fillRect(P, 232, W2 - 2 * P, 4); g.fillRect(P, 242, W2 - 2 * P, 2);
+  g.fillStyle = RED; g.textAlign = 'left'; g.font = `400 96px ${SHOUT}`; let y = wrap(paper.head, P, 340, W2 - 2 * P, 104);
+  g.fillStyle = INK; g.font = `700 38px ${LABEL}`; y = wrap(paper.sub, P, y + 14, W2 - 2 * P, 46) + 20;
+  g.fillRect(P, y, W2 - 2 * P, 3); y += 54; g.font = `500 32px ${LABEL}`; const colW = 480, top = y; let by = top;
+  for (const b of paper.body) by = wrap(b, P, by, colW, 40) + 14;
+  const sx = P + colW + 60, sw = W2 - P - sx; g.fillRect(sx - 30, top - 36, 3, 560); let sy = top;
+  if (paper.quote) { g.font = `400 30px ${SHOUT}`; g.fillText('QUOTE OF THE MATCH', sx, sy); sy += 50; g.font = `italic 500 36px ${LABEL}`; sy = wrap(`“${paper.quote}”`, sx, sy, sw, 44); g.font = `700 26px ${LABEL}`; g.fillText(paper.who, sx, sy + 6); sy += 70; }
+  g.font = `400 30px ${SHOUT}`; g.fillText(paper.starLabel, sx, sy); sy += 46; g.font = `500 34px ${LABEL}`; wrap(paper.star, sx, sy, sw, 42);
+  g.fillStyle = INK; g.fillRect(P, H2 - 150, W2 - 2 * P, 4); g.font = `400 40px ${SHOUT}`; g.fillText('BEEHIVE BULLRUSH', P + 90, H2 - 82);
+  const done = () => c.toBlob(blob => {
+    if (!blob) return; const file = new File([blob], 'lawn-gazette.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: paper.head }).catch(() => {});
+    else { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'lawn-gazette.png'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+  });
+  const ic = new Image(); ic.onload = () => { g.drawImage(ic, P, H2 - 130, 72, 72); done(); }; ic.onerror = done; ic.src = 'logo/icon.svg';
+}
 function gameOver(last) {
   G.phase = 'over'; Snd.stopMusic(); Snd.cheer(0.4, 3); Snd.gavel(3); Snd.win();
   const t1 = D.parties.filter(p => G.assign[p.id] === 1).map(p => p.name).join(' + '), t2 = D.parties.filter(p => G.assign[p.id] === 2).map(p => p.name).join(' + ');
-  const c = $('ovC'), g = c.getContext('2d'); g.clearRect(0, 0, 160, 160);
-  if (last) { g.drawImage(sprites[last.name], 0, 0); c.style.borderColor = last.party.color;
-    $('ovT').textContent = 'LAST MP STANDING'; $('ovH').textContent = last.name; $('ovP').textContent = `${last.party.name} outlasted everyone in ${G.round} round${G.round > 1 ? 's' : ''}. Team 1 (${t1}) takes the lawn.`;
-    for (const m of G.mps) { m.state = 'idle'; m.vx = m.vy = 0; } last.pose = 'up'; last.poseT = 99;
-  } else { g.drawImage(sprites[depName('Brownlee')], 0, 0); c.style.borderColor = INK;
-    $('ovT').textContent = 'TOTAL CONVERSION'; $('ovH').textContent = 'Team 2 swallowed the House'; $('ovP').textContent = `${t2} tagged every last Runner from ${t1} in ${G.round} round${G.round > 1 ? 's' : ''}.`; }
+  note(last ? `Full time: ${last.short} is the last Runner standing` : 'Full time: every Runner has been tagged', true);
+  frontPage(last, t1, t2);
+  if (last) { for (const m of G.mps) { m.state = 'idle'; m.vx = m.vy = 0; } last.pose = 'up'; last.poseT = 99; }
   setTimeout(() => { if (G.phase === 'over') $('over').classList.remove('hidden'); }, 1300);
 }
 
@@ -1077,8 +1139,8 @@ cv.addEventListener('pointerdown', e => {
   const list = G.mps.slice().sort((a, b) => depth(b) - depth(a));
   for (const m of list) { const U = m.U, onHead = Math.hypot(x - m.sx, y - (m.sy - 50 * U)) < 21 * U, onBody = Math.abs(x - m.sx) < 12 * U && y < m.sy + 4 * U && y > m.sy - 36 * U;
     if (!onHead && !onBody) continue; if (m.safe || m.conv || m.state === 'down') continue;
-    if (m.role === 'runner') { knock(m, 1.15, 'stumble'); bump(m, rand(-6, 6), 16, rand(-16, 16)); m.vx *= 0.2; m.vy *= 0.2; fx(m.x, m.y - 10, 'BONK!', GOLD, 1.25); Snd.bonk(); exclaim(m); }
-    else { knock(m, 1.4); bump(m, rand(-8, 8), -10, rand(-14, 14)); fx(m.x, m.y - 10, 'TRIPPED!', '#8EC5E8', 1.15); Snd.trip(); exclaim(m); }
+    if (m.role === 'runner') { knock(m, 1.15, 'stumble'); bump(m, rand(-6, 6), 16, rand(-16, 16)); m.vx *= 0.2; m.vy *= 0.2; fx(m.x, m.y - 10, 'BONK!', GOLD, 1.25); Snd.bonk(); exclaim(m); note(`${m.short} is bonked off stride`, true); }
+    else { knock(m, 1.4); bump(m, rand(-8, 8), -10, rand(-14, 14)); fx(m.x, m.y - 10, 'TRIPPED!', '#8EC5E8', 1.15); Snd.trip(); exclaim(m); note(`${m.short} is tripped from behind`, true); }
     return; }
 });
 
@@ -1118,6 +1180,7 @@ document.querySelectorAll('.preset[data-p]').forEach(b => b.onclick = () => {
 });
 $('go').onclick = () => startMatch();
 $('again').onclick = () => startMatch();
+$('share').onclick = sharePaper;
 const toBuilder = () => { setLayout(); G.phase = 'builder'; G.mps = []; G.sheets = []; G.flying = []; Snd.stopMusic(); $('over').classList.add('hidden'); $('hud').classList.add('hidden'); $('menu').classList.add('hidden'); $('hint').classList.add('hidden'); $('builder').classList.remove('hidden'); renderBuilder(); };
 $('back').onclick = toBuilder; $('menu').onclick = toBuilder;
 const bobbleLabel = () => { $('bobble').textContent = BOBBLE ? 'Bobbleheads' : 'Face discs'; };
