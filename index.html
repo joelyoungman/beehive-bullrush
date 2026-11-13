@@ -76,6 +76,7 @@
   .note { font-size:15px; flex-basis:100%; }
   .note a { color:inherit; }
   .mvchip { font-size:13px; line-height:1.15; margin:1px 0 3px; color:var(--ink); } .mvchip b { background:var(--gold); border:1.5px solid var(--ink); border-radius:3px; padding:0 5px; margin-right:4px; white-space:nowrap; }
+  body.replaying #hud, body.replaying #seats, body.replaying #ticker, body.replaying #banner, body.replaying #hint, body.replaying #tools, body.replaying #star { visibility:hidden; }
   /* Seat scoreboard */
   #seats { position:fixed; left:50%; transform:translateX(-50%); top:90px; width:min(520px,calc(94vw / var(--ui, 1))); z-index:4; pointer-events:none; }
   #seats .bar { position:relative; display:flex; justify-content:space-between; height:18px; background:var(--paper-hi); border:3px solid var(--ink); border-radius:4px; box-shadow:3px 3px 0 rgba(27,42,65,.5); overflow:visible; }
@@ -151,6 +152,7 @@
 <div id="tools">
   <button class="tool" id="bobble">Bobbleheads</button>
   <button class="tool" id="voices">Voices on</button>
+  <button class="tool" id="replays">Replays on</button>
   <button class="tool" id="mute">Sound on</button>
   <button class="tool hidden" id="menu">Coalitions</button>
   <button class="tool" id="cred">Credits</button>

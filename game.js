@@ -344,7 +344,7 @@ const Snd = {
 };
 
 /* ---------- game state ---------- */
-const G = { grip: 1, wind: 0, wx: 'clear', swing: null, seatStart: 0, wobCd: 0, life: { t: 20, kind: '', p: 0 }, phase: 'builder', dir: 1, round: 0, t: 0, time: 0, mps: [], sheets: [], flying: [], fx: [], waves: [], puffs: [], boops: [], init: 0, shake: 0, endT: 0, assign: {} };
+const G = { replay: null, clip: null, pend: null, ring: [], grip: 1, wind: 0, wx: 'clear', swing: null, seatStart: 0, wobCd: 0, life: { t: 20, kind: '', p: 0 }, phase: 'builder', dir: 1, round: 0, t: 0, time: 0, mps: [], sheets: [], flying: [], fx: [], waves: [], puffs: [], boops: [], init: 0, shake: 0, endT: 0, assign: {} };
 const partyOf = id => D.parties.find(p => p.id === id);
 
 // One small trait per party (shown on its team-builder card). Effects are kept small so a match still lasts 5 to 8 rounds.
@@ -362,6 +362,7 @@ function makeMP(m, party, team) {
   o.spd0 = o.spd; return o;
 }
 function startMatch() {
+  if (G.replay) { G.replay.onEnd = null; endReplay(); }
   Snd.init(); clearTimeout(starTimer); $('star').classList.add('hidden');
   setLayout(); G.puffs = [];
   G.mps = [];
@@ -389,6 +390,7 @@ function formation(snap) {
   for (const m of G.mps) { m.safe = false; m.conv = false; m.joined = m.role === 'tagger'; if (snap) { m.x = m.tx; m.y = m.ty; m.vx = m.vy = 0; } m.state = 'idle'; m.stun = 0; }
 }
 function callRound() {
+  G.ring = []; G.clip = null; G.pend = null;
   G.seatStart = seatSplit().L;
   for (const m of G.mps) { m.rd = { dodge: 0, tags: 0, dist: 0, by: '' }; m.stumbled = false; }   // this round's tally, for Player of the round
   Snd.gavel(2); cam.gerry.blow = 1.2; cam.gerry.say = 'Order!'; cam.gerry.sayT = 2; note(`Round ${G.round}: Runners head for the ${G.dir > 0 ? 'South' : 'North'} End`, true);
@@ -398,6 +400,53 @@ function callRound() {
   Snd.combo = 0;
 }
 function banner(big, small) { const b = $('banner'); b.innerHTML = big + (small ? `<small>${small}</small>` : ''); b.classList.remove('go'); void b.offsetWidth; b.classList.add('go'); }
+/* ---------- instant replay ---------- */
+// While a round runs, every frame's key MP fields go into a short ring. When a tackle beats the round's best closing speed,
+// the ring (plus a moment after) is kept as a clip. After the round the clip plays back slowly, zoomed on the tackle.
+const REPLAY_RATE = 0.4, PRE = 66, POST = 36;
+let REPLAYS = true;
+try { REPLAYS = localStorage.getItem('bullrush.replays') !== '0'; } catch (e) {}
+const snap = () => G.mps.map(m => ({ x: m.x, y: m.y, vx: m.vx, vy: m.vy, stun: m.stun, kt: m.kt, hop: m.hop, side: m.side, poseT: m.poseT, phase: m.phase, state: m.state, pose: m.pose, role: m.role, conv: m.conv, safe: m.safe, face: m.face, hd: [m.hd.ox, m.hd.oy, m.hd.a] }));
+function applySnap(fr, fr2, k) {
+  for (let i = 0; i < G.mps.length; i++) { const m = G.mps[i], a = fr[i], b = fr2 ? fr2[i] : a;
+    m.x = lerp(a.x, b.x, k); m.y = lerp(a.y, b.y, k); m.vx = lerp(a.vx, b.vx, k); m.vy = lerp(a.vy, b.vy, k); m.hop = lerp(a.hop || 0, b.hop || 0, k);
+    m.stun = a.stun; m.kt = a.kt; m.side = a.side; m.poseT = a.poseT; m.phase = a.phase; m.state = a.state; m.pose = a.pose; m.role = a.role; m.conv = a.conv; m.safe = a.safe; m.face = a.face; m.hd.ox = a.hd[0]; m.hd.oy = a.hd[1]; m.hd.a = a.hd[2]; }
+}
+function recordFrame() {
+  const fr = snap(); G.ring.push(fr); if (G.ring.length > PRE + 4) G.ring.shift();
+  if (G.pend) { G.pend.frames.push(fr); if (++G.pend.after >= POST) { G.clip = G.pend; G.pend = null; } }
+}
+function clipConsider(t, r, score) {
+  if (!G.ring || (G.clip && score <= G.clip.score) || (G.pend && score <= G.pend.score)) return;
+  G.pend = { score, frames: G.ring.slice(), after: 0, at: G.ring.length, focus: [r.x, r.y], cap: `Round ${G.round}: ${t.short} takes down ${r.short}` };
+}
+function startReplay(clip, onEnd) {
+  G.fx = []; G.replay = { clip, i: 0, back: snap(), onEnd, t: 0 }; document.body.classList.add('replaying'); $('ticker').classList.add('hidden'); $('star').classList.add('hidden'); Snd.pop(0, 440, 0.1);
+}
+function stepReplay(dt) {
+  const R = G.replay, n = R.clip.frames.length; G.fx = []; R.t += dt; R.i += dt * 60 * REPLAY_RATE;
+  if (R.i >= n - 1) return endReplay();
+  const i = Math.floor(R.i); applySnap(R.clip.frames[i], R.clip.frames[i + 1], R.i - i);
+}
+function endReplay() {
+  const R = G.replay; if (!R) return; G.replay = null; document.body.classList.remove('replaying'); applySnap(R.back, null, 0); Snd.pop(0, 330, 0.08);
+  if (R.onEnd) R.onEnd();
+}
+function drawReplay() {   // letterbox, stamp, caption: drawn on top, outside the zoom
+  const R = G.replay, bh = Math.max(34, VH * 0.1), fade = Math.min(1, R.t * 3);
+  ctx.save(); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.fillStyle = INK; ctx.fillRect(0, 0, VW, bh * fade); ctx.fillRect(0, VH - bh * fade, VW, bh * fade);
+  ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = 'rgba(243,226,190,.35)'; ctx.fillRect(0, 0, VW, VH); ctx.globalCompositeOperation = 'source-over';
+  const f = Math.max(13, bh * 0.4); ctx.textBaseline = 'middle';
+  ctx.save(); ctx.translate(18, bh * 0.5); ctx.rotate(-0.04); ctx.font = `400 ${f}px ${SHOUT}`; const w = ctx.measureText('REPLAY').width + f * 1.5;
+  ctx.fillStyle = RED; ctx.strokeStyle = PAPER; ctx.lineWidth = 2.5; rr(0, -f * 0.75, w, f * 1.5, 4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = Math.floor(R.t * 2) % 2 ? PAPER : GOLD; ctx.beginPath(); ctx.arc(f * 0.6, 0, f * 0.22, 0, TAU); ctx.fill();
+  ctx.fillStyle = PAPER; ctx.textAlign = 'left'; ctx.fillText('REPLAY', f * 1.05, f * 0.04); ctx.restore();
+  ctx.fillStyle = PAPER; ctx.textAlign = 'center'; ctx.font = `400 ${Math.max(15, bh * 0.42)}px ${SHOUT}`; ctx.fillText(R.clip.cap.toUpperCase(), VW / 2, VH - bh * 0.5, VW - 24);
+  ctx.textAlign = 'right'; ctx.font = `700 ${Math.max(11, bh * 0.28)}px ${LABEL}`; ctx.fillStyle = 'rgba(243,233,210,.75)'; ctx.fillText('TAP TO SKIP', VW - 14, bh * 0.5);
+  ctx.restore();
+}
+
 /* ---------- commentary ticker ---------- */
 // Plain descriptions of what just happened (never speech), newest first. Busy moments are thinned so it stays readable.
 function note(text, force) {
@@ -642,6 +691,7 @@ function updateCameos(dt) {
 function update(dt) {
   G.time += dt; G.t += dt; G.shake = Math.max(0, G.shake - dt);
   updateCameos(dt);
+  if (G.replay) { stepReplay(dt); return; }
   G.tickT -= dt; if (G.tickT <= 0 && G.log) { G.tickT = 0.5; renderTicker(); if (G.swing) G.swing.t -= 0.5; seatsUpdate(); }
   for (const f of G.fx) f.t += dt; G.fx = G.fx.filter(f => f.t < 1.3);
   for (const f of G.puffs) f.t += dt; G.puffs = G.puffs.filter(f => f.t < 0.55);
@@ -687,14 +737,15 @@ function update(dt) {
           r.saCd = 2.2; r.pose = 'stiff'; r.poseT = 0.5; r.side = t.x > r.x ? 1 : -1;
           const shove = window.__moves && r.pid === 'labour' ? 1 + 0.2 * window.__moveScale : 1;
           knock(t, 1.3 * shove); t.vx = (t.x - r.x) / (d || 1) * 14 * shove; t.vy = (t.y - r.y) / (d || 1) * 10 * shove; bump(t, rand(-8, 8), -9, rand(-12, 12));
-          fx(r.x, r.y - 8, stiff ? 'STIFF-ARM!' : pick(['JUKED!', 'SIDESTEP!', 'MISSED!']), '#FBF6EA'); if (stiff) Snd.boing(); else Snd.juke();
-          r.dodges = (r.dodges || 0) + 1; r.rd.dodge++; G.stats.dodges++; note(stiff ? `${r.short} stiff-arms ${t.short}` : `${r.short} jinks past ${t.short}`);
+          fx(r.x, r.y - 8, stiff ? pick(['FEND-OFF!', 'FENDED!']) : pick(['SIDESTEP!', 'SOLD THE DUMMY!', 'GOOSE-STEP!', 'MISSED TACKLE!']), '#FBF6EA'); if (stiff) Snd.boing(); else Snd.juke();
+          r.dodges = (r.dodges || 0) + 1; r.rd.dodge++; G.stats.dodges++; note(stiff ? pick([`${r.short} fends off ${t.short}`, `${r.short} fends ${t.short} away`]) : pick([`${r.short} sidesteps ${t.short}`, `${r.short} sells ${t.short} the dummy`, `${r.short} goose-steps past ${t.short}`]));
         } else {                                                   // tackled
+          const hit = Math.hypot(t.vx - r.vx, t.vy - r.vy); clipConsider(t, r, hit);
           r.conv = true; knock(r, 2.2); r.vx = t.vx * 0.6; r.vy = t.vy * 0.6; bump(r, rand(-10, 10), -12, rand(-14, 14));
           knock(t, 0.55, 'stumble'); bump(t, 0, -6, rand(-6, 6)); t.tgt = null;
-          fx(r.x, r.y - 8, pick(['TAGGED!', 'TACKLED!', 'GOTCHA!', 'CONVERTED!']), RED, 1.15);
+          const big = hit > 26; fx(r.x, r.y - 8, big ? pick(['BIG HIT!', 'CLOTHESLINED!', 'SMASHED!']) : pick(['TACKLED!', 'WRAPPED UP!', 'BUNDLED!', 'DUMPED!', 'ON THE DECK!', 'CONVERTED!']), RED, big ? 1.3 : 1.15);
           if (rand() < 0.2) { const t = pick(CROWD); setTimeout(() => fx(r.x, r.y - 2, t, GOLD, 0.75), 300); Voice.say(t, hash(t) + (rand() < 0.5 ? 1 : 0), false, null); }
-          t.tags = (t.tags || 0) + 1; t.rd.tags++; r.rd.by = t.short; G.stats.tags++; G.stats.last = r; const left = live.filter(o => !o.conv).length; note(`${t.short} tags ${r.short}` + (left <= 4 ? ` (${left} Runner${left === 1 ? '' : 's'} left)` : ''), left <= 4);
+          t.tags = (t.tags || 0) + 1; t.rd.tags++; r.rd.by = t.short; G.stats.tags++; G.stats.last = r; const left = live.filter(o => !o.conv).length; note((big ? pick([`${t.short} clotheslines ${r.short}`, `${t.short} smashes ${r.short}`, `${t.short} puts ${r.short} on the deck`]) : pick([`${t.short} tackles ${r.short}`, `${t.short} wraps up ${r.short}`, `${t.short} bundles over ${r.short}`]))  + (left <= 4 ? ` (${left} Runner${left === 1 ? '' : 's'} left)` : ''), left <= 4);
           Snd.tag(); hud();
         }
         break; } }
@@ -708,6 +759,7 @@ function update(dt) {
   }
   separate(dt);
   for (const m of G.mps) body(m, dt);
+  if (G.phase === 'run') recordFrame();
 }
 function runnerAI(m, dt, taggers) {
   m.saCd -= dt; m.imm = (m.imm || 0) - dt; m.poseT -= dt; if (m.poseT <= 0) m.pose = '';
@@ -725,7 +777,7 @@ function runnerAI(m, dt, taggers) {
   const n = Math.hypot(dx, dy), near = dir > 0 ? ZS - m.y : m.y - ZN, sp = m.spd * (near < 14 ? 1.15 : 1);
   m.vx = lerp(m.vx, dx / n * sp, Math.min(1, dt * 7 * G.grip)); m.vy = lerp(m.vy, dy / n * sp, Math.min(1, dt * 7 * G.grip)); m.state = 'run';
   if (dir > 0 ? m.y >= ZS + 1 : m.y <= ZN - 1) {
-    m.safe = true; fx(m.x, m.y - 8, 'SAFE!', GOLD); Snd.safe(); bump(m, 0, -8, 0); note(`${m.short} is safe at the ${G.dir > 0 ? 'South' : 'North'} End`);
+    m.safe = true; fx(m.x, m.y - 8, 'SAFE!', GOLD); Snd.safe(); bump(m, 0, -8, 0); note(pick([`${m.short} is safe at the ${G.dir > 0 ? 'South' : 'North'} End`, `${m.short} gets home to the ${G.dir > 0 ? 'South' : 'North'} End`]));
     if (m.party.id === 'tpm') { cam.ferris.fist = 2.2; cam.kapa.fist = 2.2; cam.ferris.say = pick(SIDELINE_QUOTES['Tākuta Ferris']).t; cam.kapa.say = pick(SIDELINE_QUOTES['Mariameno Kapa-Kingi']).t;
       const [who, c] = rand() < 0.5 ? ['Tākuta Ferris', cam.ferris] : ['Mariameno Kapa-Kingi', cam.kapa]; Voice.say(c.say, hash(who), false, who); }
   }
@@ -787,8 +839,8 @@ function roundStar() {   // best player this round: sidesteps and tags count mos
 let starTimer = 0;
 function showStar(st) {
   const el = $('star'), m = st.m, rows = st.role === 'Runner'
-    ? [['Sidesteps', st.rd.dodge], ['Metres run', Math.round(st.rd.dist)], ['Tagged by', st.safe ? 'nobody' : (st.rd.by || 'nobody')]]
-    : [['Tags made', st.rd.tags], ['Metres run', Math.round(st.rd.dist)]];
+    ? [['Sidesteps', st.rd.dodge], ['Metres run', Math.round(st.rd.dist)], ['Tackled by', st.safe ? 'nobody' : (st.rd.by || 'nobody')]]
+    : [['Tackles made', st.rd.tags], ['Metres run', Math.round(st.rd.dist)]];
   const qs = QUOTES[m.name], q = qs ? pick(qs).t : '';
   el.innerHTML = `<div class="sh"><b>PLAYER OF THE ROUND</b><span>ROUND ${st.round}</span></div><div class="sb"><canvas width="160" height="160"></canvas><div><h3>${esc(m.short.toUpperCase())}</h3><em>${esc(m.party.name)} · ${st.role}</em>${rows.map(r => `<p><u>${r[0]}</u> ${esc(r[1])}</p>`).join('')}</div></div>${q ? `<div class="sq">\u201C${esc(q)}\u201D</div>` : ''}`;
   const c = el.querySelector('canvas'); c.style.borderColor = m.party.color; c.getContext('2d').drawImage(sprites[m.name], 0, 0);
@@ -804,8 +856,11 @@ function endRound() {
   if (left.length === 0) return gameOver(null);
   if (left.length === 1 && (G.init > 1 || G.round >= 5)) return gameOver(left[0]);
   { const L = seatSplit().L, d = L - G.seatStart; if (Math.abs(d) >= 1) { G.swing = { txt: `SWING ${Math.round(Math.abs(d))} SEATS TO THE ${d < 0 ? 'TAGGERS' : 'RUNNERS'}`, t: 7 }; note(G.swing.txt.charAt(0) + G.swing.txt.slice(1).toLowerCase(), true); } }
-  if (star) showStar(star);
+  const clip = G.pend && G.pend.frames.length > 30 ? G.pend : G.clip;   // a clip still collecting its aftermath is fine to use
+  const afterwards = () => { if (star) showStar(star); };
+  const doReplay = REPLAYS && clip && G.round >= 2;   // never after round 1
   G.round++; G.dir *= -1; G.phase = 'between'; G.t = 0; formation(false); hud();
+  if (doReplay) startReplay(clip, afterwards); else afterwards();
 }
 const NUM = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 let paper = null;   // what the front page currently says, so it can be saved as an image
@@ -817,12 +872,12 @@ function frontPage(last, t1, t2) {
   if (last) { head = `LAST ${last.party.name.toUpperCase()} STANDING`; sub = `${last.name} outlasts the field to take the lawn for ${t1}`; }
   else { head = n <= 2 ? `HOUSE FALLS IN ${rounds}` : n >= 7 ? 'LONG HAUL ENDS: HOUSE SWALLOWED' : `HOUSE SWALLOWED IN ${rounds}`; sub = `${t2} tag every last Runner from ${t1}`; }
   const body = [];
-  body.push(`Spectators on the Parliament lawn saw ${last ? `${t1} hold out` : `the Taggers' coalition (${t2}) close in`} over ${n} round${n === 1 ? '' : 's'}, with ${S.tags} tag${S.tags === 1 ? '' : 's'} and ${S.dodges} sidestep${S.dodges === 1 ? '' : 's'} on the day.`);
+  body.push(`Spectators on the Parliament lawn saw ${last ? `${t1} hold out` : `the Taggers' coalition (${t2}) close in`} over ${n} round${n === 1 ? '' : 's'}, with ${S.tags} tackle${S.tags === 1 ? '' : 's'} and ${S.dodges} sidestep${S.dodges === 1 ? '' : 's'} on the day.`);
   if (S.pile) body.push(`${S.pile === 1 ? 'A pile-up' : `${S.pile} pile-ups`} brought the Speaker to his feet.`);
   if (S.papers) body.push(`Willis's budget papers claimed ${S.papers} Runner${S.papers === 1 ? '' : 's'}, who sat down to read them.`);
   if (last) body.push(`${last.name} (${last.party.name}) stayed upright while everyone else was converted.`);
   else if (S.last) body.push(`${S.last.name}, the last Runner standing for ${S.last.party.name}, was tagged in round ${n}.`);
-  const star = starRun ? `${starRun.short}, ${starRun.dodges} sidestep${starRun.dodges === 1 ? '' : 's'}` : starTag ? `${starTag.short} the Tagger, ${starTag.tags} tag${starTag.tags === 1 ? '' : 's'}` : 'nobody, a quiet day';
+  const star = starRun ? `${starRun.short}, ${starRun.dodges} sidestep${starRun.dodges === 1 ? '' : 's'}` : starTag ? `${starTag.short} the Tagger, ${starTag.tags} tackle${starTag.tags === 1 ? '' : 's'}` : 'nobody, a quiet day';
   const date = new Date().toLocaleDateString('en-NZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
   paper = { date, head, sub, body, quote: qt ? qt.t : '', who: q ? q.name : '', src: qt ? qt.src : '', star, starLabel: starRun ? 'STAR RUNNER' : 'STAR TAGGER' };
   $('pDate').textContent = date; $('pHead').textContent = head; $('pSub').textContent = sub;
@@ -1201,6 +1256,7 @@ function drawSheet(x, y, rot, s, lift = 0) {
 function draw() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (G.shake > 0) ctx.translate(rand(-1, 1) * G.shake * 12, rand(-1, 1) * G.shake * 8);
+  if (G.replay) { const f = G.replay.clip.focus, fp = proj(f[0], f[1]), z = 1.45; ctx.translate(fp.x, fp.y - 40 * fp.s); ctx.scale(z, z); ctx.translate(-fp.x, -(fp.y - 40 * fp.s)); }
   drawBackground();
   for (const s of G.sheets) { const p = proj(s.x, s.y); ctx.globalAlpha = Math.min(1, s.life); drawSheet(p.x, p.y, s.rot, p.s); ctx.globalAlpha = 1; }
   { const ax = VW * (V.farH + V.nearH) / (HZ ? L : W), dz = VH * (V.nearY - V.farY) / (HZ ? W : L);
@@ -1224,7 +1280,7 @@ function draw() {
     ctx.fillStyle = 'rgba(27,42,65,.5)'; rr(-w / 2 + 3, -hh / 2 + 3, w, hh, 3); ctx.fill();
     ctx.fillStyle = f.color; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; rr(-w / 2, -hh / 2, w, hh, 3); ctx.fill(); ctx.stroke();
     ctx.fillStyle = INK; ctx.fillText(f.text, 0, fs * 0.06); ctx.restore(); }
-  drawWeather(); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); drawHand();
+  drawWeather(); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); if (G.replay) drawReplay(); else drawHand();
   if (!grain) { const c = document.createElement('canvas'); c.width = c.height = 160; const d = c.getContext('2d'); d.fillStyle = '#fff'; d.fillRect(0, 0, 160, 160);
     for (let i = 0; i < 2600; i++) { d.fillStyle = `rgba(60,45,20,${Math.random() * 0.16})`; d.fillRect(Math.random() * 160, Math.random() * 160, 1.3, 1.3); } grain = ctx.createPattern(c, 'repeat'); }
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = grain; ctx.fillRect(0, 0, VW, VH); ctx.globalCompositeOperation = 'source-over';
@@ -1233,6 +1289,7 @@ function draw() {
 /* ---------- input ---------- */
 cv.addEventListener('pointerdown', e => {
   const x = e.clientX, y = e.clientY; Snd.init();
+  if (G.replay) { endReplay(); return; }
   if (G.phase === 'builder') return;
   hand.x = x; hand.y = y; hand.pokeT = G.time; G.boops.push({ x, y, t: G.time }); Snd.boop();
   const g = cam.gerry, n = cam.nicola, inHit = h => h && Math.hypot(x - h[0], y - h[1]) < h[2];
@@ -1244,7 +1301,7 @@ cv.addEventListener('pointerdown', e => {
     if (!onHead && !onBody) continue; if (m.safe || m.conv || m.state === 'down') continue;
     if (window.__moves && m.pid === 'nzfirst' && m.role === 'runner' && m.stumbled) { fx(m.x, m.y - 10, 'SEASONED!', '#8EC5E8', 1.1); Snd.boing(); return; }
     if (m.role === 'runner') { m.stumbled = true; knock(m, 1.15, 'stumble'); bump(m, rand(-6, 6), 16, rand(-16, 16)); m.vx *= 0.2; m.vy *= 0.2; fx(m.x, m.y - 10, 'BONK!', GOLD, 1.25); Snd.bonk(); exclaim(m); note(`${m.short} is bonked off stride`, true); }
-    else { knock(m, 1.4); bump(m, rand(-8, 8), -10, rand(-14, 14)); fx(m.x, m.y - 10, 'TRIPPED!', '#8EC5E8', 1.15); Snd.trip(); exclaim(m); note(`${m.short} is tripped from behind`, true); }
+    else { knock(m, 1.4); bump(m, rand(-8, 8), -10, rand(-14, 14)); fx(m.x, m.y - 10, pick(['ANKLE-TAPPED!', 'TRIPPED!']), '#8EC5E8', 1.15); Snd.trip(); exclaim(m); note(`${m.short} is ankle-tapped`, true); }
     return; }
 });
 
@@ -1285,11 +1342,14 @@ document.querySelectorAll('.preset[data-p]').forEach(b => b.onclick = () => {
 $('go').onclick = () => startMatch();
 $('again').onclick = () => startMatch();
 $('share').onclick = sharePaper;
-const toBuilder = () => { setLayout(); G.phase = 'builder'; G.mps = []; G.sheets = []; G.flying = []; Snd.stopMusic(); $('over').classList.add('hidden'); $('hud').classList.add('hidden'); $('menu').classList.add('hidden'); $('hint').classList.add('hidden'); $('builder').classList.remove('hidden'); renderBuilder(); };
+const toBuilder = () => { if (G.replay) { G.replay.onEnd = null; endReplay(); } setLayout(); G.phase = 'builder'; G.mps = []; G.sheets = []; G.flying = []; Snd.stopMusic(); $('over').classList.add('hidden'); $('hud').classList.add('hidden'); $('menu').classList.add('hidden'); $('hint').classList.add('hidden'); $('builder').classList.remove('hidden'); renderBuilder(); };
 $('back').onclick = toBuilder; $('menu').onclick = toBuilder;
 const bobbleLabel = () => { $('bobble').textContent = BOBBLE ? 'Bobbleheads' : 'Face discs'; };
 $('bobble').onclick = () => { BOBBLE = !BOBBLE; try { localStorage.setItem('bullrush.bobble', BOBBLE ? '1' : '0'); } catch (e) {} bobbleLabel(); document.querySelectorAll('.faces canvas').forEach(c => paintAvatar(c, c.dataset.n)); };
 bobbleLabel();
+const replaysLabel = () => { $('replays').textContent = REPLAYS ? 'Replays on' : 'Replays off'; };
+$('replays').onclick = () => { REPLAYS = !REPLAYS; try { localStorage.setItem('bullrush.replays', REPLAYS ? '1' : '0'); } catch (e) {} replaysLabel(); if (!REPLAYS && G.replay) endReplay(); };
+replaysLabel();
 $('mute').onclick = () => { Snd.setMuted(!Snd.muted); if (Snd.muted) Voice.stop(); $('mute').textContent = Snd.muted ? 'Sound off' : 'Sound on'; };
 const voiceLabel = () => { $('voices').textContent = Voice.on ? 'Voices on' : 'Voices off'; };
 $('voices').onclick = () => { Voice.on = !Voice.on; try { localStorage.setItem('bullrush.voices', Voice.on ? '1' : '0'); } catch (e) {} if (!Voice.on) Voice.stop(); voiceLabel(); };

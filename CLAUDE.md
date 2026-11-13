@@ -15,7 +15,7 @@ Public repo: github.com/joelyoungman/beehive-bullrush. Collaborator: Sarah (sand
 
 - `index.html`: page, all CSS, menus and scoreboard.
 - `game.js`: everything else, in one closure. Sections are marked `/* ---------- name ---------- */`.
-- Match-day extras (from Sarah's mockups): party signature moves (`MOVES`; tuned small with `window.__moveScale`, switch off with `window.__moves = false` when balancing), the seat scoreboard (`seatsUpdate()`), weather, crowd placards, lawn life and the coalition wobble, the Player of the round card (`roundStar()`, `showStar()`; per-round tallies in `m.rd`), the LIVE ticker (`note()` in `game.js` feeds `#ticker`; descriptions only, never speech) and the full-time front page, "The Lawn Gazette" (`frontPage()`, `sharePaper()`; the quote of the match comes from `QUOTES`).
+- Match-day extras (from Sarah's mockups): instant replay (`recordFrame()`, `startReplay()`; from round 2, toggle in the toolbar), party signature moves (`MOVES`; tuned small with `window.__moveScale`, switch off with `window.__moves = false` when balancing), the seat scoreboard (`seatsUpdate()`), weather, crowd placards, lawn life and the coalition wobble, the Player of the round card (`roundStar()`, `showStar()`; per-round tallies in `m.rd`), the LIVE ticker (`note()` in `game.js` feeds `#ticker`; descriptions only, never speech) and the full-time front page, "The Lawn Gazette" (`frontPage()`, `sharePaper()`; the quote of the match comes from `QUOTES`).
 - `data.js`: generated. Never edit by hand; run `node tools/build-data.js`.
 - `manifest/*.json`: research data per party (who was elected, photo URL, licence, source).
 - `tools/build-data.js`: merges manifests into `data.js`. `EXTRA` holds party-site photos for MPs with no free photo.
@@ -41,6 +41,8 @@ Public repo: github.com/joelyoungman/beehive-bullrush. Collaborator: Sarah (sand
 - Sound is synthesised in `Snd`: soft tuned plucks, pops and thumps through a small reverb. No whooshes, no whistle (the user disliked both).
 
 ## Rules that matter
+
+- Use New Zealand rugby and league language for hits, not American football slang: fend-off (not stiff-arm), sidestep, goose-step, sold the dummy (not juked), wrapped up, bundled, on the deck, ankle-tapped, clothesline for the big hits. Spell in NZ English.
 
 - Quotes must be real and sourced. `QUOTES` and `SIDELINE_QUOTES` hold `{ t, src }`. Never invent a line for a real person; MPs without a verified quote use the stock `HOUSE` phrases. Excerpts are fine if the words are theirs.
 - No recordings or AI clones of politicians' voices. Voices are two generic NZ text-to-speech voices; each speaker gets a caricature speed and pitch from `VOICE_STYLE` in `game.js` (like a cartoon voice actor, not an impression). After changing `VOICE_STYLE`, delete that speaker's files in `voices/` and re-run the two voice tools.
