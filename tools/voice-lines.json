@@ -1,162 +1,232 @@
 [
  {
+  "file": "christopher-luxon-1rumwga.mp3",
+  "text": "I can tell you now, it's too close to call.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+10%",
+  "pitch": "-4Hz"
+ },
+ {
+  "file": "christopher-luxon-c03ukj.mp3",
+  "text": "I think everyone's over politics so let's all have a bit of a break.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+10%",
+  "pitch": "-4Hz"
+ },
+ {
   "file": "christopher-luxon-8qotzi.mp3",
   "text": "I'm wealthy, I'm, you know, sorted.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+6%",
-  "pitch": "+0Hz"
+  "rate": "+10%",
+  "pitch": "-4Hz"
  },
  {
   "file": "christopher-luxon-pmnwvl.mp3",
   "text": "Go make a Marmite sandwich and put an apple in a bag.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+6%",
-  "pitch": "+0Hz"
+  "rate": "+10%",
+  "pitch": "-4Hz"
  },
  {
   "file": "christopher-luxon-1z3ad0.mp3",
   "text": "Have more babies if you wish, that would be helpful.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+6%",
-  "pitch": "+0Hz"
+  "rate": "+10%",
+  "pitch": "-4Hz"
+ },
+ {
+  "file": "winston-peters-1cosioh.mp3",
+  "text": "A lot of people are getting carried away right here, right now.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-14%",
+  "pitch": "-18Hz"
  },
  {
   "file": "winston-peters-1jjomii.mp3",
   "text": "I know he's the Prime Minister, I made him the Prime Minister.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+0%",
-  "pitch": "-4Hz"
+  "rate": "-14%",
+  "pitch": "-18Hz"
  },
  {
   "file": "winston-peters-12rhbst.mp3",
   "text": "Don't come and ask a silly question like that.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+0%",
-  "pitch": "-4Hz"
+  "rate": "-14%",
+  "pitch": "-18Hz"
  },
  {
   "file": "winston-peters-iyjss9.mp3",
   "text": "You don't know what I know, and I know that's a fact!",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+0%",
-  "pitch": "-4Hz"
+  "rate": "-14%",
+  "pitch": "-18Hz"
+ },
+ {
+  "file": "david-seymour-vo3xi5.mp3",
+  "text": "It's very uncertain.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+22%",
+  "pitch": "+12Hz"
  },
  {
   "file": "david-seymour-o22zxa.mp3",
   "text": "The French, for instance, love the cock.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+0%",
-  "pitch": "-4Hz"
+  "rate": "+22%",
+  "pitch": "+12Hz"
  },
  {
   "file": "david-seymour-u1ub21.mp3",
   "text": "We've got an economy that's running on a sugar hit.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+0%",
-  "pitch": "-4Hz"
+  "rate": "+22%",
+  "pitch": "+12Hz"
  },
  {
   "file": "david-seymour-1pk88u2.mp3",
   "text": "I quite like knowing who the idiots in society are.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+0%",
-  "pitch": "-4Hz"
+  "rate": "+22%",
+  "pitch": "+12Hz"
+ },
+ {
+  "file": "shane-jones-3rn6jz.mp3",
+  "text": "We've been served an electoral spaghetti.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-6%",
+  "pitch": "-20Hz"
+ },
+ {
+  "file": "shane-jones-8841hs.mp3",
+  "text": "My cup of optimism constantly overflows.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-6%",
+  "pitch": "-20Hz"
  },
  {
   "file": "shane-jones-gdbrdc.mp3",
   "text": "Goodbye, Freddie!",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+1%",
-  "pitch": "-7Hz"
+  "rate": "-6%",
+  "pitch": "-20Hz"
  },
  {
   "file": "shane-jones-ar29tg.mp3",
   "text": "Some sort of demonic eggbeater!",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+1%",
-  "pitch": "-7Hz"
+  "rate": "-6%",
+  "pitch": "-20Hz"
  },
  {
   "file": "shane-jones-cl6727.mp3",
   "text": "Woke, riddled munchkins who want to fry eggs on solar panels!",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+1%",
-  "pitch": "-7Hz"
+  "rate": "-6%",
+  "pitch": "-20Hz"
+ },
+ {
+  "file": "chris-hipkins-mu728h.mp3",
+  "text": "Tonight New Zealand has spoken.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+14%",
+  "pitch": "+2Hz"
  },
  {
   "file": "chris-hipkins-t5eaft.mp3",
   "text": "Bread and butter issues!",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "-4%",
+  "rate": "+14%",
   "pitch": "+2Hz"
  },
  {
   "file": "chris-hipkins-ex8d6l.mp3",
   "text": "Get outside and spread their legs.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "-4%",
+  "rate": "+14%",
   "pitch": "+2Hz"
  },
  {
   "file": "chris-hipkins-xsc3ns.mp3",
   "text": "Pashing on a dance floor.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "-4%",
+  "rate": "+14%",
   "pitch": "+2Hz"
+ },
+ {
+  "file": "chloe-swarbrick-t9bdz6.mp3",
+  "text": "We have made history. You have made history.",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "+10%",
+  "pitch": "+8Hz"
  },
  {
   "file": "chloe-swarbrick-18fx8nj.mp3",
   "text": "OK, boomer.",
   "voice": "en-NZ-MollyNeural",
-  "rate": "+6%",
-  "pitch": "-8Hz"
+  "rate": "+10%",
+  "pitch": "+8Hz"
  },
  {
   "file": "chloe-swarbrick-73c8hx.mp3",
   "text": "Six of 68 Government MPs with a spine.",
   "voice": "en-NZ-MollyNeural",
-  "rate": "+6%",
-  "pitch": "-8Hz"
+  "rate": "+10%",
+  "pitch": "+8Hz"
  },
  {
   "file": "rawiri-waititi-16t1e8l.mp3",
   "text": "Colonial noose!",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+2%",
-  "pitch": "+4Hz"
+  "rate": "-8%",
+  "pitch": "-14Hz"
  },
  {
   "file": "rawiri-waititi-18rdwu5.mp3",
   "text": "A pebble in your shoe.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+2%",
-  "pitch": "+4Hz"
+  "rate": "-8%",
+  "pitch": "-14Hz"
  },
  {
   "file": "hana-rawhiti-maipi-clarke-akjd07.mp3",
   "text": "Kāwana!",
   "voice": "en-NZ-MollyNeural",
-  "rate": "-2%",
-  "pitch": "-7Hz"
+  "rate": "+6%",
+  "pitch": "-4Hz"
  },
  {
   "file": "kieran-mcanulty-dva148.mp3",
   "text": "He ended up in jail.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "-6%",
-  "pitch": "+1Hz"
+  "rate": "+8%",
+  "pitch": "-16Hz"
  },
  {
   "file": "willie-jackson-z0ww3o.mp3",
   "text": "You don't walk over our kaupapa.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+0%",
-  "pitch": "+2Hz"
+  "rate": "-3%",
+  "pitch": "+14Hz"
+ },
+ {
+  "file": "qiulae-wong-1vu0kip.mp3",
+  "text": "Let's change politics for good.",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "-5%",
+  "pitch": "-3Hz"
  },
  {
   "file": "qiulae-wong-1v9ev3e.mp3",
   "text": "Shit, we did it!",
   "voice": "en-NZ-MollyNeural",
+  "rate": "-5%",
+  "pitch": "-3Hz"
+ },
+ {
+  "file": "paul-henry-1gehf9l.mp3",
+  "text": "On these numbers, we'll be in government, thank god.",
+  "voice": "en-NZ-MitchellNeural",
   "rate": "-6%",
   "pitch": "+1Hz"
  },
@@ -164,134 +234,386 @@
   "file": "paul-henry-al0whi.mp3",
   "text": "New Zealand has extraordinary potential, but we are not living up to it.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+2%",
+  "rate": "-6%",
   "pitch": "+1Hz"
+ },
+ {
+  "file": "daniel-eb-1hb9uiv.mp3",
+  "text": "I'm Daniel Eb, by the way. Deputy leader.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+6%",
+  "pitch": "+3Hz"
+ },
+ {
+  "file": "james-christmas-k4nny6.mp3",
+  "text": "The voters are right even when they are not.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-6%",
+  "pitch": "+13Hz"
+ },
+ {
+  "file": "james-christmas-13h1rls.mp3",
+  "text": "It will all come out in the wash.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-6%",
+  "pitch": "+13Hz"
+ },
+ {
+  "file": "ricardo-menendez-march-169up9.mp3",
+  "text": "Every time I check, it's looking completely different.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+0%",
+  "pitch": "-1Hz"
+ },
+ {
+  "file": "ricardo-menendez-march-16tg9fs.mp3",
+  "text": "We kept to the cost of living.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+0%",
+  "pitch": "-1Hz"
+ },
+ {
+  "file": "ricardo-menendez-march-hcbv5p.mp3",
+  "text": "Lock Winston out of government!",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+0%",
+  "pitch": "-1Hz"
+ },
+ {
+  "file": "oriini-kaipara-1x0v4vi.mp3",
+  "text": "I will still back you and go in to bat for you.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-6%",
+  "pitch": "-15Hz"
+ },
+ {
+  "file": "oriini-kaipara-zjlzfh.mp3",
+  "text": "Nervousness in the puku.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-6%",
+  "pitch": "-15Hz"
+ },
+ {
+  "file": "mark-mitchell-1lds44p.mp3",
+  "text": "Above my pay grade.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+0%",
+  "pitch": "+0Hz"
+ },
+ {
+  "file": "simeon-brown-qrxjzh.mp3",
+  "text": "It shows our strength is in electorates.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+4%",
+  "pitch": "+16Hz"
+ },
+ {
+  "file": "simeon-brown-pdlejg.mp3",
+  "text": "Voters need to be able to see what the choice is.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+4%",
+  "pitch": "+16Hz"
+ },
+ {
+  "file": "barbara-edmonds-1r3o3d8.mp3",
+  "text": "Nine out of 10 Kiwis won't pay a cent.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+11%",
+  "pitch": "+3Hz"
+ },
+ {
+  "file": "barbara-edmonds-rrbida.mp3",
+  "text": "Yes, that is my job.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+11%",
+  "pitch": "+3Hz"
  },
  {
   "file": "nicola-willis-2vqbak.mp3",
   "text": "No B S in here.",
   "voice": "en-NZ-MollyNeural",
-  "rate": "+5%",
-  "pitch": "+2Hz"
+  "rate": "+12%",
+  "pitch": "+6Hz"
  },
  {
   "file": "nicola-willis-ibk9xw.mp3",
   "text": "No rainbows and unicorns either.",
   "voice": "en-NZ-MollyNeural",
-  "rate": "+5%",
-  "pitch": "+2Hz"
+  "rate": "+12%",
+  "pitch": "+6Hz"
  },
  {
   "file": "nicola-willis-rux1g8.mp3",
   "text": "No lolly scramble!",
   "voice": "en-NZ-MollyNeural",
-  "rate": "+5%",
-  "pitch": "+2Hz"
+  "rate": "+12%",
+  "pitch": "+6Hz"
  },
  {
   "file": "nicola-willis-1a9jph9.mp3",
   "text": "No sugar hits!",
   "voice": "en-NZ-MollyNeural",
-  "rate": "+5%",
-  "pitch": "+2Hz"
+  "rate": "+12%",
+  "pitch": "+6Hz"
  },
  {
   "file": "nicola-willis-1c1lo6i.mp3",
   "text": "How big is his hole?",
   "voice": "en-NZ-MollyNeural",
-  "rate": "+5%",
-  "pitch": "+2Hz"
+  "rate": "+12%",
+  "pitch": "+6Hz"
  },
  {
   "file": "nicola-willis-so3582.mp3",
   "text": "Don an adult nappy and chain yourself to a door.",
   "voice": "en-NZ-MollyNeural",
-  "rate": "+5%",
-  "pitch": "+2Hz"
+  "rate": "+12%",
+  "pitch": "+6Hz"
  },
  {
   "file": "nicola-willis-ctb12n.mp3",
   "text": "Delayed but not derailed.",
   "voice": "en-NZ-MollyNeural",
-  "rate": "+5%",
-  "pitch": "+2Hz"
+  "rate": "+12%",
+  "pitch": "+6Hz"
  },
  {
   "file": "nicola-willis-415yqe.mp3",
   "text": "I haven't been able to convince my coalition partners yet.",
   "voice": "en-NZ-MollyNeural",
-  "rate": "+5%",
-  "pitch": "+2Hz"
+  "rate": "+12%",
+  "pitch": "+6Hz"
  },
  {
   "file": "nicola-willis-clb08r.mp3",
   "text": "Make really good choices about how I invest your money.",
   "voice": "en-NZ-MollyNeural",
-  "rate": "+5%",
-  "pitch": "+2Hz"
+  "rate": "+12%",
+  "pitch": "+6Hz"
+ },
+ {
+  "file": "chris-bishop-huz4ox.mp3",
+  "text": "We need thousands upon thousands of new homes!",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
+ },
+ {
+  "file": "chris-bishop-wvvwcd.mp3",
+  "text": "Cities must grow!",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
+ },
+ {
+  "file": "chris-bishop-8d7jb.mp3",
+  "text": "Houses need to be more affordable.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
+ },
+ {
+  "file": "chris-bishop-1au3pps.mp3",
+  "text": "This is a big win for growth.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
+ },
+ {
+  "file": "chris-bishop-1g31ty2.mp3",
+  "text": "Whatever ends up being built, will be tolled.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
  },
  {
   "file": "chris-bishop-yk1id3.mp3",
   "text": "What a lot of crap!",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "-2%",
-  "pitch": "+5Hz"
+  "rate": "+24%",
+  "pitch": "+6Hz"
+ },
+ {
+  "file": "chris-bishop-1clsinh.mp3",
+  "text": "I could say the same to you.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
+ },
+ {
+  "file": "chris-bishop-y6ood2.mp3",
+  "text": "How's your fiscal plan going?",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
+ },
+ {
+  "file": "chris-bishop-cewi37.mp3",
+  "text": "I dobbed myself in.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
+ },
+ {
+  "file": "chris-bishop-tlzcqc.mp3",
+  "text": "I did what you're not meant to do.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
  },
  {
   "file": "gerry-brownlee-1lwpbfk.mp3",
   "text": "No, don't do that.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+5%",
-  "pitch": "-6Hz"
+  "rate": "-16%",
+  "pitch": "-24Hz"
  },
  {
   "file": "gerry-brownlee-6ubnkf.mp3",
   "text": "Lock the doors!",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+5%",
-  "pitch": "-6Hz"
+  "rate": "-16%",
+  "pitch": "-24Hz"
  },
  {
   "file": "gerry-brownlee-hng6h6.mp3",
   "text": "I'm going to be the one who wins here.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+5%",
-  "pitch": "-6Hz"
+  "rate": "-16%",
+  "pitch": "-24Hz"
  },
  {
   "file": "gerry-brownlee-fpkro4.mp3",
   "text": "Have you got any other poetry?",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+5%",
-  "pitch": "-6Hz"
+  "rate": "-16%",
+  "pitch": "-24Hz"
  },
  {
   "file": "gerry-brownlee-198x7zv.mp3",
   "text": "Oh, that's very generous of you.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+5%",
-  "pitch": "-6Hz"
+  "rate": "-16%",
+  "pitch": "-24Hz"
  },
  {
   "file": "gerry-brownlee-11t6s8.mp3",
   "text": "I never ever wanted to be Speaker.",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+5%",
-  "pitch": "-6Hz"
+  "rate": "-16%",
+  "pitch": "-24Hz"
+ },
+ {
+  "file": "paul-goldsmith-13ogv47.mp3",
+  "text": "This is tough legislation. That is the point.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-12%",
+  "pitch": "-10Hz"
+ },
+ {
+  "file": "paul-goldsmith-zfawss.mp3",
+  "text": "The legislation will not be changing.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-12%",
+  "pitch": "-10Hz"
+ },
+ {
+  "file": "paul-goldsmith-14e151w.mp3",
+  "text": "If people don't agree with us, they'll throw us out.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-12%",
+  "pitch": "-10Hz"
+ },
+ {
+  "file": "chris-penk-220c51.mp3",
+  "text": "Tradies are bogged down in paperwork.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-22%",
+  "pitch": "-12Hz"
+ },
+ {
+  "file": "chris-penk-k1btpk.mp3",
+  "text": "Kiwis are fed up, and rightly so.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-22%",
+  "pitch": "-12Hz"
+ },
+ {
+  "file": "chris-penk-161r6jw.mp3",
+  "text": "Negotiations sometimes take years.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-22%",
+  "pitch": "-12Hz"
+ },
+ {
+  "file": "chris-penk-c05uz5.mp3",
+  "text": "Cracking down on the cowboys.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "-22%",
+  "pitch": "-12Hz"
+ },
+ {
+  "file": "takuta-ferris-n3fmqi.mp3",
+  "text": "Our people are up, our people are on their feet!",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+2%",
+  "pitch": "-12Hz"
+ },
+ {
+  "file": "takuta-ferris-1uzlgbd.mp3",
+  "text": "Te Tai Tonga never left the party, the party left Te Tai Tonga.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+2%",
+  "pitch": "-12Hz"
+ },
+ {
+  "file": "takuta-ferris-16o9oyw.mp3",
+  "text": "We're not too worried about it.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+2%",
+  "pitch": "-12Hz"
+ },
+ {
+  "file": "mariameno-kapa-kingi-8dx656.mp3",
+  "text": "Don't mistake that grace for weakness.",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "-11%",
+  "pitch": "+2Hz"
+ },
+ {
+  "file": "mariameno-kapa-kingi-s5vvpa.mp3",
+  "text": "Don't come to talk at us about us.",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "-11%",
+  "pitch": "+2Hz"
+ },
+ {
+  "file": "mariameno-kapa-kingi-14gzrbj.mp3",
+  "text": "Unity doesn't require conformity.",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "-11%",
+  "pitch": "+2Hz"
+ },
+ {
+  "file": "mariameno-kapa-kingi-86vlb3.mp3",
+  "text": "Unity is not about sameness.",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "-11%",
+  "pitch": "+2Hz"
  },
  {
   "file": "gerry-brownlee-knls4i.mp3",
   "text": "Order!",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+5%",
-  "pitch": "-6Hz"
+  "rate": "-16%",
+  "pitch": "-24Hz"
  },
  {
   "file": "gerry-brownlee-8kvkp9.mp3",
   "text": "Order! Order!",
   "voice": "en-NZ-MitchellNeural",
-  "rate": "+5%",
-  "pitch": "-6Hz"
+  "rate": "-16%",
+  "pitch": "-24Hz"
  },
  {
   "file": "house-a-1n0e9n5.mp3",
@@ -415,6 +737,62 @@
  {
   "file": "house-b-x6pwp0.mp3",
   "text": "That is out of order!",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "+0%",
+  "pitch": "+0Hz"
+ },
+ {
+  "file": "house-a-1ypllqy.mp3",
+  "text": "Recount!",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+0%",
+  "pitch": "+0Hz"
+ },
+ {
+  "file": "house-b-1ypllqy.mp3",
+  "text": "Recount!",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "+0%",
+  "pitch": "+0Hz"
+ },
+ {
+  "file": "house-a-17bafjr.mp3",
+  "text": "Specials aren't counted yet!",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+0%",
+  "pitch": "+0Hz"
+ },
+ {
+  "file": "house-b-17bafjr.mp3",
+  "text": "Specials aren't counted yet!",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "+0%",
+  "pitch": "+0Hz"
+ },
+ {
+  "file": "house-a-1cxj0mu.mp3",
+  "text": "Wait for the 27th!",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+0%",
+  "pitch": "+0Hz"
+ },
+ {
+  "file": "house-b-1cxj0mu.mp3",
+  "text": "Wait for the 27th!",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "+0%",
+  "pitch": "+0Hz"
+ },
+ {
+  "file": "house-a-hvauyu.mp3",
+  "text": "Coalition talks at halftime!",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+0%",
+  "pitch": "+0Hz"
+ },
+ {
+  "file": "house-b-hvauyu.mp3",
+  "text": "Coalition talks at halftime!",
   "voice": "en-NZ-MollyNeural",
   "rate": "+0%",
   "pitch": "+0Hz"

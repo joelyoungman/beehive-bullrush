@@ -403,9 +403,9 @@ const cam = {
   gerry: { x: -15, y: 50, cd: 0, blow: 0, order: 0, orderCd: 0 },
   nicola: { x: W + 15, y: 57, cd: 0, toss: 0, auto: 4 },
   bishop: { x: W + 12, y: 25, say: '', sayT: 0, next: 3 },
-  gold: { x: W + 6.5, y: 78, dir: 1, shake: 0 },
-  penk: { x: -9.5, y: 85, sip: 0, next: 5 },
-  ferris: { x: -17, y: 9, fist: 0 }, kapa: { x: W + 17, y: 7, fist: 0 },
+  gold: { x: W + 6.5, y: 78, dir: 1, shake: 0, say: '' },
+  penk: { x: -9.5, y: 85, sip: 0, next: 5, say: '', sayT: 0 },
+  ferris: { x: -17, y: 9, fist: 0, say: '' }, kapa: { x: W + 17, y: 7, fist: 0, say: '' },
 };
 function placeCameos() {
   const c = cam, set = (o, x, y) => { o.x = x; o.y = y; };
@@ -417,30 +417,53 @@ function placeCameos() {
 }
 // Things these people are on record as saying, each with its source. Everyone else gets stock phrases of the House.
 const QUOTES = {
-  "Christopher Luxon": [{ t: "I'm wealthy, I'm, you know, sorted.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
+  "Christopher Luxon": [{ t: "I can tell you now, it's too close to call.", src: "https://thespinoff.co.nz/politics/08-11-2026/who-won-the-2026-election" },
+    { t: "I think everyone's over politics so let's all have a bit of a break.", src: "https://www.opb.org/article/2026/11/08/no-clear-winner-in-new-zealand-election-as-leaders-prepare-for-weeks-of-talks/" },
+    { t: "I'm wealthy, I'm, you know, sorted.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
     { t: "Go make a Marmite sandwich and put an apple in a bag.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
     { t: "Have more babies if you wish, that would be helpful.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
-  "Winston Peters": [{ t: "I know he's the Prime Minister, I made him the Prime Minister.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
+  "Winston Peters": [{ t: "A lot of people are getting carried away right here, right now.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" },
+    { t: "I know he's the Prime Minister, I made him the Prime Minister.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
     { t: "Don't come and ask a silly question like that.", src: "https://www.nzherald.co.nz/nz/watch-winston-peters-greatest-hits-v-the-media/ZJ5DSQYPAMDRDJWDUREXA5WEDY/" },
     { t: "You don't know what I know, and I know that's a fact!", src: "https://m.scoop.co.nz/stories/HL0802/S00330/peters-fights-with-media-28-february-2008.htm" }],
-  "David Seymour": [{ t: "The French, for instance, love the coq.", src: "https://www.rnz.co.nz/news/political/284435/david-seymour-on-this-week's-coq-ups" },
+  "David Seymour": [{ t: "It's very uncertain.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" },
+    { t: "The French, for instance, love the coq.", src: "https://www.rnz.co.nz/news/political/284435/david-seymour-on-this-week's-coq-ups" },
     { t: "We've got an economy that's running on a sugar hit.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
     { t: "I quite like knowing who the idiots in society are.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
-  "Shane Jones": [{ t: "Goodbye, Freddie!", src: "https://thespinoff.co.nz/opinion/21-12-2023/shane-jones-versus-the-frog" },
+  "Shane Jones": [{ t: "We've been served an electoral spaghetti.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" },
+    { t: "My cup of optimism constantly overflows.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" },
+    { t: "Goodbye, Freddie!", src: "https://thespinoff.co.nz/opinion/21-12-2023/shane-jones-versus-the-frog" },
     { t: "Some sort of demonic eggbeater!", src: "https://thespinoff.co.nz/politics/26-11-2025/demonic-eggbeater-shane-jones-has-a-normal-one-on-rnz" },
     { t: "Woke, riddled munchkins who want to fry eggs on solar panels!", src: "https://thespinoff.co.nz/politics/26-11-2025/demonic-eggbeater-shane-jones-has-a-normal-one-on-rnz" }],
-  "Chris Hipkins": [{ t: "Bread and butter issues!", src: "https://interest.co.nz/public-policy/119318/pm-elect-chris-hipkins-says-first-news-conference-he-wants-ditch-unnecessary" },
+  "Chris Hipkins": [{ t: "Tonight New Zealand has spoken.", src: "https://thespinoff.co.nz/politics/08-11-2026/who-won-the-2026-election" },
+    { t: "Bread and butter issues!", src: "https://interest.co.nz/public-policy/119318/pm-elect-chris-hipkins-says-first-news-conference-he-wants-ditch-unnecessary" },
     { t: "Get outside and spread their legs.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
     { t: "Pashing on a dance floor.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
-  "Chlöe Swarbrick": [{ t: "OK, boomer.", src: "https://www.1news.co.nz/2019/11/05/chloe-swarbrick-quips-ok-boomer-at-national-mp-during-climate-speech" },
+  "Chlöe Swarbrick": [{ t: "We have made history. You have made history.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" },
+    { t: "OK, boomer.", src: "https://www.1news.co.nz/2019/11/05/chloe-swarbrick-quips-ok-boomer-at-national-mp-during-climate-speech" },
     { t: "Six of 68 Government MPs with a spine.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
   "Rawiri Waititi": [{ t: "Colonial noose!", src: "https://www.1news.co.nz/2020/12/08/colonial-noose-maori-partys-rawiri-waititi-takes-stand-against-parliament-tie-rules" },
     { t: "A pebble in your shoe.", src: "https://www.nzherald.co.nz/rotorua-daily-post/news/a-pebble-in-your-shoe-maori-partys-rawiri-waititis-promise-to-be-unapologetic-voice-for-maori/HTE3ZYUI7FJAUWANYTQ4AIQQDY" }],
   "Hana-Rawhiti Maipi-Clarke": [{ t: "Kāwana!", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
   "Kieran McAnulty": [{ t: "He ended up in jail.", src: "https://www.nzherald.co.nz/the-country/news/labour-mp-sells-iconic-ute-that-he-once-fought-over-with-a-car-thief-he-ended-up-in-jail/LTG6L7KURPXYEU2IJ6GIFZG2UY" }],
   "Willie Jackson": [{ t: "You don't walk over our kaupapa.", src: "https://www.1news.co.nz/2025/05/15/labours-willie-jackson-booted-from-house/" }],
-  "Qiulae Wong": [{ t: "Shit, we did it!", src: "https://thespinoff.co.nz/politics/08-11-2026/shit-we-did-it-inside-opportunitys-history-making-night" }],
-  "Paul Henry": [{ t: "New Zealand has extraordinary potential, but we are not living up to it.", src: "https://www.act.org.nz/news/paul-henry-to-stand-for-act-in-2026-election" }],
+  "Qiulae Wong": [{ t: "Let's change politics for good.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" },
+    { t: "Shit, we did it!", src: "https://thespinoff.co.nz/politics/08-11-2026/shit-we-did-it-inside-opportunitys-history-making-night" }],
+  "Paul Henry": [{ t: "On these numbers, we'll be in government, thank god.", src: "https://thespinoff.co.nz/culture/08-11-2026/all-the-weird-and-wonderful-things-from-election-night-coverage" },
+    { t: "New Zealand has extraordinary potential, but we are not living up to it.", src: "https://www.act.org.nz/news/paul-henry-to-stand-for-act-in-2026-election" }],
+  "Daniel Eb": [{ t: "I'm Daniel Eb, by the way. Deputy leader.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" }],
+  "James Christmas": [{ t: "The voters are right even when they are not.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" },
+    { t: "It will all come out in the wash.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" }],
+  "Ricardo Menéndez March": [{ t: "Every time I check, it's looking completely different.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" },
+    { t: "We kept to the cost of living.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" },
+    { t: "Lock Winston out of government!", src: "https://thespinoff.co.nz/politics/30-09-2026/eight-things-we-learned-from-the-great-mt-albert-debate" }],
+  "Oriini Kaipara": [{ t: "I will still back you and go in to bat for you.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" },
+    { t: "Nervousness in the puku.", src: "https://thespinoff.co.nz/politics/08-11-2026/the-hangover-key-takeaways-and-reactions-from-election-2026" }],
+  "Mark Mitchell": [{ t: "Above my pay grade.", src: "https://thespinoff.co.nz/politics/07-11-2026/election-2026-live-updates-all-the-action-as-it-happens" }],
+  "Simeon Brown": [{ t: "It shows our strength is in electorates.", src: "https://thespinoff.co.nz/politics/08-11-2026/the-hangover-key-takeaways-and-reactions-from-election-2026" },
+    { t: "Voters need to be able to see what the choice is.", src: "https://thespinoff.co.nz/politics/08-11-2026/the-hangover-key-takeaways-and-reactions-from-election-2026" }],
+  "Barbara Edmonds": [{ t: "Nine out of 10 Kiwis won't pay a cent.", src: "https://thespinoff.co.nz/politics/02-03-2026/barbara-edmonds-may-be-finance-minister-but-shes-still-figuring-out-how-to-be-a-politician" },
+    { t: "Yes, that is my job.", src: "https://thespinoff.co.nz/politics/02-03-2026/barbara-edmonds-may-be-finance-minister-but-shes-still-figuring-out-how-to-be-a-politician" }],
 };
 const SIDELINE_QUOTES = {
   "Nicola Willis": [{ t: "No BS in here.", src: "https://thespinoff.co.nz/politics/22-05-2025/budget-day-2025-arrives-with-cuts-cookies-and-promises-of-no-bs" },
@@ -452,7 +475,12 @@ const SIDELINE_QUOTES = {
     { t: "Delayed but not derailed.", src: "https://www.newstalkzb.co.nz/news/politics/finance-minister-nicola-willis-gives-economic-update-amid-geopolitical-turmoil-nz-s-financial-outlook-downgrade/" },
     { t: "I haven't been able to convince my coalition partners yet.", src: "https://thespinoff.co.nz/politics/29-05-2026/not-an-election-year-budget-sure-it-was" },
     { t: "Make really good choices about how I invest your money.", src: "https://thespinoff.co.nz/politics/29-05-2026/not-an-election-year-budget-sure-it-was" }],
-  "Chris Bishop": [{ t: "What a lot of crap!", src: "https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance" },
+  "Chris Bishop": [{ t: "We need thousands upon thousands of new homes!", src: "https://www.1news.co.nz/2024/07/04/zoning-land-use-reforms-will-push-down-property-prices-minister/" },
+    { t: "Cities must grow!", src: "https://www.1news.co.nz/2024/07/04/zoning-land-use-reforms-will-push-down-property-prices-minister/" },
+    { t: "Houses need to be more affordable.", src: "https://www.1news.co.nz/2024/07/04/zoning-land-use-reforms-will-push-down-property-prices-minister/" },
+    { t: "This is a big win for growth.", src: "https://m.scoop.co.nz/stories/PA2503/S00212/speech-to-the-property-council-residential-development-summit.htm" },
+    { t: "Whatever ends up being built, will be tolled.", src: "https://www.rnz.co.nz/news/political/587101/political-parties-already-squabbling-over-infrastructure-plan" },
+    { t: "What a lot of crap!", src: "https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance" },
     { t: "I could say the same to you.", src: "https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance" },
     { t: "How's your fiscal plan going?", src: "https://www.nzherald.co.nz/nz/politics/nationals-chris-bishop-embarrassed-after-being-told-to-leave-house-for-first-time/5OGJGBQDDVHH7CV4YIUTM4VKUU/" },
     { t: "I dobbed myself in.", src: "https://www.nzherald.co.nz/nz/politics/nationals-chris-bishop-embarrassed-after-being-told-to-leave-house-for-first-time/5OGJGBQDDVHH7CV4YIUTM4VKUU/" },
@@ -463,37 +491,70 @@ const SIDELINE_QUOTES = {
     { t: "Have you got any other poetry?", src: "https://www.nzherald.co.nz/nz/politics/gerry-brownlee-the-wit-and-grumpiness-of-parliaments-speaker/Y2DDNX66FNAE7NG4DJEY3XO54E/" },
     { t: "Oh, that's very generous of you.", src: "https://thespinoff.co.nz/politics/13-03-2026/echo-chamber-nz-firsts-takes-jabs-at-gerry-brownlee" },
     { t: "I never ever wanted to be Speaker.", src: "https://www.nzherald.co.nz/nz/politics/gerry-brownlee-the-wit-and-grumpiness-of-parliaments-speaker/Y2DDNX66FNAE7NG4DJEY3XO54E/" }],
+  "Paul Goldsmith": [{ t: "This is tough legislation. That is the point.", src: "https://www.odt.co.nz/news/national/high-court-finds-gang-patch-ban-inconsistent-with-bill-of-rights-nnoifwlb" },
+    { t: "The legislation will not be changing.", src: "https://www.odt.co.nz/news/national/high-court-finds-gang-patch-ban-inconsistent-with-bill-of-rights-nnoifwlb" },
+    { t: "If people don't agree with us, they'll throw us out.", src: "https://www.rnz.co.nz/news/national/510152/bill-of-rights-won-t-stop-gang-patch-ban-justice-minister" }],
+  "Chris Penk": [{ t: "Tradies are bogged down in paperwork.", src: "https://buildingtoday.co.nz/2025/04/09/penk-government-announcements-just-the-start/" },
+    { t: "Kiwis are fed up, and rightly so.", src: "https://buildingtoday.co.nz/2025/04/09/penk-government-announcements-just-the-start/" },
+    { t: "Negotiations sometimes take years.", src: "https://buildingtoday.co.nz/2025/04/09/penk-government-announcements-just-the-start/" },
+    { t: "Cracking down on the cowboys.", src: "https://buildingtoday.co.nz/2025/04/09/penk-government-announcements-just-the-start/" }],
+  "Tākuta Ferris": [{ t: "Our people are up, our people are on their feet!", src: "https://www.1news.co.nz/2023/10/15/new-te-pati-maori-mp-it-doesnt-feel-too-different/" },
+    { t: "Te Tai Tonga never left the party, the party left Te Tai Tonga.", src: "https://thespinoff.co.nz/atea/01-10-2026/the-wildest-moments-from-a-hectic-te-tai-tonga-debate" },
+    { t: "We're not too worried about it.", src: "https://thespinoff.co.nz/atea/01-10-2026/the-wildest-moments-from-a-hectic-te-tai-tonga-debate" }],
+  "Mariameno Kapa-Kingi": [{ t: "Don't mistake that grace for weakness.", src: "https://nzherald.co.nz/northern-advocate/news/te-tai-tokerau-mps-message-to-the-government-ignore-us-at-your-peril/IQU3SH5UU5ANJAXTYC4NYRPPMU" },
+    { t: "Don't come to talk at us about us.", src: "https://nzherald.co.nz/northern-advocate/news/te-tai-tokerau-mps-message-to-the-government-ignore-us-at-your-peril/IQU3SH5UU5ANJAXTYC4NYRPPMU" },
+    { t: "Unity doesn't require conformity.", src: "https://www.nzherald.co.nz/northern-advocate/news/mariameno-kapa-kingis-te-tai-tokerau-party-aims-for-long-term-change/LC2XHP2ROZFE3JUMUHK6HOLWWM/" },
+    { t: "Unity is not about sameness.", src: "https://www.nzherald.co.nz/northern-advocate/news/mariameno-kapa-kingis-te-tai-tokerau-party-aims-for-long-term-change/LC2XHP2ROZFE3JUMUHK6HOLWWM/" }],
 };
-const CROWD = ['Recount!', "Specials aren't counted yet!", 'Wait for the 27th!', 'Coalition talks at halftime!', 'Point of order!', 'Hear, hear!'];
 const HOUSE = ['Point of order!', 'Mr Speaker!', 'Shame!', 'I seek leave!', 'Withdraw and apologise!', 'Hear, hear!', 'Order, order!', 'I move the question be put!', 'That is out of order!'];
-// Lines are pre-recorded in voices/ with two natural New Zealand voices (see tools/make-voices.py). They are generic
-// voices, not impressions of anyone. If a file is missing, the browser's own speech voice reads the line instead.
+// Election-week shouts from the crowd after some tags. Not said by or put in the mouth of anyone real; read in the House voices.
+const CROWD = ['Recount!', "Specials aren't counted yet!", 'Wait for the 27th!', 'Coalition talks at halftime!'];
+// Caricature delivery per speaker: speed (%) and pitch (Hz) applied to the two generic voices, like a cartoon voice actor
+// exaggerating a manner. Not an impression or clone of anyone's real voice. Speakers not listed get a spread from their name.
+// Used by tools/voice-lines.js for the recordings and by Voice.browser() for the fallback.
+const VOICE_STYLE = {
+  'Gerry Brownlee': { rate: -16, pitch: -24 },     // booming, deliberate Speaker
+  'Winston Peters': { rate: -14, pitch: -18 },     // slow, grand
+  'Shane Jones': { rate: -6, pitch: -20 },         // big and rumbling
+  'Chris Penk': { rate: -22, pitch: -12 },         // laid-back drawl
+  'Paul Goldsmith': { rate: -12, pitch: -10 },     // dry schoolmaster
+  'Christopher Luxon': { rate: 10, pitch: -4 },    // brisk boardroom
+  'Chris Bishop': { rate: 24, pitch: 6 },          // in a hurry
+  'David Seymour': { rate: 22, pitch: 12 },        // quick and chirpy
+  'Chris Hipkins': { rate: 14, pitch: 2 },         // quick-fire
+  'Nicola Willis': { rate: 12, pitch: 6 },         // brisk
+  'Chlöe Swarbrick': { rate: 10, pitch: 8 },
+  'Rawiri Waititi': { rate: -8, pitch: -14 },
+};
+const voiceStyle = name => { if (VOICE_STYLE[name]) return VOICE_STYLE[name]; const h = hash(name); return { rate: (h % 25) - 12, pitch: ((h >>> 4) % 33) - 16 }; };
+// Lines are pre-recorded in voices/ with two natural New Zealand voices (see tools/make-voices.py), each speaker with the
+// caricature speed and pitch in VOICE_STYLE. They are generic voices, not impressions of anyone. If a file is missing, the browser's own speech voice reads the line instead.
 const slug = n => n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
 const Voice = {
   cur: null,
   on: (() => { try { return localStorage.getItem('bullrush.voices') !== '0'; } catch (e) { return true; } })(),
-  stop() { if (this.cur) this.cur.pause(); if (window.speechSynthesis) speechSynthesis.cancel(); },
+  stop() { if (this.cur) { this.cur.pause(); this.cur = null; } if (window.speechSynthesis) speechSynthesis.cancel(); },
   say(text, seed, force, who) {
     if (Snd.muted || !this.on) return;
     if (this.cur && !this.cur.ended && !this.cur.paused) { if (!force) return; this.cur.pause(); }
     if (window.speechSynthesis && (speechSynthesis.speaking || speechSynthesis.pending)) { if (!force) return; speechSynthesis.cancel(); }
     const file = 'voices/' + (who ? slug(who) : 'house-' + (seed % 2 ? 'a' : 'b')) + '-' + hash(text).toString(36) + '.mp3';
-    const a = new Audio(file); let fell = false; const fallback = () => { if (fell) return; fell = true; if (this.cur === a) this.cur = null; this.browser(text, seed); };
+    const a = new Audio(file); let fell = false; const fallback = () => { if (fell) return; fell = true; if (this.cur === a) this.cur = null; this.browser(text, seed, who); };
     a.volume = 1; a.onerror = fallback; this.cur = a;
     const p = a.play(); if (p && p.catch) p.catch(fallback);
   },
-  browser(text, seed) {
+  browser(text, seed, who) {
     if (Snd.muted || !this.on || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
     const ss = window.speechSynthesis, u = new SpeechSynthesisUtterance(text.replace(/\bBS\b/g, 'B S').replace('coq', 'cock'));
     const rank = v => (/natural|online|neural|google/i.test(v.name) ? 10 : 0) + (/en[-_]NZ/i.test(v.lang) ? 4 : /en[-_]AU/i.test(v.lang) ? 3 : /en[-_]GB/i.test(v.lang) ? 2 : 1);
     const all = ss.getVoices().filter(v => /^en/i.test(v.lang)).sort((x, y) => rank(y) - rank(x)), pool = all.filter(v => rank(v) >= rank(all[0]) - 1);
     if (pool.length) u.voice = pool[seed % pool.length];
-    u.pitch = 0.94 + ((seed >>> 3) % 10) / 80; u.rate = 1 + ((seed >>> 7) % 10) / 100; u.volume = 0.9;
+    const st = who ? voiceStyle(who) : { rate: 0, pitch: 0 }; u.pitch = clamp(1 + st.pitch / 40, 0.3, 1.8); u.rate = clamp(1 + st.rate / 100, 0.6, 1.5); u.volume = 0.9;
     ss.speak(u);
   },
 };
 function exclaim(m) {   // a poked MP blurts something; the sideline hushes so the voice you hear is theirs
-  cam.gerry.sayT = cam.nicola.sayT = cam.bishop.sayT = 0;
+  cam.gerry.sayT = cam.nicola.sayT = cam.bishop.sayT = cam.penk.sayT = 0; cam.gold.say = "";
   const own = QUOTES[m.name], t = own ? pick(own).t : pick(HOUSE);
   m.say = t; m.sayT = 2.1; Voice.say(t, hash(m.name), true, own ? m.name : null);
 }
@@ -516,14 +577,14 @@ function updateCameos(dt) {
       const down = G.mps.filter(m => m.state === 'down');
       for (const a of down) { let c = 0; for (const o of down) if (Math.hypot(a.x - o.x, a.y - o.y) < 13) c++; if (c >= 4) { g.order = 2; g.orderCd = 5; fx(a.x, a.y - 6, 'PILE-UP!', GOLD, 1.3); break; } }
     }
-    b.next -= dt; if (b.next <= 0) { b.next = rand(3.5, 6); b.say = pick(SIDELINE_QUOTES['Chris Bishop']).t; b.sayT = 2.2; }
+    b.next -= dt; if (b.next <= 0) { b.next = rand(5, 9); sideSay(b, 'Chris Bishop', pick(SIDELINE_QUOTES['Chris Bishop']).t, false); b.sayT = 2.4; }
   }
   b.sayT = Math.max(0, b.sayT - dt);
   go.p += go.dir * dt * 0.12; if (go.p > 1) go.dir = -1; if (go.p < 0) go.dir = 1;
   if (HZ) { go.x = W + 5.5; go.y = lerp(L * 0.48, L * 0.86, go.p); } else { go.x = W + 6.5; go.y = lerp(68, 95, go.p); }
   go.shake = Math.max(0, go.shake - dt); go.drop = Math.max(0, (go.drop || 0) - dt);
-  if (run && go.shake <= 0) for (const m of G.mps) if (m.party.id === 'act' && m.state === 'run' && Math.abs(m.vy) > 6 && Math.hypot(m.x - go.x, m.y - go.y) < 30) { go.shake = 1.6; go.drop = 1.3; Snd.pop(0.35, 300, 0.12); break; }
-  pk.sip = Math.max(0, pk.sip - dt); pk.next -= dt; if (pk.next <= 0) { pk.next = rand(6, 11); pk.sip = 1.4; }
+  if (run && go.shake <= 0) for (const m of G.mps) if (m.party.id === 'act' && m.state === 'run' && Math.abs(m.vy) > 6 && Math.hypot(m.x - go.x, m.y - go.y) < 30) { go.shake = 1.6; go.drop = 1.3; Snd.pop(0.35, 300, 0.12); go.say = pick(SIDELINE_QUOTES['Paul Goldsmith']).t; Voice.say(go.say, hash('Paul Goldsmith'), false, 'Paul Goldsmith'); break; }
+  pk.sip = Math.max(0, pk.sip - dt); pk.sayT = Math.max(0, pk.sayT - dt); pk.next -= dt; if (pk.next <= 0) { pk.next = rand(6, 11); pk.sip = 1.4; if (run) { sideSay(pk, 'Chris Penk', pick(SIDELINE_QUOTES['Chris Penk']).t, false); pk.sayT = 2.6; } }
   cam.ferris.fist = Math.max(0, cam.ferris.fist - dt); cam.kapa.fist = Math.max(0, cam.kapa.fist - dt);
 }
 
@@ -576,7 +637,7 @@ function update(dt) {
           r.conv = true; knock(r, 2.2); r.vx = t.vx * 0.6; r.vy = t.vy * 0.6; bump(r, rand(-10, 10), -12, rand(-14, 14));
           knock(t, 0.55, 'stumble'); bump(t, 0, -6, rand(-6, 6)); t.tgt = null;
           fx(r.x, r.y - 8, pick(['TAGGED!', 'TACKLED!', 'GOTCHA!', 'CONVERTED!']), RED, 1.15);
-          if (rand() < 0.2) { const line = pick(CROWD); setTimeout(() => fx(r.x, r.y - 2, line, '#F3E9D2', 0.75), 300); }   // crowd chatter, text only
+          if (rand() < 0.2) { const t = pick(CROWD); setTimeout(() => fx(r.x, r.y - 2, t, GOLD, 0.75), 300); Voice.say(t, hash(t) + (rand() < 0.5 ? 1 : 0), false, null); }
           Snd.tag(); hud();
         }
         break; } }
@@ -608,7 +669,8 @@ function runnerAI(m, dt, taggers) {
   m.vx = lerp(m.vx, dx / n * sp, Math.min(1, dt * 7)); m.vy = lerp(m.vy, dy / n * sp, Math.min(1, dt * 7)); m.state = 'run';
   if (dir > 0 ? m.y >= ZS + 1 : m.y <= ZN - 1) {
     m.safe = true; fx(m.x, m.y - 8, 'SAFE!', GOLD); Snd.safe(); bump(m, 0, -8, 0);
-    if (m.party.id === 'tpm') { cam.ferris.fist = 2.2; cam.kapa.fist = 2.2; }
+    if (m.party.id === 'tpm') { cam.ferris.fist = 2.2; cam.kapa.fist = 2.2; cam.ferris.say = pick(SIDELINE_QUOTES['Tākuta Ferris']).t; cam.kapa.say = pick(SIDELINE_QUOTES['Mariameno Kapa-Kingi']).t;
+      const [who, c] = rand() < 0.5 ? ['Tākuta Ferris', cam.ferris] : ['Mariameno Kapa-Kingi', cam.kapa]; Voice.say(c.say, hash(who), false, who); }
   }
 }
 function taggerAI(m, dt, live, load) {
@@ -804,7 +866,7 @@ function tree(x, y, seed, peek) {
     const lean = peek.side * 0.2, shaking = peek.c.fist > 0;
     const q = person(px, p.y - 2 * U, U * 0.8, { suit: '#3b3b3b', trim: '#111', tie: '#d12c38', sprite: headSprite(peek.name), binos: !shaking, headRot: lean, hd: { ox: 0, oy: shaking ? Math.sin(G.time * 30) * 0.05 : 0, a: 0 },
       aL: shaking && peek.side < 0 ? 2.7 + Math.sin(G.time * 26) * 0.35 : 0.2, aR: shaking && peek.side > 0 ? 2.7 + Math.sin(G.time * 26) * 0.35 : 0.2 });
-    if (shaking) bubble(px, p.y - 62 * U, pick2(seed, ['Oi!!', 'Hmph!', 'Unbelievable!']), U); }
+    if (shaking && peek.c.say) bubble(px, p.y - 62 * U, peek.c.say, U); }
   prop(p, U, seed);
 }
 // Sideline props, in place of trees: roadworks, a democracy sausage sizzle, and an election hoarding.
@@ -888,6 +950,7 @@ const drawCam = {
     const book = (i, ox, oy, rot) => { ctx.save(); ctx.translate(p.x + ox * U, p.y + oy * U); ctx.rotate(rot); ctx.fillStyle = cols[i]; ctx.strokeStyle = INK; ctx.lineWidth = 1.5; rr(-11 * U, -2.5 * U, 22 * U, 5 * U, 1); ctx.fill(); ctx.stroke(); ctx.fillStyle = PAPER; ctx.fillRect(-9 * U, 0.4 * U, 17 * U, 1.2 * U); ctx.restore(); };
     for (let i = 0; i < (d ? 3 : 4); i++) book(i, (i % 2) * 2, -23.5 - i * 5, 0);
     if (d) { const t = 1 - c.drop / 1.3, bt = Math.min(1, t * 1.25); book(3, 4 + c.dir * -bt * 34, -38.5 - Math.sin(bt * Math.PI) * 30 + bt * bt * 38, bt * 7 * -c.dir); }
+    if (sh && c.say) bubble(p.x, p.y - 72 * U, c.say, U);
   },
   penk() { const c = cam.penk, p = proj(c.x, c.y), U = p.s * 1.1;
     ctx.strokeStyle = '#d9d9d9'; ctx.lineWidth = 3 * U; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p.x - 24 * U, p.y); ctx.lineTo(p.x + 6 * U, p.y - 16 * U); ctx.moveTo(p.x + 22 * U, p.y); ctx.lineTo(p.x - 6 * U, p.y - 16 * U); ctx.stroke();
@@ -896,7 +959,7 @@ const drawCam = {
     const q = person(4 * U, 2 * U, U, { suit: '#5b6b7a', trim: '#2c3640', tie: GOLD, sprite: headSprite(depName('Penk')), sit: true, face: 1, shades: true, aL: 0.5, aR: c.sip > 0 ? 2.5 : 1.3, hd: { ox: 0, oy: 0, a: 0.25 } });
     const hx = 4 * U + q.hR[0], hy = 2 * U + q.hR[1]; ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 1.5; rr(hx - 3.5 * U, hy - 9 * U, 7 * U, 9 * U, 1.5); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#6b3f1d'; ctx.fillRect(hx - 3.5 * U, hy - 6 * U, 7 * U, 3 * U);
     ctx.restore();
-    if ((G.time % 9) < 2.5 && G.phase === 'run') bubble(p.x + 6 * U, p.y - 78 * U, pick2(Math.floor(G.time / 9), ['Lovely day.', 'Not my problem.', 'Flat white, thanks.', 'Zzz…']), U);
+    if (c.sayT > 0) bubble(p.x + 6 * U, p.y - 78 * U, c.say, U);
   },
 };
 
@@ -1060,10 +1123,10 @@ $('back').onclick = toBuilder; $('menu').onclick = toBuilder;
 const bobbleLabel = () => { $('bobble').textContent = BOBBLE ? 'Bobbleheads' : 'Face discs'; };
 $('bobble').onclick = () => { BOBBLE = !BOBBLE; try { localStorage.setItem('bullrush.bobble', BOBBLE ? '1' : '0'); } catch (e) {} bobbleLabel(); document.querySelectorAll('.faces canvas').forEach(c => paintAvatar(c, c.dataset.n)); };
 bobbleLabel();
-const voicesLabel = () => { $('voices').textContent = Voice.on ? 'Voices on' : 'Voices off'; };
-$('voices').onclick = () => { Voice.on = !Voice.on; try { localStorage.setItem('bullrush.voices', Voice.on ? '1' : '0'); } catch (e) {} if (!Voice.on) Voice.stop(); voicesLabel(); };
-voicesLabel();
-$('mute').onclick = () => { Snd.setMuted(!Snd.muted); $('mute').textContent = Snd.muted ? 'Sound off' : 'Sound on'; };
+$('mute').onclick = () => { Snd.setMuted(!Snd.muted); if (Snd.muted) Voice.stop(); $('mute').textContent = Snd.muted ? 'Sound off' : 'Sound on'; };
+const voiceLabel = () => { $('voices').textContent = Voice.on ? 'Voices on' : 'Voices off'; };
+$('voices').onclick = () => { Voice.on = !Voice.on; try { localStorage.setItem('bullrush.voices', Voice.on ? '1' : '0'); } catch (e) {} if (!Voice.on) Voice.stop(); voiceLabel(); };
+voiceLabel();
 $('cred').onclick = () => {
   const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const link = c => c.src && /^https:\/\//.test(c.src) ? ` · <a href="${esc(c.src)}" target="_blank" rel="noopener">source</a>` : '';
@@ -1088,5 +1151,5 @@ function frame(now) {
   draw(); requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-window.__bullrush = { G, cam, sprites, bobbles, hasPhoto, Snd, update, person, ctx, hand, makeHand };   // handy for debugging in the console
+window.__bullrush = { G, cam, sprites, bobbles, hasPhoto, Snd, Voice, update, person, ctx, hand, makeHand };   // handy for debugging in the console
 })();

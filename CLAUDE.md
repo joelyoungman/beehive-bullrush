@@ -42,7 +42,7 @@ Public repo: github.com/joelyoungman/beehive-bullrush. Collaborator: Sarah (sand
 ## Rules that matter
 
 - Quotes must be real and sourced. `QUOTES` and `SIDELINE_QUOTES` hold `{ t, src }`. Never invent a line for a real person; MPs without a verified quote use the stock `HOUSE` phrases. Excerpts are fine if the words are theirs.
-- No recordings or AI clones of politicians' voices. Voices are two generic NZ text-to-speech voices.
+- No recordings or AI clones of politicians' voices. Voices are two generic NZ text-to-speech voices; each speaker gets a caricature speed and pitch from `VOICE_STYLE` in `game.js` (like a cartoon voice actor, not an impression). After changing `VOICE_STYLE`, delete that speaker's files in `voices/` and re-run the two voice tools.
 - Photos are hot-linked, never downloaded into the repo. Free-licence Wikimedia Commons photos are preferred; credit every image (the Credits panel reads `data.js`).
 - Do not add descriptions of people's appearance or ethnicity to the manifests.
 - Rosters use preliminary 7 November 2026 results (official count due 27 November 2026).
@@ -59,5 +59,5 @@ Public repo: github.com/joelyoungman/beehive-bullrush. Collaborator: Sarah (sand
 
 - Tap controls, audio and the phone layout have only been checked by script and screenshot, not by a person on a phone.
 - The pointer hand is a painted illustration, not a photo.
-- 48 of 60 MPs have no verified quote yet.
+- 41 of 60 MPs have no verified quote yet. Sideline figures (Bishop, Goldsmith, Penk, Ferris, Kapa-Kingi, Willis, Brownlee) only say sourced lines.
 - GitHub Pages is not enabled; there is no public play link.
