@@ -797,7 +797,7 @@ function drawMP(m) {
   if (!down) { ctx.font = `700 ${Math.max(9, 12 * U)}px ${LABEL}`; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; ctx.strokeStyle = INK; const nm = m.short.toUpperCase(); ctx.strokeText(nm, p.x, p.y + 5 * U); ctx.fillStyle = PAPER; ctx.fillText(nm, p.x, p.y + 5 * U); }
 }
 function tree(x, y, seed, peek) {
-  const p = proj(x, y), U = p.s * 1.25; let h = seed; const r = () => ((h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0) % 1000) / 1000;
+  const p = proj(x, y), U = p.s * 1.25; if (!peek) p.x = clamp(p.x, 58 * U, VW - 58 * U);   // keep props fully on screen let h = seed; const r = () => ((h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0) % 1000) / 1000;
   ctx.fillStyle = 'rgba(0,0,0,.25)'; ell(p.x, p.y, 46 * U, 9 * U); ctx.fill();
   if (peek) { const out = 0.55 + Math.sin(G.time * 0.8 + seed) * 0.3 + (peek.c.fist > 0 ? 0.35 : 0), px = p.x + peek.side * (8 + out * 20) * U;
     const lean = peek.side * 0.2, shaking = peek.c.fist > 0;
@@ -809,7 +809,8 @@ function tree(x, y, seed, peek) {
 // Sideline props, in place of trees: roadworks, a democracy sausage sizzle, and an election hoarding.
 function prop(p, U, seed) {
   const kind = seed % 3, out = () => { ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.lineJoin = 'round'; };
-  const sign = (cx, cy, w, h, txt, bg, fg, fs) => { ctx.fillStyle = bg; out(); rr(cx - w / 2, cy - h / 2, w, h, 3 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = fg; ctx.font = `${fs * U}px ${SHOUT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; txt.split('|').forEach((t, i, a) => ctx.fillText(t, cx, cy + (i - (a.length - 1) / 2) * fs * 1.15 * U)); };
+  const sign = (cx, cy, w, h, txt, bg, fg, fs) => { ctx.fillStyle = bg; out(); rr(cx - w / 2, cy - h / 2, w, h, 3 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; let f2 = fs; ctx.font = `${f2 * U}px ${SHOUT}`; for (const t of txt.split('|')) while (f2 > 4 && ctx.measureText(t).width > w - 8 * U) { f2 -= 0.5; ctx.font = `${f2 * U}px ${SHOUT}`; }   // shrink to fit the board
+    fs = f2; txt.split('|').forEach((t, i, a) => ctx.fillText(t, cx, cy + (i - (a.length - 1) / 2) * fs * 1.15 * U)); };
   if (kind === 0) {          // roadworks: three cones and a sign
     for (const [dx, sc] of [[-26, 1], [0, 1.25], [26, 1]]) { const bx = p.x + dx * U, by = p.y, w = 17 * sc * U, h = 46 * sc * U;
       ctx.fillStyle = RED; out(); ctx.beginPath(); ctx.moveTo(bx - w, by); ctx.lineTo(bx - w * 0.18, by - h); ctx.lineTo(bx + w * 0.18, by - h); ctx.lineTo(bx + w, by); ctx.closePath(); ctx.fill(); ctx.stroke();
