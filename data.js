@@ -131,11 +131,15 @@ window.BULLRUSH_DATA = {
     {
      "name": "Craig Renney",
      "short": "Renney",
-     "img": null,
+     "img": "https://www.labour.org.nz/media/inok2c50/craig-renney.jpg?width=640&format=webp&quality=80",
      "cors": null,
      "status": true,
      "leader": false,
-     "credit": null
+     "credit": {
+      "by": "NZ Labour Party",
+      "lic": "© NZ Labour Party (campaign photo, not free-licensed)",
+      "src": "https://www.labour.org.nz/2026-campaign/our-candidates/craig-renney/"
+     }
     }
    ]
   },
@@ -282,11 +286,15 @@ window.BULLRUSH_DATA = {
     {
      "name": "Jessica Rowe",
      "short": "Rowe",
-     "img": null,
+     "img": "https://www.national.org.nz/_next/image?url=https%3A%2F%2Fassets.national.org.nz%2Fweb%2Fprod%2FCandidate-Jessica-Rowe-2026.jpg%3Fv%3D1789094360&w=828&q=75",
      "cors": null,
      "status": true,
      "leader": false,
-     "credit": null
+     "credit": {
+      "by": "NZ National Party",
+      "lic": "© NZ National Party (campaign photo, not free-licensed)",
+      "src": "https://www.national.org.nz/team/jessicarowe"
+     }
     }
    ]
   },
@@ -626,20 +634,28 @@ window.BULLRUSH_DATA = {
     {
      "name": "Taine Randell",
      "short": "Randell",
-     "img": null,
+     "img": "https://assets.nationbuilder.com/nzfirst/pages/10724/features/original/Candidate_Headline_Images_%2874%29.png?1786247112",
      "cors": null,
      "status": true,
      "leader": false,
-     "credit": null
+     "credit": {
+      "by": "New Zealand First",
+      "lic": "© New Zealand First (campaign photo, not free-licensed)",
+      "src": "https://www.nzfirst.nz/taine_randell"
+     }
     },
     {
      "name": "Craig Stobo",
      "short": "Stobo",
-     "img": null,
+     "img": "https://assets.nationbuilder.com/nzfirst/pages/12342/features/original/Candidate_Headline_Images_%282%29.png?1789341518",
      "cors": null,
      "status": true,
      "leader": false,
-     "credit": null
+     "credit": {
+      "by": "New Zealand First",
+      "lic": "© New Zealand First (campaign photo, not free-licensed)",
+      "src": "https://www.nzfirst.nz/craig_stobo"
+     }
     },
     {
      "name": "Harete Hipango",
@@ -695,11 +711,15 @@ window.BULLRUSH_DATA = {
     {
      "name": "Daniel Eb",
      "short": "Eb",
-     "img": null,
+     "img": "https://assets.nationbuilder.com/garethmorgan/pages/9874/meta_images/original/candidate-daniel-eb.jpg?1779966213",
      "cors": null,
      "status": true,
      "leader": false,
-     "credit": null
+     "credit": {
+      "by": "The Opportunity Party",
+      "lic": "© The Opportunity Party (campaign photo, not free-licensed)",
+      "src": "https://www.opportunity.org.nz/candidate-daniel-eb"
+     }
     },
     {
      "name": "Jessica Hammond",
@@ -730,11 +750,15 @@ window.BULLRUSH_DATA = {
     {
      "name": "Eden Skipper",
      "short": "Skipper",
-     "img": null,
+     "img": "https://assets.nationbuilder.com/garethmorgan/pages/9873/meta_images/original/candidate-eden-skipper.jpg?1779966000",
      "cors": null,
      "status": true,
      "leader": false,
-     "credit": null
+     "credit": {
+      "by": "The Opportunity Party",
+      "lic": "© The Opportunity Party (campaign photo, not free-licensed)",
+      "src": "https://www.opportunity.org.nz/candidate-eden-skipper"
+     }
     },
     {
      "name": "Jodie Kuntzsch",
@@ -752,11 +776,15 @@ window.BULLRUSH_DATA = {
     {
      "name": "Sarah Lucas",
      "short": "Lucas",
-     "img": null,
+     "img": "https://assets.nationbuilder.com/garethmorgan/pages/9872/meta_images/original/candidate-sarah-lucas.jpg?1779965809",
      "cors": null,
      "status": true,
      "leader": false,
-     "credit": null
+     "credit": {
+      "by": "The Opportunity Party",
+      "lic": "© The Opportunity Party (campaign photo, not free-licensed)",
+      "src": "https://www.opportunity.org.nz/candidate-sarah-lucas"
+     }
     }
    ]
   },
