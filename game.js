@@ -418,6 +418,7 @@ const QUOTES = {
   "Hana-Rawhiti Maipi-Clarke": [{ t: "Kāwana!", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
   "Kieran McAnulty": [{ t: "He ended up in jail.", src: "https://www.nzherald.co.nz/the-country/news/labour-mp-sells-iconic-ute-that-he-once-fought-over-with-a-car-thief-he-ended-up-in-jail/LTG6L7KURPXYEU2IJ6GIFZG2UY" }],
   "Willie Jackson": [{ t: "You don't walk over our kaupapa.", src: "https://www.1news.co.nz/2025/05/15/labours-willie-jackson-booted-from-house/" }],
+  "Qiulae Wong": [{ t: "Shit, we did it!", src: "https://thespinoff.co.nz/politics/08-11-2026/shit-we-did-it-inside-opportunitys-history-making-night" }],
   "Paul Henry": [{ t: "New Zealand has extraordinary potential, but we are not living up to it.", src: "https://www.act.org.nz/news/paul-henry-to-stand-for-act-in-2026-election" }],
 };
 const SIDELINE_QUOTES = {
@@ -431,16 +432,25 @@ const SIDELINE_QUOTES = {
   "Gerry Brownlee": [{ t: "No, don't do that.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
 };
 const HOUSE = ['Point of order!', 'Mr Speaker!', 'Shame!', 'I seek leave!', 'Withdraw and apologise!', 'Hear, hear!', 'Order, order!', 'I move the question be put!', 'That is out of order!'];
-// The browser's own speech voice reads the lines aloud. It is a generic voice at a silly pitch, not an impression of anyone.
+// Lines are pre-recorded in voices/ with two natural New Zealand voices (see tools/make-voices.py). They are generic
+// voices, not impressions of anyone. If a file is missing, the browser's own speech voice reads the line instead.
+const slug = n => n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
 const Voice = {
-  say(text, seed, force) {
+  cur: null,
+  say(text, seed, force, who) {
+    if (Snd.muted) return;
+    if (this.cur && !this.cur.ended && !this.cur.paused) { if (!force) return; this.cur.pause(); }
+    if (window.speechSynthesis && (speechSynthesis.speaking || speechSynthesis.pending)) { if (!force) return; speechSynthesis.cancel(); }
+    const file = 'voices/' + (who ? slug(who) : 'house-' + (seed % 2 ? 'a' : 'b')) + '-' + hash(text).toString(36) + '.mp3';
+    const a = new Audio(file); let fell = false; const fallback = () => { if (fell) return; fell = true; if (this.cur === a) this.cur = null; this.browser(text, seed); };
+    a.volume = 1; a.onerror = fallback; this.cur = a;
+    const p = a.play(); if (p && p.catch) p.catch(fallback);
+  },
+  browser(text, seed) {
     if (Snd.muted || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
-    const ss = window.speechSynthesis;
-    if (ss.speaking || ss.pending) { if (!force) return; ss.cancel(); }
-    const u = new SpeechSynthesisUtterance(text.replace(/\bBS\b/g, 'B S').replace('coq', 'cock'));
-    // Prefer the browser's natural-sounding voices (Edge's online voices, Chrome's Google voices), New Zealand accent first, and leave the pitch alone.
+    const ss = window.speechSynthesis, u = new SpeechSynthesisUtterance(text.replace(/\bBS\b/g, 'B S').replace('coq', 'cock'));
     const rank = v => (/natural|online|neural|google/i.test(v.name) ? 10 : 0) + (/en[-_]NZ/i.test(v.lang) ? 4 : /en[-_]AU/i.test(v.lang) ? 3 : /en[-_]GB/i.test(v.lang) ? 2 : 1);
-    const all = ss.getVoices().filter(v => /^en/i.test(v.lang)).sort((a, b) => rank(b) - rank(a)), pool = all.filter(v => rank(v) >= rank(all[0]) - 1);
+    const all = ss.getVoices().filter(v => /^en/i.test(v.lang)).sort((x, y) => rank(y) - rank(x)), pool = all.filter(v => rank(v) >= rank(all[0]) - 1);
     if (pool.length) u.voice = pool[seed % pool.length];
     u.pitch = 0.94 + ((seed >>> 3) % 10) / 80; u.rate = 1 + ((seed >>> 7) % 10) / 100; u.volume = 0.9;
     ss.speak(u);
@@ -448,9 +458,9 @@ const Voice = {
 };
 function exclaim(m) {   // a poked MP blurts something
   const own = QUOTES[m.name], t = own ? pick(own).t : pick(HOUSE);
-  m.say = t; m.sayT = 2.1; Voice.say(t, hash(m.name), true);
+  m.say = t; m.sayT = 2.1; Voice.say(t, hash(m.name), true, own ? m.name : null);
 }
-function sideSay(c, name, t, force) { c.say = t; c.sayT = 2; Voice.say(t, hash(name), force); }
+function sideSay(c, name, t, force) { c.say = t; c.sayT = 2; Voice.say(t, hash(name), force, name); }
 const HECKLES = ['What a lot of crap!', 'Keep left!', 'Call that a tackle?', 'Merge like a zip!', 'Traffic is backing up!', 'Move it, Taggers!', 'Eyes on the road!', 'That lane is closed!', 'Faster! Faster!'];
 function tossSheet(n) {
   for (let i = 0; i < n; i++) G.flying.push({ x0: cam.nicola.x, y0: cam.nicola.y, x1: rand(8, W - 8), y1: rand(ZN + 6, ZS - 6), t: -i * 0.15, rot: rand(TAU) });
@@ -994,7 +1004,7 @@ $('cred').onclick = () => {
   $('credIn').innerHTML = `<p><b>Backdrop:</b> ${esc(bg.title)}, ${esc(bg.by)} · ${esc(bg.lic)}${link(bg)}</p>` +
     D.parties.map(p => `<h3 style="margin:.6em 0 .2em">${esc(p.name)}</h3><ul style="margin:0;padding-left:18px">${p.members.map(m => row(m.name, hasPhoto[m.name] ? m.credit : null)).join('')}</ul>`).join('') +
     `<h3 style="margin:.6em 0 .2em">Sideline</h3><ul style="margin:0;padding-left:18px">${D.departed.map(m => row(m.name, hasPhoto[m.name] ? m.credit : null)).join('')}</ul>` +
-    `<h3 style="margin:.6em 0 .2em">Things they really said</h3><ul style="margin:0;padding-left:18px">${Object.entries({ ...QUOTES, ...SIDELINE_QUOTES }).map(([n, q]) => q.map(x => `<li><b>${esc(n)}</b>: “${esc(x.t)}” · <a href="${esc(x.src)}" target="_blank" rel="noopener">source</a></li>`).join('')).join('')}</ul><p>Everyone else calls out stock phrases of the House. Lines are read by your browser's built-in voice, not by the people quoted.</p>` +
+    `<h3 style="margin:.6em 0 .2em">Things they really said</h3><ul style="margin:0;padding-left:18px">${Object.entries({ ...QUOTES, ...SIDELINE_QUOTES }).map(([n, q]) => q.map(x => `<li><b>${esc(n)}</b>: “${esc(x.t)}” · <a href="${esc(x.src)}" target="_blank" rel="noopener">source</a></li>`).join('')).join('')}</ul><p>Everyone else calls out stock phrases of the House. Lines are spoken by two generic New Zealand text-to-speech voices, not by the people quoted.</p>` +
     `<p>Photos are cropped and cut out by the game for the bobbleheads (or shown as face discs). Music and sound effects are synthesised in the browser. This is a parody; it is not affiliated with any party or with Parliament.</p>`;
   $('credits').classList.remove('hidden');
 };
