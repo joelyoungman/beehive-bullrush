@@ -353,10 +353,10 @@ function makeMP(m, party, team) {
     spd: 15.5 + (h % 100) / 100 * 4.5 + (m.leader ? 0.8 : 0), str: 0.1 + ((h >> 8) % 100) / 100 * 0.2,
     state: 'idle', stun: 0, safe: false, conv: false, joined: false, delay: 0, saCd: 0, lunge: 0, lungeCd: rand(0, 1), tgt: null, think: 0,
     jf: rand(1.5, 3.2), jp: rand(TAU), phase: rand(TAU), side: h % 2 ? 1 : -1, pose: '', poseT: 0, hop: 0,
-    hd: { ox: 0, oy: 0, vx: 0, vy: 0, a: 0, va: 0 }, tx: 0, ty: 0, sx: 0, sy: 0, U: 1 };
+    hd: { ox: 0, oy: 0, vx: 0, vy: 0, a: 0, va: 0 }, tx: 0, ty: 0, sx: 0, sy: 0, U: 1, rd: { dodge: 0, tags: 0, dist: 0, by: '' } };
 }
 function startMatch() {
-  Snd.init();
+  Snd.init(); clearTimeout(starTimer); $('star').classList.add('hidden');
   setLayout(); G.puffs = [];
   G.mps = [];
   for (const p of D.parties) { const t = G.assign[p.id]; if (t) for (const m of p.members) G.mps.push(makeMP(m, p, t)); }
@@ -380,6 +380,7 @@ function formation(snap) {
   for (const m of G.mps) { m.safe = false; m.conv = false; m.joined = m.role === 'tagger'; if (snap) { m.x = m.tx; m.y = m.ty; m.vx = m.vy = 0; } m.state = 'idle'; m.stun = 0; }
 }
 function callRound() {
+  for (const m of G.mps) m.rd = { dodge: 0, tags: 0, dist: 0, by: '' };   // this round's tally, for Player of the round
   Snd.gavel(2); cam.gerry.blow = 1.2; cam.gerry.say = 'Order!'; cam.gerry.sayT = 2; note(`Round ${G.round}: Runners head for the ${G.dir > 0 ? 'South' : 'North'} End`, true);
   banner('BULLRUSH!', G.round === 1 ? 'Runners: get to the South End!' : `Round ${G.round} — back to the ${G.dir > 0 ? 'South' : 'North'} End!`);
   setTimeout(() => Snd.cheer(0.22, 1.8), 350);
@@ -650,13 +651,13 @@ function update(dt) {
           r.saCd = 2.2; r.pose = 'stiff'; r.poseT = 0.5; r.side = t.x > r.x ? 1 : -1;
           knock(t, 1.3); t.vx = (t.x - r.x) / (d || 1) * 14; t.vy = (t.y - r.y) / (d || 1) * 10; bump(t, rand(-8, 8), -9, rand(-12, 12));
           fx(r.x, r.y - 8, stiff ? 'STIFF-ARM!' : pick(['JUKED!', 'SIDESTEP!', 'MISSED!']), '#FBF6EA'); if (stiff) Snd.boing(); else Snd.juke();
-          r.dodges = (r.dodges || 0) + 1; G.stats.dodges++; note(stiff ? `${r.short} stiff-arms ${t.short}` : `${r.short} jinks past ${t.short}`);
+          r.dodges = (r.dodges || 0) + 1; r.rd.dodge++; G.stats.dodges++; note(stiff ? `${r.short} stiff-arms ${t.short}` : `${r.short} jinks past ${t.short}`);
         } else {                                                   // tackled
           r.conv = true; knock(r, 2.2); r.vx = t.vx * 0.6; r.vy = t.vy * 0.6; bump(r, rand(-10, 10), -12, rand(-14, 14));
           knock(t, 0.55, 'stumble'); bump(t, 0, -6, rand(-6, 6)); t.tgt = null;
           fx(r.x, r.y - 8, pick(['TAGGED!', 'TACKLED!', 'GOTCHA!', 'CONVERTED!']), RED, 1.15);
           if (rand() < 0.2) { const t = pick(CROWD); setTimeout(() => fx(r.x, r.y - 2, t, GOLD, 0.75), 300); Voice.say(t, hash(t) + (rand() < 0.5 ? 1 : 0), false, null); }
-          t.tags = (t.tags || 0) + 1; G.stats.tags++; G.stats.last = r; const left = live.filter(o => !o.conv).length; note(`${t.short} tags ${r.short}` + (left <= 4 ? ` (${left} Runner${left === 1 ? '' : 's'} left)` : ''), left <= 4);
+          t.tags = (t.tags || 0) + 1; t.rd.tags++; r.rd.by = t.short; G.stats.tags++; G.stats.last = r; const left = live.filter(o => !o.conv).length; note(`${t.short} tags ${r.short}` + (left <= 4 ? ` (${left} Runner${left === 1 ? '' : 's'} left)` : ''), left <= 4);
           Snd.tag(); hud();
         }
         break; } }
@@ -722,7 +723,7 @@ function separate(dt) {
 }
 function body(m, dt) {
   if (m.sayT > 0) m.sayT -= dt;
-  m.x += m.vx * dt; m.y += m.vy * dt;
+  m.x += m.vx * dt; m.y += m.vy * dt; if (G.phase === 'run' && m.rd) m.rd.dist += Math.hypot(m.vx, m.vy) * dt;
   m.x = clamp(m.x, 1.5, W - 1.5); m.y = clamp(m.y, 1, L - 1);
   if (m.role === 'tagger' && G.phase === 'run') m.y = clamp(m.y, ZN + 1, ZS - 1);
   const sp = Math.hypot(m.vx, m.vy), was = Math.sin(m.phase);
@@ -737,13 +738,31 @@ function body(m, dt) {
   h.ox += h.vx * dt; h.oy += h.vy * dt; h.a += h.va * dt;
   h.ox = clamp(h.ox, -0.7, 0.7); h.oy = clamp(h.oy, -0.6, 0.45); h.a = clamp(h.a, -0.9, 0.9);
 }
+function roundStar() {   // best player this round: sidesteps and tags count most, then ground covered, plus a bonus for staying un-tagged
+  const score = m => m.rd.dodge * 3 + m.rd.tags * 3 + m.rd.dist / 25 + (m.role === 'runner' && !m.conv ? 4 : 0);
+  const m = G.mps.slice().sort((a, b) => score(b) - score(a))[0];
+  return m && score(m) > 0 ? { m, role: m.role === 'runner' ? 'Runner' : 'Tagger', rd: { ...m.rd }, round: G.round, safe: m.role === 'runner' && !m.conv } : null;
+}
+let starTimer = 0;
+function showStar(st) {
+  const el = $('star'), m = st.m, rows = st.role === 'Runner'
+    ? [['Sidesteps', st.rd.dodge], ['Metres run', Math.round(st.rd.dist)], ['Tagged by', st.safe ? 'nobody' : (st.rd.by || 'nobody')]]
+    : [['Tags made', st.rd.tags], ['Metres run', Math.round(st.rd.dist)]];
+  const qs = QUOTES[m.name], q = qs ? pick(qs).t : '';
+  el.innerHTML = `<div class="sh"><b>PLAYER OF THE ROUND</b><span>ROUND ${st.round}</span></div><div class="sb"><canvas width="160" height="160"></canvas><div><h3>${esc(m.short.toUpperCase())}</h3><em>${esc(m.party.name)} · ${st.role}</em>${rows.map(r => `<p><u>${r[0]}</u> ${esc(r[1])}</p>`).join('')}</div></div>${q ? `<div class="sq">\u201C${esc(q)}\u201D</div>` : ''}`;
+  const c = el.querySelector('canvas'); c.style.borderColor = m.party.color; c.getContext('2d').drawImage(sprites[m.name], 0, 0);
+  el.classList.remove('hidden', 'out'); void el.offsetWidth; el.classList.add('in');
+  clearTimeout(starTimer); starTimer = setTimeout(() => { el.classList.remove('in'); el.classList.add('out'); setTimeout(() => el.classList.add('hidden'), 400); }, 3200);
+}
 function endRound() {
+  const star = roundStar();
   let newbies = 0;
   for (const m of G.mps) if (m.conv) { m.role = 'tagger'; m.conv = false; m.pose = ''; newbies++; }
   const left = G.mps.filter(m => m.role === 'runner');
   hud();
   if (left.length === 0) return gameOver(null);
   if (left.length === 1 && (G.init > 1 || G.round >= 5)) return gameOver(left[0]);
+  if (star) showStar(star);
   G.round++; G.dir *= -1; G.phase = 'between'; G.t = 0; formation(false); hud();
 }
 const NUM = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];

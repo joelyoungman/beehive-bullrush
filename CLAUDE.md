@@ -15,7 +15,7 @@ Public repo: github.com/joelyoungman/beehive-bullrush. Collaborator: Sarah (sand
 
 - `index.html`: page, all CSS, menus and scoreboard.
 - `game.js`: everything else, in one closure. Sections are marked `/* ---------- name ---------- */`.
-- Match-day extras (from Sarah's mockups): the LIVE ticker (`note()` in `game.js` feeds `#ticker`; descriptions only, never speech) and the full-time front page, "The Lawn Gazette" (`frontPage()`, `sharePaper()`; the quote of the match comes from `QUOTES`).
+- Match-day extras (from Sarah's mockups): the Player of the round card (`roundStar()`, `showStar()`; per-round tallies in `m.rd`), the LIVE ticker (`note()` in `game.js` feeds `#ticker`; descriptions only, never speech) and the full-time front page, "The Lawn Gazette" (`frontPage()`, `sharePaper()`; the quote of the match comes from `QUOTES`).
 - `data.js`: generated. Never edit by hand; run `node tools/build-data.js`.
 - `manifest/*.json`: research data per party (who was elected, photo URL, licence, source).
 - `tools/build-data.js`: merges manifests into `data.js`. `EXTRA` holds party-site photos for MPs with no free photo.
