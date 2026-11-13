@@ -452,7 +452,11 @@ const SIDELINE_QUOTES = {
     { t: "Delayed but not derailed.", src: "https://www.newstalkzb.co.nz/news/politics/finance-minister-nicola-willis-gives-economic-update-amid-geopolitical-turmoil-nz-s-financial-outlook-downgrade/" },
     { t: "I haven't been able to convince my coalition partners yet.", src: "https://thespinoff.co.nz/politics/29-05-2026/not-an-election-year-budget-sure-it-was" },
     { t: "Make really good choices about how I invest your money.", src: "https://thespinoff.co.nz/politics/29-05-2026/not-an-election-year-budget-sure-it-was" }],
-  "Chris Bishop": [{ t: "What a lot of crap!", src: "https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance" }],
+  "Chris Bishop": [{ t: "What a lot of crap!", src: "https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance" },
+    { t: "I could say the same to you.", src: "https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance" },
+    { t: "How's your fiscal plan going?", src: "https://www.nzherald.co.nz/nz/politics/nationals-chris-bishop-embarrassed-after-being-told-to-leave-house-for-first-time/5OGJGBQDDVHH7CV4YIUTM4VKUU/" },
+    { t: "I dobbed myself in.", src: "https://www.nzherald.co.nz/nz/politics/nationals-chris-bishop-embarrassed-after-being-told-to-leave-house-for-first-time/5OGJGBQDDVHH7CV4YIUTM4VKUU/" },
+    { t: "I did what you're not meant to do.", src: "https://www.nzherald.co.nz/nz/politics/nationals-chris-bishop-embarrassed-after-being-told-to-leave-house-for-first-time/5OGJGBQDDVHH7CV4YIUTM4VKUU/" }],
   "Gerry Brownlee": [{ t: "No, don't do that.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
     { t: "Lock the doors!", src: "https://www.nzherald.co.nz/nz/politics/gerry-brownlee-the-wit-and-grumpiness-of-parliaments-speaker/Y2DDNX66FNAE7NG4DJEY3XO54E/" },
     { t: "I'm going to be the one who wins here.", src: "https://www.nzherald.co.nz/nz/politics/gerry-brownlee-the-wit-and-grumpiness-of-parliaments-speaker/Y2DDNX66FNAE7NG4DJEY3XO54E/" },
@@ -494,7 +498,6 @@ function exclaim(m) {   // a poked MP blurts something; the sideline hushes so t
   m.say = t; m.sayT = 2.1; Voice.say(t, hash(m.name), true, own ? m.name : null);
 }
 function sideSay(c, name, t, force) { c.say = t; c.sayT = 2; Voice.say(t, hash(name), force, name); }
-const HECKLES = ['What a lot of crap!', 'Keep left!', 'Call that a tackle?', 'Merge like a zip!', 'Traffic is backing up!', 'Move it, Taggers!', 'Eyes on the road!', 'That lane is closed!', 'Faster! Faster!'];
 function tossSheet(n) {
   for (let i = 0; i < n; i++) G.flying.push({ x0: cam.nicola.x, y0: cam.nicola.y, x1: rand(8, W - 8), y1: rand(ZN + 6, ZS - 6), t: -i * 0.15, rot: rand(TAU) });
   cam.nicola.toss = 0.6; if (n > 1) sideSay(cam.nicola, 'Nicola Willis', pick(SIDELINE_QUOTES['Nicola Willis']).t, true);   // she only speaks when tapped
@@ -513,7 +516,7 @@ function updateCameos(dt) {
       const down = G.mps.filter(m => m.state === 'down');
       for (const a of down) { let c = 0; for (const o of down) if (Math.hypot(a.x - o.x, a.y - o.y) < 13) c++; if (c >= 4) { g.order = 2; g.orderCd = 5; fx(a.x, a.y - 6, 'PILE-UP!', GOLD, 1.3); break; } }
     }
-    b.next -= dt; if (b.next <= 0) { b.next = rand(3.5, 6); b.say = pick(HECKLES); b.sayT = 2.2; }
+    b.next -= dt; if (b.next <= 0) { b.next = rand(3.5, 6); b.say = pick(SIDELINE_QUOTES['Chris Bishop']).t; b.sayT = 2.2; }
   }
   b.sayT = Math.max(0, b.sayT - dt);
   go.p += go.dir * dt * 0.12; if (go.p > 1) go.dir = -1; if (go.p < 0) go.dir = 1;
