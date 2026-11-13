@@ -427,9 +427,17 @@ const SIDELINE_QUOTES = {
     { t: "No lolly scramble!", src: "https://www.odt.co.nz/news/national/no-sugar-hits-as-willis-battles-to-balance-books-j9nh54xs" },
     { t: "No sugar hits!", src: "https://www.odt.co.nz/news/national/no-sugar-hits-as-willis-battles-to-balance-books-j9nh54xs" },
     { t: "How big is his hole?", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
-    { t: "Don an adult nappy and chain yourself to a door.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
+    { t: "Don an adult nappy and chain yourself to a door.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
+    { t: "Delayed but not derailed.", src: "https://www.newstalkzb.co.nz/news/politics/finance-minister-nicola-willis-gives-economic-update-amid-geopolitical-turmoil-nz-s-financial-outlook-downgrade/" },
+    { t: "I haven't been able to convince my coalition partners yet.", src: "https://thespinoff.co.nz/politics/29-05-2026/not-an-election-year-budget-sure-it-was" },
+    { t: "Make really good choices about how I invest your money.", src: "https://thespinoff.co.nz/politics/29-05-2026/not-an-election-year-budget-sure-it-was" }],
   "Chris Bishop": [{ t: "What a lot of crap!", src: "https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance" }],
-  "Gerry Brownlee": [{ t: "No, don't do that.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" }],
+  "Gerry Brownlee": [{ t: "No, don't do that.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
+    { t: "Lock the doors!", src: "https://www.nzherald.co.nz/nz/politics/gerry-brownlee-the-wit-and-grumpiness-of-parliaments-speaker/Y2DDNX66FNAE7NG4DJEY3XO54E/" },
+    { t: "I'm going to be the one who wins here.", src: "https://www.nzherald.co.nz/nz/politics/gerry-brownlee-the-wit-and-grumpiness-of-parliaments-speaker/Y2DDNX66FNAE7NG4DJEY3XO54E/" },
+    { t: "Have you got any other poetry?", src: "https://www.nzherald.co.nz/nz/politics/gerry-brownlee-the-wit-and-grumpiness-of-parliaments-speaker/Y2DDNX66FNAE7NG4DJEY3XO54E/" },
+    { t: "Oh, that's very generous of you.", src: "https://thespinoff.co.nz/politics/13-03-2026/echo-chamber-nz-firsts-takes-jabs-at-gerry-brownlee" },
+    { t: "I never ever wanted to be Speaker.", src: "https://www.nzherald.co.nz/nz/politics/gerry-brownlee-the-wit-and-grumpiness-of-parliaments-speaker/Y2DDNX66FNAE7NG4DJEY3XO54E/" }],
 };
 const HOUSE = ['Point of order!', 'Mr Speaker!', 'Shame!', 'I seek leave!', 'Withdraw and apologise!', 'Hear, hear!', 'Order, order!', 'I move the question be put!', 'That is out of order!'];
 // Lines are pre-recorded in voices/ with two natural New Zealand voices (see tools/make-voices.py). They are generic
@@ -468,7 +476,7 @@ function tossSheet(n) {
 }
 function shockwave() {
   G.waves.push({ x: cam.gerry.x, y: cam.gerry.y, r: 0, hit: new Set() });
-  Snd.gavel(3); sideSay(cam.gerry, 'Gerry Brownlee', rand() < 0.4 ? "No, don't do that." : 'Order! Order!', true); cam.gerry.blow = 1.3; cam.gerry.order = 1.6; G.shake = 0.5;
+  Snd.gavel(3); sideSay(cam.gerry, 'Gerry Brownlee', rand() < 0.65 ? pick(SIDELINE_QUOTES['Gerry Brownlee']).t : 'Order! Order!', true); cam.gerry.blow = 1.3; cam.gerry.order = 1.6; G.shake = 0.5;
 }
 function updateCameos(dt) {
   const g = cam.gerry, n = cam.nicola, b = cam.bishop, go = cam.gold, pk = cam.penk, run = G.phase === 'run';

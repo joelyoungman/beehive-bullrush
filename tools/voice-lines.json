@@ -210,6 +210,27 @@
   "pitch": "+2Hz"
  },
  {
+  "file": "nicola-willis-ctb12n.mp3",
+  "text": "Delayed but not derailed.",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "+5%",
+  "pitch": "+2Hz"
+ },
+ {
+  "file": "nicola-willis-415yqe.mp3",
+  "text": "I haven't been able to convince my coalition partners yet.",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "+5%",
+  "pitch": "+2Hz"
+ },
+ {
+  "file": "nicola-willis-clb08r.mp3",
+  "text": "Make really good choices about how I invest your money.",
+  "voice": "en-NZ-MollyNeural",
+  "rate": "+5%",
+  "pitch": "+2Hz"
+ },
+ {
   "file": "chris-bishop-yk1id3.mp3",
   "text": "What a lot of crap!",
   "voice": "en-NZ-MitchellNeural",
@@ -219,6 +240,41 @@
  {
   "file": "gerry-brownlee-1lwpbfk.mp3",
   "text": "No, don't do that.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+5%",
+  "pitch": "-6Hz"
+ },
+ {
+  "file": "gerry-brownlee-6ubnkf.mp3",
+  "text": "Lock the doors!",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+5%",
+  "pitch": "-6Hz"
+ },
+ {
+  "file": "gerry-brownlee-hng6h6.mp3",
+  "text": "I'm going to be the one who wins here.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+5%",
+  "pitch": "-6Hz"
+ },
+ {
+  "file": "gerry-brownlee-fpkro4.mp3",
+  "text": "Have you got any other poetry?",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+5%",
+  "pitch": "-6Hz"
+ },
+ {
+  "file": "gerry-brownlee-198x7zv.mp3",
+  "text": "Oh, that's very generous of you.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+5%",
+  "pitch": "-6Hz"
+ },
+ {
+  "file": "gerry-brownlee-11t6s8.mp3",
+  "text": "I never ever wanted to be Speaker.",
   "voice": "en-NZ-MitchellNeural",
   "rate": "+5%",
   "pitch": "-6Hz"
