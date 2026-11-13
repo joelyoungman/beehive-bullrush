@@ -867,9 +867,11 @@ let paper = null;   // what the front page currently says, so it can be saved as
 function frontPage(last, t1, t2) {
   const n = G.round, rounds = (n < NUM.length ? NUM[n] : String(n)).toUpperCase() + (n === 1 ? ' ROUND' : ' ROUNDS'), S = G.stats;
   const players = G.mps.slice(), starRun = players.filter(m => m.dodges).sort((a, b) => b.dodges - a.dodges)[0], starTag = players.filter(m => m.tags).sort((a, b) => b.tags - a.tags)[0];
-  const quoted = players.filter(m => QUOTES[m.name]), q = quoted.length ? pick(quoted) : null, qt = q ? pick(QUOTES[q.name]) : null;
+  const hero = last || S.last || starRun || null;   // pictured on the front page
+  // Quote of the match: the hero first, then the stars, else anyone who played. Only sourced QUOTES, never invented.
+  const q = [hero, starRun, starTag].find(m => m && QUOTES[m.name]) || pick(players.filter(m => QUOTES[m.name])) || null, qt = q ? pick(QUOTES[q.name]) : null;
   let head, sub;
-  if (last) { head = `LAST ${last.party.name.toUpperCase()} STANDING`; sub = `${last.name} outlasts the field to take the lawn for ${t1}`; }
+  if (last) { head = `${last.short.toUpperCase()}: LAST ${last.party.name.toUpperCase()} STANDING`; sub = `${last.name} outlasts the field to take the lawn for ${t1}`; }
   else { head = n <= 2 ? `HOUSE FALLS IN ${rounds}` : n >= 7 ? 'LONG HAUL ENDS: HOUSE SWALLOWED' : `HOUSE SWALLOWED IN ${rounds}`; sub = `${t2} tag every last Runner from ${t1}`; }
   const body = [];
   body.push(`Spectators on the Parliament lawn saw ${last ? `${t1} hold out` : `the Taggers' coalition (${t2}) close in`} over ${n} round${n === 1 ? '' : 's'}, with ${S.tags} tackle${S.tags === 1 ? '' : 's'} and ${S.dodges} sidestep${S.dodges === 1 ? '' : 's'} on the day.`);
@@ -879,12 +881,19 @@ function frontPage(last, t1, t2) {
   else if (S.last) body.push(`${S.last.name}, the last Runner standing for ${S.last.party.name}, was tagged in round ${n}.`);
   const star = starRun ? `${starRun.short}, ${starRun.dodges} sidestep${starRun.dodges === 1 ? '' : 's'}` : starTag ? `${starTag.short} the Tagger, ${starTag.tags} tackle${starTag.tags === 1 ? '' : 's'}` : 'nobody, a quiet day';
   const date = new Date().toLocaleDateString('en-NZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
-  paper = { date, head, sub, body, quote: qt ? qt.t : '', who: q ? q.name : '', src: qt ? qt.src : '', star, starLabel: starRun ? 'STAR RUNNER' : 'STAR TAGGER' };
+  const topTag = starRun && starTag ? `${starTag.short}, ${starTag.tags} tackle${starTag.tags === 1 ? '' : 's'}` : '';
+  paper = { date, head, sub, body, quote: qt ? qt.t : '', who: q ? q.name : '', src: qt ? qt.src : '', star, starLabel: starRun ? 'STAR RUNNER' : 'STAR TAGGER', topTag };
   $('pDate').textContent = date; $('pHead').textContent = head; $('pSub').textContent = sub;
   $('pBody').innerHTML = body.map(b => `<p>${esc(b)}</p>`).join('');
   $('pQuoteBox').classList.toggle('hidden', !qt);
   if (qt) { $('pQuote').textContent = `“${qt.t}”`; $('pWho').innerHTML = `${esc(q.name)} · <a href="${esc(qt.src)}" target="_blank" rel="noopener">source</a>`; }
   $('pStarL').textContent = paper.starLabel; $('pStar').textContent = star;
+  $('pTagBox').classList.toggle('hidden', !topTag); $('pTag').textContent = topTag;
+  $('pFig').classList.toggle('hidden', !hero);
+  if (hero) {   // the photo stays in the page only: hot-linked photos would block saving the shared picture
+    const c = $('pPic'), g = c.getContext('2d'); g.clearRect(0, 0, 160, 160); if (sprites[hero.name]) g.drawImage(sprites[hero.name], 0, 0); c.style.borderColor = hero.party.color;
+    $('pCap').textContent = hero === last ? `${hero.name}, still running` : hero === S.last ? `${hero.name}, the last to fall` : `${hero.name}, star runner`;
+  }
 }
 function sharePaper() {   // draw the front page to a canvas and save or share it as a picture
   if (!paper) return;
@@ -899,7 +908,8 @@ function sharePaper() {   // draw the front page to a canvas and save or share i
   for (const b of paper.body) by = wrap(b, P, by, colW, 40) + 14;
   const sx = P + colW + 60, sw = W2 - P - sx; g.fillRect(sx - 30, top - 36, 3, 560); let sy = top;
   if (paper.quote) { g.font = `400 30px ${SHOUT}`; g.fillText('QUOTE OF THE MATCH', sx, sy); sy += 50; g.font = `italic 500 36px ${LABEL}`; sy = wrap(`“${paper.quote}”`, sx, sy, sw, 44); g.font = `700 26px ${LABEL}`; g.fillText(paper.who, sx, sy + 6); sy += 70; }
-  g.font = `400 30px ${SHOUT}`; g.fillText(paper.starLabel, sx, sy); sy += 46; g.font = `500 34px ${LABEL}`; wrap(paper.star, sx, sy, sw, 42);
+  g.font = `400 30px ${SHOUT}`; g.fillText(paper.starLabel, sx, sy); sy += 46; g.font = `500 34px ${LABEL}`; sy = wrap(paper.star, sx, sy, sw, 42);
+  if (paper.topTag) { sy += 24; g.font = `400 30px ${SHOUT}`; g.fillText('TOP TAGGER', sx, sy); sy += 46; g.font = `500 34px ${LABEL}`; wrap(paper.topTag, sx, sy, sw, 42); }
   g.fillStyle = INK; g.fillRect(P, H2 - 150, W2 - 2 * P, 4); g.font = `400 40px ${SHOUT}`; g.fillText('BEEHIVE BULLRUSH', P + 90, H2 - 82);
   const done = () => c.toBlob(blob => {
     if (!blob) return; const file = new File([blob], 'lawn-gazette.png', { type: 'image/png' });

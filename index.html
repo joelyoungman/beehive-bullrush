@@ -118,9 +118,13 @@
   #over .pside blockquote { margin:0; font-size:21px; font-style:italic; line-height:1.15; }
   #over .pside cite { display:block; font-size:14px; font-weight:700; font-style:normal; margin:.3em 0 .9em; }
   #over .pside p { font-weight:700; }
+  #over .pstory { display:flex; gap:14px; align-items:flex-start; }
+  #over .pstory figure { flex:none; width:104px; margin:4px 0 0; text-align:center; }
+  #over .pstory canvas { width:104px; height:104px; border-radius:50%; border:4px solid var(--ink); box-shadow:3px 3px 0 rgba(27,42,65,.4); background:var(--paper); }
+  #over .pstory figcaption { font-size:13px; font-weight:700; line-height:1.2; margin-top:6px; }
   #over .pbtns { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:10px; }
   @media (max-width:560px) { #ticker span:nth-of-type(n+2) { display:none; } #ticker span { flex:1; } }
-  @media (max-width:560px) { #over .pcols { grid-template-columns:1fr; } #over .pside { border-left:0; padding-left:0; border-top:2px solid var(--ink); padding-top:8px; } #over .pm span:nth-child(2) { display:none; } }
+  @media (max-width:560px) { #over .pcols { grid-template-columns:1fr; } #over .pside { border-left:0; padding-left:0; border-top:2px solid var(--ink); padding-top:8px; } #over .pm span:nth-child(2) { display:none; } #over .pstory figure { width:72px; } #over .pstory canvas { width:72px; height:72px; } }
   #credits .panel { width:min(640px,100%); }
   #over .in { padding:18px; text-align:center; overflow:auto; }
   #over h2 { font:400 clamp(24px,5vw,40px)/1.05 var(--shout); margin:.3em 0 .2em; color:var(--red); }
@@ -129,7 +133,8 @@
   #credits .in { padding:12px 16px; overflow:auto; font-size:16px; }
   #credits li { margin-bottom:3px; }
   @media (max-width:720px) {
-    .cols { grid-template-columns:1fr; }
+    .cols { grid-template-columns:1fr; grid-auto-rows:max-content; }   /* stacked columns scroll instead of squashing the cards */
+    .col .card { flex:none; }
     .side .lbl { display:none; } .side .big { font-size:24px; } .badge { font-size:12px; }
     #hint { display:none; }
   }
@@ -187,9 +192,9 @@
     <div class="pm"><span id="pDate"></span><span>LATE EDITION</span><span>PRICE: ONE SPECIAL VOTE</span></div>
     <div class="pname">THE LAWN GAZETTE</div>
     <h2 id="pHead"></h2><p class="psub" id="pSub"></p>
-    <div class="pcols"><div id="pBody"></div>
+    <div class="pcols"><div class="pstory"><figure id="pFig"><canvas id="pPic" width="160" height="160"></canvas><figcaption id="pCap"></figcaption></figure><div id="pBody"></div></div>
       <div class="pside"><div id="pQuoteBox"><h3>QUOTE OF THE MATCH</h3><blockquote id="pQuote"></blockquote><cite id="pWho"></cite></div>
-        <h3 id="pStarL">STAR RUNNER</h3><p id="pStar"></p></div></div>
+        <h3 id="pStarL">STAR RUNNER</h3><p id="pStar"></p><div id="pTagBox"><h3>TOP TAGGER</h3><p id="pTag"></p></div></div></div>
     <div class="pbtns"><button class="preset" id="again">Rematch</button> <button class="preset" id="back">New coalitions</button> <button class="preset" id="share">Share front page</button></div>
   </div></div>
 </div>
