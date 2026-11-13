@@ -1,4 +1,4 @@
-/* Bullrush on the Parliament Lawn — a satirical playground game.
+/* Beehive Bullrush — a satirical playground game on the Parliament lawn.
    World: x 0..W across the lawn, y 0..L from the North End (far, by the Beehive) to the South End (near). */
 (() => {
 'use strict';
@@ -21,8 +21,8 @@ const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 const lerp = (a, b, t) => a + (b - a) * t;
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const TAU = Math.PI * 2;
-const INK = '#1B2A41', PAPER = '#F3E9D2', RED = '#E4572E', GOLD = '#F2B134';
-const SHOUT = '"Bowlby One", ${SHOUT}, sans-serif', LABEL = '"Barlow Condensed", "Arial Narrow", "Trebuchet MS", sans-serif';
+const INK = '#1B2A41', PAPER = '#F3E9D2', RED = '#E4572E', GOLD = '#F2B134', SKY = '#8EC5E8';
+const SHOUT = '"Bowlby One", Impact, "Arial Black", sans-serif', LABEL = '"Barlow Condensed", "Arial Narrow", "Trebuchet MS", sans-serif';
 if (document.fonts && document.fonts.load) { document.fonts.load('20px "Bowlby One"'); document.fonts.load('700 20px "Barlow Condensed"'); }
 
 /* ---------- view ---------- */
@@ -47,15 +47,77 @@ function proj(x, y) {
 const sprites = {};      // name -> 160px circular canvas
 const hasPhoto = {};
 const listeners = [];
-// Optional per-photo crop tweaks: centre x, centre y, size (fractions of image width/height/width).
+// Head framing, measured per photo: every face is scaled so the eyes are the same distance apart and placed at the same
+// spot in the crop, matching the Louise Upston crop (centre x, centre y, size; fractions of the photo's width/height/width).
+// Regenerate by re-measuring the eyes (a face detector gave the first pass); don't hand-tune one head without checking the others.
 const CROP = {
-  'Mariameno Kapa-Kingi': { cx: 0.47, cy: 0.4, s: 0.25 },   // a wide shot of the debating chamber
-  'Craig Renney': { cx: 0.49, cy: 0.3, s: 0.5 }, 'Jessica Rowe': { cx: 0.52, cy: 0.31, s: 0.26 }, 'Daniel Eb': { cx: 0.49, cy: 0.28, s: 0.3 },
-  'Eden Skipper': { cx: 0.5, cy: 0.32, s: 0.27 },
-  'Sarah Lucas': { cx: 0.51, cy: 0.29, s: 0.25 }, 'Taine Randell': { cx: 0.757, cy: 0.34, s: 0.11 }, 'Craig Stobo': { cx: 0.735, cy: 0.31, s: 0.11 },
-  'Paul Henry': { cx: 0.5, cy: 0.45, s: 0.62 },
-  'Todd McClay': { cx: 0.5, cy: 0.4, s: 0.7 },
-  'Andrew Hoggard': { cx: 0.5, cy: 0.4, s: 0.75 },
+  "Chris Hipkins": { cx: 0.4816, cy: 0.3310, s: 0.7305 },
+  "Carmel Sepuloni": { cx: 0.5732, cy: 0.3054, s: 0.4885 },
+  "Kieran McAnulty": { cx: 0.5419, cy: 0.3189, s: 0.5882 },
+  "Barbara Edmonds": { cx: 0.5430, cy: 0.3052, s: 0.5832 },
+  "Willie Jackson": { cx: 0.5371, cy: 0.3959, s: 0.6779 },
+  "Ayesha Verrall": { cx: 0.4855, cy: 0.3045, s: 0.5840 },
+  "Megan Woods": { cx: 0.4668, cy: 0.3305, s: 0.5852 },
+  "Ginny Andersen": { cx: 0.5598, cy: 0.3083, s: 0.5596 },
+  "Cushla Tangaere-Manuel": { cx: 0.4799, cy: 0.2819, s: 0.6750 },
+  "Craig Renney": { cx: 0.4991, cy: 0.2751, s: 0.5212 },
+  "Christopher Luxon": { cx: 0.4906, cy: 0.3346, s: 0.9987 },
+  "Simeon Brown": { cx: 0.4913, cy: 0.3636, s: 1.0535 },
+  "Erica Stanford": { cx: 0.4719, cy: 0.3239, s: 0.8143 },
+  "Louise Upston": { cx: 0.5000, cy: 0.3406, s: 0.9890 },
+  "Mark Mitchell": { cx: 0.4639, cy: 0.3806, s: 1.0670 },
+  "Tama Potaka": { cx: 0.4663, cy: 0.3636, s: 1.0662 },
+  "Simon Watts": { cx: 0.4974, cy: 0.3665, s: 1.0167 },
+  "Todd McClay": { cx: 0.5186, cy: 0.4119, s: 0.9919 },
+  "Matt Doocey": { cx: 0.4790, cy: 0.3330, s: 0.9312 },
+  "Mahesh Muralidhar": { cx: 0.5100, cy: 0.3635, s: 1.0107 },
+  "Jessica Rowe": { cx: 0.5365, cy: 0.3004, s: 0.3134 },
+  "Chlöe Swarbrick": { cx: 0.5216, cy: 0.3828, s: 0.5413 },
+  "Marama Davidson": { cx: 0.4781, cy: 0.3565, s: 0.9317 },
+  "Julie Anne Genter": { cx: 0.4198, cy: 0.3640, s: 0.8699 },
+  "Tamatha Paul": { cx: 0.4777, cy: 0.3518, s: 0.8873 },
+  "Ricardo Menéndez March": { cx: 0.5574, cy: 0.3230, s: 0.8756 },
+  "Teanau Tuiono": { cx: 0.4782, cy: 0.3957, s: 0.8064 },
+  "Hūhana Lyndon": { cx: 0.5679, cy: 0.3264, s: 0.8660 },
+  "Lan Pham": { cx: 0.5037, cy: 0.3370, s: 0.8746 },
+  "Steve Abel": { cx: 0.4961, cy: 0.3398, s: 0.7645 },
+  "David Seymour": { cx: 0.4948, cy: 0.3562, s: 0.8225 },
+  "Nicole McKee": { cx: 0.5011, cy: 0.3114, s: 0.7689 },
+  "Karen Chhour": { cx: 0.4344, cy: 0.3557, s: 0.9477 },
+  "Simon Court": { cx: 0.6165, cy: 0.3228, s: 0.6089 },
+  "Todd Stephenson": { cx: 0.5444, cy: 0.3801, s: 1.0882 },
+  "Andrew Hoggard": { cx: 0.5524, cy: 0.2904, s: 0.6695 },
+  "Parmjeet Parmar": { cx: 0.5362, cy: 0.2245, s: 0.4849 },
+  "Paul Henry": { cx: 0.5599, cy: 0.4417, s: 0.6309 },
+  "James Christmas": { cx: 0.5046, cy: 0.4184, s: 0.9804 },
+  "Winston Peters": { cx: 0.4661, cy: 0.4218, s: 0.9096 },
+  "Shane Jones": { cx: 0.4404, cy: 0.4142, s: 0.5586 },
+  "Casey Costello": { cx: 0.5922, cy: 0.3429, s: 0.8812 },
+  "Andy Foster": { cx: 0.5345, cy: 0.2878, s: 0.8711 },
+  "Jenny Marcroft": { cx: 0.5538, cy: 0.3989, s: 0.7900 },
+  "Taine Randell": { cx: 0.7322, cy: 0.2580, s: 0.1426 },
+  "Craig Stobo": { cx: 0.7399, cy: 0.2887, s: 0.1356 },
+  "Harete Hipango": { cx: 0.5027, cy: 0.4218, s: 0.9892 },
+  "Michael Laws": { cx: 0.5632, cy: 0.3347, s: 0.9659 },
+  "Qiulae Wong": { cx: 0.4998, cy: 0.3388, s: 0.7010 },
+  "Daniel Eb": { cx: 0.5027, cy: 0.2774, s: 0.2910 },
+  "Jessica Hammond": { cx: 0.5864, cy: 0.2504, s: 0.5083 },
+  "Kayla Kingdon-Bebb": { cx: 0.4269, cy: 0.3360, s: 0.8674 },
+  "Eden Skipper": { cx: 0.5061, cy: 0.3350, s: 0.3401 },
+  "Jodie Kuntzsch": { cx: 0.4770, cy: 0.3578, s: 0.6343 },
+  "Sarah Lucas": { cx: 0.5033, cy: 0.3055, s: 0.3359 },
+  "Rawiri Waititi": { cx: 0.4779, cy: 0.3498, s: 0.8232 },
+  "Debbie Ngarewa-Packer": { cx: 0.5367, cy: 0.3316, s: 0.8341 },
+  "Hana-Rawhiti Maipi-Clarke": { cx: 0.5206, cy: 0.2622, s: 0.5867 },
+  "Oriini Kaipara": { cx: 0.5214, cy: 0.3374, s: 0.9891 },
+  "Aperahama Edwards": { cx: 0.4818, cy: 0.3094, s: 0.7398 },
+  "Gerry Brownlee": { cx: 0.4615, cy: 0.3515, s: 0.9836 },
+  "Nicola Willis": { cx: 0.5273, cy: 0.3086, s: 0.7211 },
+  "Chris Bishop": { cx: 0.4932, cy: 0.3980, s: 1.0195 },
+  "Paul Goldsmith": { cx: 0.5216, cy: 0.3816, s: 1.0442 },
+  "Tākuta Ferris": { cx: 0.5348, cy: 0.3666, s: 0.9648 },
+  "Mariameno Kapa-Kingi": { cx: 0.5123, cy: 0.3749, s: 0.2205 },
+  "Chris Penk": { cx: 0.4979, cy: 0.3831, s: 0.9896 },
 };
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 // Give each head a printed-programme finish: a little faded, warm, with a faint dot screen.
@@ -100,56 +162,15 @@ function standIn(p, color) {
   gloss(g);
   return c;
 }
-// Framing nudges on top of the crop: [shift right, shift down, zoom out], as fractions of the crop size.
-const ADJ = {
-  "Christopher Luxon": [0, -0.05, 1.25],
-  "Simeon Brown": [0, -0.02, 1.15],
-  "Erica Stanford": [0, 0, 1.1],
-  "Louise Upston": [0, -0.03, 1.15],
-  "Mark Mitchell": [0, -0.04, 1.3],
-  "Tama Potaka": [0, -0.02, 1.25],
-  "Simon Watts": [0, -0.02, 1.2],
-  "Todd McClay": [0, -0.02, 1.35],
-  "Matt Doocey": [0, -0.02, 1.25],
-  "Mahesh Muralidhar": [0, 0, 1.15],
-  "Jessica Rowe": [0, 0, 1.2],
-  "Marama Davidson": [0, 0, 1.15],
-  "Lan Pham": [0, 0, 1.08],
-  "Karen Chhour": [0, 0, 1.1],
-  "Simon Court": [0.14, 0.05, 1],
-  "Todd Stephenson": [0, 0, 1.2],
-  "Andrew Hoggard": [-0.08, -0.12, 0.85],
-  "Paul Henry": [0.12, 0, 1.15],
-  "James Christmas": [0, 0, 1.1],
-  "Winston Peters": [0.05, 0, 1],
-  "Shane Jones": [0.05, 0.08, 0.75],
-  "Casey Costello": [0, 0, 1.1],
-  "Jenny Marcroft": [0, 0.04, 1],
-  "Taine Randell": [-0.15, 0, 1.15],
-  "Craig Stobo": [0, 0, 1.1],
-  "Michael Laws": [-0.05, 0, 1],
-  "Daniel Eb": [-0.06, 0, 1.1],
-  "Jessica Hammond": [-0.035, -0.08, 0.75],
-  "Kayla Kingdon-Bebb": [-0.05, 0, 1.15],
-  "Jodie Kuntzsch": [0, 0.03, 0.85],
-  "Sarah Lucas": [0, 0, 1.15],
-  "Hana-Rawhiti Maipi-Clarke": [0, -0.02, 0.75],
-  "Oriini Kaipara": [0, 0, 1.15],
-  "Aperahama Edwards": [0, 0.03, 1],
-  "Gerry Brownlee": [0, 0, 1.1],
-  "Nicola Willis": [0, 0, 0.85],
-  "Chris Bishop": [0, -0.03, 1.3],
-  "Paul Goldsmith": [0, -0.02, 1.3],
-  "Tākuta Ferris": [0, 0.12, 1],
-  "Chris Penk": [0, -0.02, 1.25],
-};
+const ADJ = {};   // (framing now lives in CROP)
 function rawCrop(img, name) {   // the square head crop, unclipped
   const c = document.createElement('canvas'); c.width = c.height = 160; const g = c.getContext('2d');
   const w = img.naturalWidth, h = img.naturalHeight, o = CROP[name];
   let s = Math.min(w, h * 0.8) * 0.86, cx = w / 2, top = Math.max(0, h * 0.36 - s / 2);
-  if (o) { s = o.s * w; cx = o.cx * w; top = Math.max(0, o.cy * h - s / 2); }
+  if (o) { s = o.s * w; cx = o.cx * w; top = o.cy * h - s / 2; }
   const j = ADJ[name]; if (j) { const my = top + s / 2 + j[1] * s; cx += j[0] * s; s *= j[2]; top = my - s / 2; }
   g.fillStyle = '#ccc'; g.fillRect(0, 0, 160, 160);
+  if (cx - s / 2 < 0 || top < 0 || cx + s / 2 > w || top + s > h) { g.save(); try { g.filter = 'blur(10px)'; } catch (e) {} g.drawImage(img, -20, -20, 200, 200); g.restore(); }   // soft stand-in where the crop runs off the photo
   g.drawImage(img, cx - s / 2, top, s, s, 0, 0, 160, 160);
   return c;
 }
@@ -198,7 +219,7 @@ function pump() {
     const job = queue.shift(); loading++;
     const img = new Image(); if (job.cors) img.crossOrigin = 'anonymous';
     img.onload = () => { loading--; job.ok(img); pump(); };
-    img.onerror = () => { loading--; if (job.tries++ < 1) setTimeout(() => { queue.push(job); pump(); }, 1800); else if (job.fail) job.fail(); else { console.warn('Bullrush: using a stand-in, photo did not load for', job.label); } pump(); };
+    img.onerror = () => { loading--; if (job.tries++ < 1) setTimeout(() => { queue.push(job); pump(); }, 1800); else if (job.fail) job.fail(); else { console.warn('Beehive Bullrush: using a stand-in, photo did not load for', job.label); } pump(); };
     img.src = job.url;
   }
 }
@@ -358,7 +379,7 @@ function formation(snap) {
   for (const m of G.mps) { m.safe = false; m.conv = false; m.joined = m.role === 'tagger'; if (snap) { m.x = m.tx; m.y = m.ty; m.vx = m.vy = 0; } m.state = 'idle'; m.stun = 0; }
 }
 function callRound() {
-  Snd.gavel(2); cam.gerry.blow = 1.2; sideSay(cam.gerry, 'Gerry Brownlee', 'Order!', false);
+  Snd.gavel(2); cam.gerry.blow = 1.2; cam.gerry.say = 'Order!'; cam.gerry.sayT = 2;
   banner('BULLRUSH!', G.round === 1 ? 'Runners: get to the South End!' : `Round ${G.round} — back to the ${G.dir > 0 ? 'South' : 'North'} End!`);
   setTimeout(() => Snd.cheer(0.22, 1.8), 350);
   for (const m of G.mps) { m.delay = m.role === 'runner' ? rand(0, 0.9) : rand(0, 0.3); m.saCd = 0; m.tgt = null; }
@@ -389,9 +410,9 @@ const cam = {
 function placeCameos() {
   const c = cam, set = (o, x, y) => { o.x = x; o.y = y; };
   if (HZ) { set(c.gerry, -10, L / 2); set(c.nicola, -9, L * 0.8); set(c.bishop, -9, L * 0.2); set(c.penk, W + 4, L * 0.1); set(c.ferris, -8, -15); set(c.kapa, -8, L + 15);
-    c.trees = [[W * 0.62, -16, 37], [W * 0.56, L + 16, 58]]; c.flags = [[-15, L * 0.36], [-15, L * 0.64]]; }
+    c.trees = [[W * 0.62, -16, 36], [W * 0.56, L + 16, 37]]; c.flags = [[-15, L * 0.36], [-15, L * 0.64]]; }
   else { set(c.gerry, -15, 50); set(c.nicola, W + 15, 57); set(c.bishop, W + 12, 25); set(c.penk, -9.5, 85); set(c.ferris, -17, 9); set(c.kapa, W + 17, 7);
-    c.trees = [[-25, 31, 37], [W + 26, 40, 58]]; c.flags = [[-7, -3], [W + 7, -3]]; }
+    c.trees = [[-25, 31, 36], [W + 26, 40, 37]]; c.flags = [[-7, -3], [W + 7, -3]]; }
   c.gold.p = 0.5; c.gold.dir = 1;
 }
 // Things these people are on record as saying, each with its source. Everyone else gets stock phrases of the House.
@@ -459,7 +480,11 @@ const SIDELINE_QUOTES = {
     { t: "Houses need to be more affordable.", src: "https://www.1news.co.nz/2024/07/04/zoning-land-use-reforms-will-push-down-property-prices-minister/" },
     { t: "This is a big win for growth.", src: "https://m.scoop.co.nz/stories/PA2503/S00212/speech-to-the-property-council-residential-development-summit.htm" },
     { t: "Whatever ends up being built, will be tolled.", src: "https://www.rnz.co.nz/news/political/587101/political-parties-already-squabbling-over-infrastructure-plan" },
-    { t: "What a lot of crap!", src: "https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance" }],
+    { t: "What a lot of crap!", src: "https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance" },
+    { t: "I could say the same to you.", src: "https://www.rnz.co.nz/news/national/562700/what-a-load-of-crap-bishop-seen-ranting-during-stan-walker-s-performance" },
+    { t: "How's your fiscal plan going?", src: "https://www.nzherald.co.nz/nz/politics/nationals-chris-bishop-embarrassed-after-being-told-to-leave-house-for-first-time/5OGJGBQDDVHH7CV4YIUTM4VKUU/" },
+    { t: "I dobbed myself in.", src: "https://www.nzherald.co.nz/nz/politics/nationals-chris-bishop-embarrassed-after-being-told-to-leave-house-for-first-time/5OGJGBQDDVHH7CV4YIUTM4VKUU/" },
+    { t: "I did what you're not meant to do.", src: "https://www.nzherald.co.nz/nz/politics/nationals-chris-bishop-embarrassed-after-being-told-to-leave-house-for-first-time/5OGJGBQDDVHH7CV4YIUTM4VKUU/" }],
   "Gerry Brownlee": [{ t: "No, don't do that.", src: "https://en.wikipedia.org/wiki/Quote_of_the_Year" },
     { t: "Lock the doors!", src: "https://www.nzherald.co.nz/nz/politics/gerry-brownlee-the-wit-and-grumpiness-of-parliaments-speaker/Y2DDNX66FNAE7NG4DJEY3XO54E/" },
     { t: "I'm going to be the one who wins here.", src: "https://www.nzherald.co.nz/nz/politics/gerry-brownlee-the-wit-and-grumpiness-of-parliaments-speaker/Y2DDNX66FNAE7NG4DJEY3XO54E/" },
@@ -528,14 +553,15 @@ const Voice = {
     ss.speak(u);
   },
 };
-function exclaim(m) {   // a poked MP blurts something
+function exclaim(m) {   // a poked MP blurts something; the sideline hushes so the voice you hear is theirs
+  cam.gerry.sayT = cam.nicola.sayT = cam.bishop.sayT = cam.penk.sayT = 0; cam.gold.say = "";
   const own = QUOTES[m.name], t = own ? pick(own).t : pick(HOUSE);
   m.say = t; m.sayT = 2.1; Voice.say(t, hash(m.name), true, own ? m.name : null);
 }
 function sideSay(c, name, t, force) { c.say = t; c.sayT = 2; Voice.say(t, hash(name), force, name); }
 function tossSheet(n) {
   for (let i = 0; i < n; i++) G.flying.push({ x0: cam.nicola.x, y0: cam.nicola.y, x1: rand(8, W - 8), y1: rand(ZN + 6, ZS - 6), t: -i * 0.15, rot: rand(TAU) });
-  cam.nicola.toss = 0.6; sideSay(cam.nicola, 'Nicola Willis', pick(SIDELINE_QUOTES['Nicola Willis']).t, n > 1);
+  cam.nicola.toss = 0.6; if (n > 1) sideSay(cam.nicola, 'Nicola Willis', pick(SIDELINE_QUOTES['Nicola Willis']).t, true);   // she only speaks when tapped
 }
 function shockwave() {
   G.waves.push({ x: cam.gerry.x, y: cam.gerry.y, r: 0, hit: new Set() });
@@ -556,8 +582,8 @@ function updateCameos(dt) {
   b.sayT = Math.max(0, b.sayT - dt);
   go.p += go.dir * dt * 0.12; if (go.p > 1) go.dir = -1; if (go.p < 0) go.dir = 1;
   if (HZ) { go.x = W + 5.5; go.y = lerp(L * 0.48, L * 0.86, go.p); } else { go.x = W + 6.5; go.y = lerp(68, 95, go.p); }
-  go.shake = Math.max(0, go.shake - dt);
-  if (run && go.shake <= 0) for (const m of G.mps) if (m.party.id === 'act' && m.state === 'run' && Math.abs(m.vy) > 6 && Math.hypot(m.x - go.x, m.y - go.y) < 30) { go.shake = 1.6; go.say = pick(SIDELINE_QUOTES['Paul Goldsmith']).t; Voice.say(go.say, hash('Paul Goldsmith'), false, 'Paul Goldsmith'); break; }
+  go.shake = Math.max(0, go.shake - dt); go.drop = Math.max(0, (go.drop || 0) - dt);
+  if (run && go.shake <= 0) for (const m of G.mps) if (m.party.id === 'act' && m.state === 'run' && Math.abs(m.vy) > 6 && Math.hypot(m.x - go.x, m.y - go.y) < 30) { go.shake = 1.6; go.drop = 1.3; Snd.pop(0.35, 300, 0.12); go.say = pick(SIDELINE_QUOTES['Paul Goldsmith']).t; Voice.say(go.say, hash('Paul Goldsmith'), false, 'Paul Goldsmith'); break; }
   pk.sip = Math.max(0, pk.sip - dt); pk.sayT = Math.max(0, pk.sayT - dt); pk.next -= dt; if (pk.next <= 0) { pk.next = rand(6, 11); pk.sip = 1.4; if (run) { sideSay(pk, 'Chris Penk', pick(SIDELINE_QUOTES['Chris Penk']).t, false); pk.sayT = 2.6; } }
   cam.ferris.fist = Math.max(0, cam.ferris.fist - dt); cam.kapa.fist = Math.max(0, cam.kapa.fist - dt);
 }
@@ -718,7 +744,8 @@ function ell(x, y, rx, ry) { ctx.beginPath(); ctx.ellipse(x, y, Math.abs(rx), Ma
 function limb(x0, y0, x1, y1, w, col) { ctx.strokeStyle = INK; ctx.lineWidth = w + 2.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = w; ctx.stroke(); }
 function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 function bubble(x, y, text, U, col = '#FBF6EA') {
-  ctx.font = `700 ${Math.max(11, 15 * U)}px ${LABEL}`; const w = ctx.measureText(text).width + 14 * U, h = 22 * U;
+  let fz = Math.max(11, 15 * U); ctx.font = `700 ${fz}px ${LABEL}`; while (fz > 8 && ctx.measureText(text).width + 14 * U > VW - 12) { fz -= 0.5; ctx.font = `700 ${fz}px ${LABEL}`; }
+  const w = ctx.measureText(text).width + 14 * U, h = 22 * U;
   x = clamp(x, w / 2 + 4, VW - w / 2 - 4);
   ctx.fillStyle = col; ctx.strokeStyle = INK; ctx.lineWidth = 2; rr(x - w / 2, y - h, w, h, 8 * U); ctx.fill(); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(x - 5 * U, y - 1); ctx.lineTo(x, y + 7 * U); ctx.lineTo(x + 5 * U, y - 1); ctx.fill();
@@ -830,19 +857,43 @@ function drawMP(m) {
     lie: Math.min(1, (G.time - (m.kt || 0)) * 7, m.conv ? 1 : Math.max(0.15, m.stun * 5)), side: m.side, face: m.face || 1,
     pose: m.pose, hop: m.hop, ring: G.phase === 'builder' ? null : tagger ? RED : m.safe ? GOLD : PAPER, sweat: sp > 14 && m.stun <= 0, seed: m.jp });
   if (reading) drawSheet(p.x + (q.hL[0] + q.hR[0]) / 2 + fc * 3 * U, p.y + (q.hL[1] + q.hR[1]) / 2 - 4 * U, 0.14 * fc, U * 0.8, 0.01);
-  if (!down) { ctx.font = `700 ${Math.max(9, 12 * U)}px ${LABEL}`; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; ctx.strokeStyle = INK; const nm = m.short.toUpperCase(); ctx.strokeText(nm, p.x, p.y + 5 * U); ctx.fillStyle = PAPER; ctx.fillText(nm, p.x, p.y + 5 * U); }
+  if (!down) { const nm = m.short.toUpperCase(); let nf = Math.max(9, 12 * U); ctx.font = `700 ${nf}px ${LABEL}`; while (nf > 6 && ctx.measureText(nm).width > 44 * U) { nf -= 0.5; ctx.font = `700 ${nf}px ${LABEL}`; } ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.strokeText(nm, p.x, p.y + 5 * U); ctx.fillStyle = PAPER; ctx.fillText(nm, p.x, p.y + 5 * U); }
 }
 function tree(x, y, seed, peek) {
-  const p = proj(x, y), U = p.s * 1.25; let h = seed; const r = () => ((h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0) % 1000) / 1000;
+  const p = proj(x, y), U = p.s * 1.25; if (!peek) p.x = clamp(p.x, 58 * U, VW - 58 * U);   // keep props fully on screen let h = seed; const r = () => ((h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0) % 1000) / 1000;
   ctx.fillStyle = 'rgba(0,0,0,.25)'; ell(p.x, p.y, 46 * U, 9 * U); ctx.fill();
   if (peek) { const out = 0.55 + Math.sin(G.time * 0.8 + seed) * 0.3 + (peek.c.fist > 0 ? 0.35 : 0), px = p.x + peek.side * (8 + out * 20) * U;
     const lean = peek.side * 0.2, shaking = peek.c.fist > 0;
     const q = person(px, p.y - 2 * U, U * 0.8, { suit: '#3b3b3b', trim: '#111', tie: '#d12c38', sprite: headSprite(peek.name), binos: !shaking, headRot: lean, hd: { ox: 0, oy: shaking ? Math.sin(G.time * 30) * 0.05 : 0, a: 0 },
       aL: shaking && peek.side < 0 ? 2.7 + Math.sin(G.time * 26) * 0.35 : 0.2, aR: shaking && peek.side > 0 ? 2.7 + Math.sin(G.time * 26) * 0.35 : 0.2 });
     if (shaking && peek.c.say) bubble(px, p.y - 62 * U, peek.c.say, U); }
-  ctx.fillStyle = '#5a3d28'; ctx.strokeStyle = '#2b1a0f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(p.x - 9 * U, p.y); ctx.quadraticCurveTo(p.x - 4 * U, p.y - 30 * U, p.x - 14 * U, p.y - 62 * U); ctx.lineTo(p.x + 12 * U, p.y - 62 * U); ctx.quadraticCurveTo(p.x + 3 * U, p.y - 30 * U, p.x + 10 * U, p.y); ctx.closePath(); ctx.fill(); ctx.stroke();
-  for (let i = 0; i < 11; i++) { const bx = p.x + (r() - 0.5) * 78 * U, by = p.y - (58 + r() * 44) * U, br = (17 + r() * 13) * U; ctx.fillStyle = i % 3 ? '#27552f' : '#1e4526'; ell(bx, by, br, br * 0.82); ctx.fill(); }
-  for (let i = 0; i < 44; i++) { const bx = p.x + (r() - 0.5) * 92 * U, by = p.y - (50 + r() * 58) * U; ctx.fillStyle = r() > 0.4 ? '#d81f2e' : '#f0475a'; ell(bx, by, 2.8 * U, 2.2 * U); ctx.fill(); }
+  prop(p, U, seed);
+}
+// Sideline props, in place of trees: roadworks, a democracy sausage sizzle, and an election hoarding.
+function prop(p, U, seed) {
+  const kind = seed % 3, out = () => { ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.lineJoin = 'round'; };
+  const sign = (cx, cy, w, h, txt, bg, fg, fs) => { ctx.fillStyle = bg; out(); rr(cx - w / 2, cy - h / 2, w, h, 3 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; let f2 = fs; ctx.font = `${f2 * U}px ${SHOUT}`; for (const t of txt.split('|')) while (f2 > 4 && ctx.measureText(t).width > w - 8 * U) { f2 -= 0.5; ctx.font = `${f2 * U}px ${SHOUT}`; }   // shrink to fit the board
+    fs = f2; txt.split('|').forEach((t, i, a) => ctx.fillText(t, cx, cy + (i - (a.length - 1) / 2) * fs * 1.15 * U)); };
+  if (kind === 0) {          // roadworks: three cones and a sign
+    for (const [dx, sc] of [[-26, 1], [0, 1.25], [26, 1]]) { const bx = p.x + dx * U, by = p.y, w = 17 * sc * U, h = 46 * sc * U;
+      ctx.fillStyle = RED; out(); ctx.beginPath(); ctx.moveTo(bx - w, by); ctx.lineTo(bx - w * 0.18, by - h); ctx.lineTo(bx + w * 0.18, by - h); ctx.lineTo(bx + w, by); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = PAPER; ctx.beginPath(); ctx.moveTo(bx - w * 0.64, by - h * 0.38); ctx.lineTo(bx + w * 0.64, by - h * 0.38); ctx.lineTo(bx + w * 0.4, by - h * 0.68); ctx.lineTo(bx - w * 0.4, by - h * 0.68); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = INK; rr(bx - w * 1.15, by - 4 * U, w * 2.3, 6 * U, 2 * U); ctx.fill(); }
+    ctx.strokeStyle = INK; ctx.lineWidth = 3 * U; ctx.beginPath(); ctx.moveTo(p.x, p.y - 56 * U); ctx.lineTo(p.x, p.y - 80 * U); ctx.stroke();
+    sign(p.x, p.y - 94 * U, 78 * U, 30 * U, 'ROADWORKS|18 MONTHS', GOLD, INK, 8.5);
+  } else if (kind === 1) {   // democracy sausage sizzle
+    ctx.fillStyle = '#8b5a2b'; out(); rr(p.x - 30 * U, p.y - 30 * U, 60 * U, 8 * U, 2 * U); ctx.fill(); ctx.stroke(); ctx.fillRect(p.x - 26 * U, p.y - 22 * U, 5 * U, 22 * U); ctx.fillRect(p.x + 21 * U, p.y - 22 * U, 5 * U, 22 * U);
+    ctx.fillStyle = '#3a3f47'; rr(p.x - 20 * U, p.y - 44 * U, 40 * U, 14 * U, 3 * U); ctx.fill(); ctx.stroke();
+    for (let i = 0; i < 4; i++) { ctx.fillStyle = '#b5532f'; rr(p.x - 15 * U + i * 8 * U, p.y - 48 * U, 5.5 * U, 11 * U, 2.5 * U); ctx.fill(); ctx.stroke(); }
+    for (let i = 0; i < 3; i++) { const t = (G.time * 0.7 + i * 0.33) % 1; ctx.fillStyle = `rgba(243,233,210,${0.6 * (1 - t)})`; ell(p.x - 10 * U + i * 10 * U + Math.sin(G.time * 2 + i) * 3 * U, p.y - 54 * U - t * 22 * U, 4 * U, 5 * U); ctx.fill(); }
+    ctx.strokeStyle = INK; ctx.lineWidth = 2.5 * U; for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(p.x + s * 34 * U, p.y - 30 * U); ctx.lineTo(p.x + s * 34 * U, p.y - 86 * U); ctx.stroke(); }
+    for (let i = 0; i < 6; i++) { ctx.fillStyle = i % 2 ? PAPER : RED; out(); ctx.beginPath(); ctx.moveTo(p.x - 36 * U + i * 12 * U, p.y - 86 * U); ctx.lineTo(p.x - 24 * U + i * 12 * U, p.y - 86 * U); ctx.lineTo(p.x - 24 * U + i * 12 * U, p.y - 74 * U); ctx.quadraticCurveTo(p.x - 30 * U + i * 12 * U, p.y - 68 * U, p.x - 36 * U + i * 12 * U, p.y - 74 * U); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    sign(p.x, p.y - 100 * U, 86 * U, 20 * U, 'DEMOCRACY SAUSAGE $2', PAPER, INK, 7);
+  } else {                   // election hoarding
+    ctx.fillStyle = '#8b5a2b'; out(); for (const s of [-1, 1]) { ctx.fillRect(p.x + s * 28 * U - 3 * U, p.y - 54 * U, 6 * U, 54 * U); ctx.strokeRect(p.x + s * 28 * U - 3 * U, p.y - 54 * U, 6 * U, 54 * U); }
+    sign(p.x, p.y - 82 * U, 88 * U, 56 * U, 'PROMISES|2 FOR 1|*terms apply', SKY, INK, 10);
+    ctx.fillStyle = RED; ctx.beginPath(); ctx.arc(p.x + 38 * U, p.y - 106 * U, 10 * U, 0, TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = PAPER; ctx.font = `${8 * U}px ${SHOUT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('NEW', p.x + 38 * U, p.y - 106 * U);
+  }
 }
 const pick2 = (seed, a) => a[seed % a.length];
 function flag(x, y, ph) {
@@ -895,7 +946,10 @@ const drawCam = {
   },
   gold() { const c = cam.gold, p = proj(c.x, c.y), U = p.s * 1.05, sh = c.shake > 0;
     const q = person(p.x, p.y, U, { suit: '#33415c', trim: '#1a2233', tie: '#00529f', sprite: headSprite(depName('Goldsmith')), moving: true, phase: G.time * 5, face: c.dir, aL: 1.0, aR: 1.0, headRot: sh ? Math.sin(G.time * 13) * 0.42 : 0, hd: { ox: 0, oy: 0, a: 0 } });
-    const cols = ['#7a1f1f', '#1f4d7a', '#3d6b2f', '#8a6a1f']; for (let i = 0; i < 4; i++) { ctx.fillStyle = cols[i]; ctx.strokeStyle = INK; ctx.lineWidth = 1.5; rr(p.x - 11 * U + (i % 2) * 2 * U, p.y - 26 * U - i * 5 * U, 22 * U, 5 * U, 1); ctx.fill(); ctx.stroke(); }
+    const cols = ['#7a1f1f', '#1f4d7a', '#3d6b2f', '#8a6a1f'], d = c.drop > 0;   // a shaken head sends the top history book flying
+    const book = (i, ox, oy, rot) => { ctx.save(); ctx.translate(p.x + ox * U, p.y + oy * U); ctx.rotate(rot); ctx.fillStyle = cols[i]; ctx.strokeStyle = INK; ctx.lineWidth = 1.5; rr(-11 * U, -2.5 * U, 22 * U, 5 * U, 1); ctx.fill(); ctx.stroke(); ctx.fillStyle = PAPER; ctx.fillRect(-9 * U, 0.4 * U, 17 * U, 1.2 * U); ctx.restore(); };
+    for (let i = 0; i < (d ? 3 : 4); i++) book(i, (i % 2) * 2, -23.5 - i * 5, 0);
+    if (d) { const t = 1 - c.drop / 1.3, bt = Math.min(1, t * 1.25); book(3, 4 + c.dir * -bt * 34, -38.5 - Math.sin(bt * Math.PI) * 30 + bt * bt * 38, bt * 7 * -c.dir); }
     if (sh && c.say) bubble(p.x, p.y - 72 * U, c.say, U);
   },
   penk() { const c = cam.penk, p = proj(c.x, c.y), U = p.s * 1.1;
@@ -919,9 +973,10 @@ function drawBackground() {
     ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = 'rgba(27,42,65,.22)'; ctx.fillRect(0, 0, VW, bh); ctx.restore(); }
   const top = farY - VH * 0.065, lg = ctx.createLinearGradient(0, top, 0, VH); lg.addColorStop(0, 'rgba(63,143,78,0)'); lg.addColorStop(0.1, 'rgba(63,143,78,1)'); lg.addColorStop(1, '#3F8F4E'); ctx.fillStyle = lg; ctx.fillRect(0, top, VW, VH - top);
   for (let i = 0; i < 12; i++) { quad(0, i * L / 12, W, (i + 1) * L / 12); if (i % 2) { ctx.fillStyle = '#4B9C59'; ctx.fill(); } }
-  const zone = (y0, y1, label) => { quad(0, y0, W, y1); ctx.fillStyle = 'rgba(243,233,210,.3)'; ctx.fill();
-    const m = proj(W / 2, (y0 + y1) / 2); ctx.save(); ctx.translate(m.x, m.y); if (HZ) ctx.rotate(-Math.PI / 2); ctx.fillStyle = PAPER; ctx.font = `700 ${22 * m.s}px ${LABEL}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, 0, 0); ctx.restore(); };
-  zone(0, ZN, 'NORTH END · SAFE'); zone(ZS, L, 'SOUTH END · SAFE');
+  const zone = (y0, y1, label, flip) => { quad(0, y0, W, y1); ctx.fillStyle = 'rgba(243,233,210,.3)'; ctx.fill();
+    const ym = (y0 + y1) / 2, m = proj(W / 2, ym); ctx.save(); ctx.translate(m.x, m.y);
+    if (HZ) { const fa = proj(0, ym), na = proj(W, ym); ctx.rotate(Math.atan2(fa.y - na.y, fa.x - na.x) + (flip ? Math.PI : 0)); } let zf = 22 * m.s; const room = (HZ ? Math.hypot(proj(0, ym).x - proj(W, ym).x, proj(0, ym).y - proj(W, ym).y) : proj(W, ym).x - proj(0, ym).x) * 0.9; ctx.fillStyle = PAPER; ctx.font = `700 ${zf}px ${LABEL}`; while (zf > 8 && ctx.measureText(label).width > room) { zf -= 0.5; ctx.font = `700 ${zf}px ${LABEL}`; } ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, 0, 0); ctx.restore(); };
+  zone(0, ZN, 'NORTH END · SAFE'); zone(ZS, L, 'SOUTH END · SAFE', true);
   ctx.strokeStyle = PAPER; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; quad(0, 0, W, L); ctx.stroke();
   for (const y of [ZN, ZS, L / 2]) { const a = proj(0, y), b = proj(W, y); ctx.setLineDash(y === L / 2 ? [10, 10] : []); ctx.globalAlpha = y === L / 2 ? 0.5 : 1; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
   ctx.setLineDash([]); ctx.globalAlpha = 1;
@@ -998,9 +1053,9 @@ function draw() {
   for (const m of G.mps) if (m.sayT > 0) bubble(m.sx, m.sy - (m.state === 'down' ? 96 : 116) * m.U, m.say, m.U * 1.1);
   for (const s of G.flying) if (s.t > 0) { const x = lerp(s.x0, s.x1, s.t), y = lerp(s.y0, s.y1, s.t), p = proj(x, y); drawSheet(p.x, p.y, s.rot + s.t * 9, p.s, (Math.sin(s.t * Math.PI) * 90 + 30 * (1 - s.t)) * p.s); }
   for (const f of G.fx) { const p = proj(f.x, f.y), al = clamp((1.3 - f.t) * 2.5, 0, 1), pop = 1 + Math.max(0, 0.22 - f.t) * 2.6, fs = 15 * p.s * f.size * pop;
-    ctx.save(); ctx.globalAlpha = al; ctx.translate(p.x, p.y - (64 + f.t * 30) * p.s); ctx.rotate(((f.x * 7 + f.y * 3) % 9 - 4) * 0.022);
+    ctx.font = `400 ${fs}px ${SHOUT}`; const w = ctx.measureText(f.text).width + fs * 0.8, hh = fs * 1.5;
+    ctx.save(); ctx.globalAlpha = al; ctx.translate(clamp(p.x, w / 2 + 6, VW - w / 2 - 6), p.y - (64 + f.t * 30) * p.s); ctx.rotate(((f.x * 7 + f.y * 3) % 9 - 4) * 0.022);
     ctx.font = `400 ${fs}px ${SHOUT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const w = ctx.measureText(f.text).width + fs * 0.8, hh = fs * 1.5;
     ctx.fillStyle = 'rgba(27,42,65,.5)'; rr(-w / 2 + 3, -hh / 2 + 3, w, hh, 3); ctx.fill();
     ctx.fillStyle = f.color; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; rr(-w / 2, -hh / 2, w, hh, 3); ctx.fill(); ctx.stroke();
     ctx.fillStyle = INK; ctx.fillText(f.text, 0, fs * 0.06); ctx.restore(); }

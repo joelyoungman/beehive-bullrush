@@ -434,6 +434,34 @@
   "pitch": "+6Hz"
  },
  {
+  "file": "chris-bishop-1clsinh.mp3",
+  "text": "I could say the same to you.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
+ },
+ {
+  "file": "chris-bishop-y6ood2.mp3",
+  "text": "How's your fiscal plan going?",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
+ },
+ {
+  "file": "chris-bishop-cewi37.mp3",
+  "text": "I dobbed myself in.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
+ },
+ {
+  "file": "chris-bishop-tlzcqc.mp3",
+  "text": "I did what you're not meant to do.",
+  "voice": "en-NZ-MitchellNeural",
+  "rate": "+24%",
+  "pitch": "+6Hz"
+ },
+ {
   "file": "gerry-brownlee-1lwpbfk.mp3",
   "text": "No, don't do that.",
   "voice": "en-NZ-MitchellNeural",
