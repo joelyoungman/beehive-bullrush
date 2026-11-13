@@ -1,12 +1,12 @@
-# Bullrush on the Parliament Lawn
+# Beehive Bullrush
 
-A satirical browser game: NZ MPs play Bullrush on the Parliament lawn. Plain HTML, canvas and JavaScript. No build step, no dependencies.
+A satirical browser game (formerly "Bullrush on the Parliament Lawn"): NZ MPs play Bullrush on the Parliament lawn. Plain HTML, canvas and JavaScript. No build step, no dependencies.
 
-Public repo: github.com/joelyoungman/bullrush. Collaborator: Sarah (sandwichwilson), who pushes to `sarah/*` branches.
+Public repo: github.com/joelyoungman/beehive-bullrush. Collaborator: Sarah (sandwichwilson), who pushes to `sarah/*` branches.
 
 ## Run and check
 
-- `node tools/serve.js` then open http://localhost:8123 (or use the `bullrush` preview config in `.claude/launch.json`).
+- `node tools/serve.js` then open http://localhost:8123 (or use the `beehive-bullrush` preview config in `.claude/launch.json`).
 - `node --check game.js` after every edit. There are no tests.
 - In the browser, `window.__bullrush` exposes `G` (game state), `update(dt)`, `Snd`, `bobbles`, `cam` for checks. Simulate a match by calling `update(1/60)` in a loop.
 - Mute before testing in the user's browser: `window.__bullrush.Snd.setMuted(true)`.
@@ -19,6 +19,8 @@ Public repo: github.com/joelyoungman/bullrush. Collaborator: Sarah (sandwichwils
 - `manifest/*.json`: research data per party (who was elected, photo URL, licence, source).
 - `tools/build-data.js`: merges manifests into `data.js`. `EXTRA` holds party-site photos for MPs with no free photo.
 - `tools/voice-lines.js` and `tools/make-voices.py`: regenerate spoken lines into `voices/` (see below).
+- `logo/`: `icon.svg` (badge, also the favicon) and `logo.svg` (badge plus wordmark).
+- Internal names (`BULLRUSH_DATA`, `window.__bullrush`, `bullrush.*` localStorage keys) keep the old name on purpose, so saved settings and the debug hooks still work.
 - `Sarah suggestions/`: Sarah's write-up and screenshots.
 - `audit-reports/`: local only, git-ignored.
 

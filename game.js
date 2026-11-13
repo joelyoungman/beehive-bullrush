@@ -1,4 +1,4 @@
-/* Bullrush on the Parliament Lawn — a satirical playground game.
+/* Beehive Bullrush — a satirical playground game on the Parliament lawn.
    World: x 0..W across the lawn, y 0..L from the North End (far, by the Beehive) to the South End (near). */
 (() => {
 'use strict';
@@ -219,7 +219,7 @@ function pump() {
     const job = queue.shift(); loading++;
     const img = new Image(); if (job.cors) img.crossOrigin = 'anonymous';
     img.onload = () => { loading--; job.ok(img); pump(); };
-    img.onerror = () => { loading--; if (job.tries++ < 1) setTimeout(() => { queue.push(job); pump(); }, 1800); else if (job.fail) job.fail(); else { console.warn('Bullrush: using a stand-in, photo did not load for', job.label); } pump(); };
+    img.onerror = () => { loading--; if (job.tries++ < 1) setTimeout(() => { queue.push(job); pump(); }, 1800); else if (job.fail) job.fail(); else { console.warn('Beehive Bullrush: using a stand-in, photo did not load for', job.label); } pump(); };
     img.src = job.url;
   }
 }
