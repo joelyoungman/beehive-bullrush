@@ -34,7 +34,7 @@ Public repo: github.com/joelyoungman/bullrush. Collaborator: Sarah (sandwichwils
 - Six inks only, apart from party colours: ink `#1B2A41`, paper `#F3E9D2`, lawn `#3F8F4E`, red `#E4572E`, gold `#F2B134`, sky `#8EC5E8`. In `game.js` use the `INK`, `PAPER`, `RED`, `GOLD` constants.
 - Two fonts: Bowlby One for shouts (`SHOUT`), Barlow Condensed for labels (`LABEL`).
 - One ink outline on everything. Flat colour, no gradients on bodies.
-- Heads: `eggHead()` gives every photo the same head shape and lighting. Framing per photo is in `CROP` (absolute) and `ADJ` (nudges).
+- Heads: `eggHead()` gives every photo the same head shape and lighting. Framing per photo is in `CROP` (centre x, centre y, size as fractions of the photo), measured so every face has the same eye spacing and eye position as the Louise Upston crop (found with a face detector's eye landmarks). `ADJ` is now empty. Don't hand-tune one head without checking the rest.
 - Sound is synthesised in `Snd`: soft tuned plucks, pops and thumps through a small reverb. No whooshes, no whistle (the user disliked both).
 
 ## Rules that matter

@@ -47,15 +47,77 @@ function proj(x, y) {
 const sprites = {};      // name -> 160px circular canvas
 const hasPhoto = {};
 const listeners = [];
-// Optional per-photo crop tweaks: centre x, centre y, size (fractions of image width/height/width).
+// Head framing, measured per photo: every face is scaled so the eyes are the same distance apart and placed at the same
+// spot in the crop, matching the Louise Upston crop (centre x, centre y, size; fractions of the photo's width/height/width).
+// Regenerate by re-measuring the eyes (a face detector gave the first pass); don't hand-tune one head without checking the others.
 const CROP = {
-  'Mariameno Kapa-Kingi': { cx: 0.47, cy: 0.4, s: 0.25 },   // a wide shot of the debating chamber
-  'Craig Renney': { cx: 0.49, cy: 0.3, s: 0.5 }, 'Jessica Rowe': { cx: 0.52, cy: 0.31, s: 0.26 }, 'Daniel Eb': { cx: 0.49, cy: 0.28, s: 0.3 },
-  'Eden Skipper': { cx: 0.5, cy: 0.32, s: 0.27 },
-  'Sarah Lucas': { cx: 0.51, cy: 0.29, s: 0.25 }, 'Taine Randell': { cx: 0.757, cy: 0.34, s: 0.11 }, 'Craig Stobo': { cx: 0.735, cy: 0.31, s: 0.11 },
-  'Paul Henry': { cx: 0.5, cy: 0.45, s: 0.62 },
-  'Todd McClay': { cx: 0.5, cy: 0.4, s: 0.7 },
-  'Andrew Hoggard': { cx: 0.5, cy: 0.4, s: 0.75 },
+  "Chris Hipkins": { cx: 0.4816, cy: 0.3310, s: 0.7305 },
+  "Carmel Sepuloni": { cx: 0.5732, cy: 0.3054, s: 0.4885 },
+  "Kieran McAnulty": { cx: 0.5419, cy: 0.3189, s: 0.5882 },
+  "Barbara Edmonds": { cx: 0.5430, cy: 0.3052, s: 0.5832 },
+  "Willie Jackson": { cx: 0.5371, cy: 0.3959, s: 0.6779 },
+  "Ayesha Verrall": { cx: 0.4855, cy: 0.3045, s: 0.5840 },
+  "Megan Woods": { cx: 0.4668, cy: 0.3305, s: 0.5852 },
+  "Ginny Andersen": { cx: 0.5598, cy: 0.3083, s: 0.5596 },
+  "Cushla Tangaere-Manuel": { cx: 0.4799, cy: 0.2819, s: 0.6750 },
+  "Craig Renney": { cx: 0.4991, cy: 0.2751, s: 0.5212 },
+  "Christopher Luxon": { cx: 0.4906, cy: 0.3346, s: 0.9987 },
+  "Simeon Brown": { cx: 0.4913, cy: 0.3636, s: 1.0535 },
+  "Erica Stanford": { cx: 0.4719, cy: 0.3239, s: 0.8143 },
+  "Louise Upston": { cx: 0.5000, cy: 0.3406, s: 0.9890 },
+  "Mark Mitchell": { cx: 0.4639, cy: 0.3806, s: 1.0670 },
+  "Tama Potaka": { cx: 0.4663, cy: 0.3636, s: 1.0662 },
+  "Simon Watts": { cx: 0.4974, cy: 0.3665, s: 1.0167 },
+  "Todd McClay": { cx: 0.5186, cy: 0.4119, s: 0.9919 },
+  "Matt Doocey": { cx: 0.4790, cy: 0.3330, s: 0.9312 },
+  "Mahesh Muralidhar": { cx: 0.5100, cy: 0.3635, s: 1.0107 },
+  "Jessica Rowe": { cx: 0.5365, cy: 0.3004, s: 0.3134 },
+  "Chlöe Swarbrick": { cx: 0.5216, cy: 0.3828, s: 0.5413 },
+  "Marama Davidson": { cx: 0.4781, cy: 0.3565, s: 0.9317 },
+  "Julie Anne Genter": { cx: 0.4198, cy: 0.3640, s: 0.8699 },
+  "Tamatha Paul": { cx: 0.4777, cy: 0.3518, s: 0.8873 },
+  "Ricardo Menéndez March": { cx: 0.5574, cy: 0.3230, s: 0.8756 },
+  "Teanau Tuiono": { cx: 0.4782, cy: 0.3957, s: 0.8064 },
+  "Hūhana Lyndon": { cx: 0.5679, cy: 0.3264, s: 0.8660 },
+  "Lan Pham": { cx: 0.5037, cy: 0.3370, s: 0.8746 },
+  "Steve Abel": { cx: 0.4961, cy: 0.3398, s: 0.7645 },
+  "David Seymour": { cx: 0.4948, cy: 0.3562, s: 0.8225 },
+  "Nicole McKee": { cx: 0.5011, cy: 0.3114, s: 0.7689 },
+  "Karen Chhour": { cx: 0.4344, cy: 0.3557, s: 0.9477 },
+  "Simon Court": { cx: 0.6165, cy: 0.3228, s: 0.6089 },
+  "Todd Stephenson": { cx: 0.5444, cy: 0.3801, s: 1.0882 },
+  "Andrew Hoggard": { cx: 0.5524, cy: 0.2904, s: 0.6695 },
+  "Parmjeet Parmar": { cx: 0.5362, cy: 0.2245, s: 0.4849 },
+  "Paul Henry": { cx: 0.5599, cy: 0.4417, s: 0.6309 },
+  "James Christmas": { cx: 0.5046, cy: 0.4184, s: 0.9804 },
+  "Winston Peters": { cx: 0.4661, cy: 0.4218, s: 0.9096 },
+  "Shane Jones": { cx: 0.4404, cy: 0.4142, s: 0.5586 },
+  "Casey Costello": { cx: 0.5922, cy: 0.3429, s: 0.8812 },
+  "Andy Foster": { cx: 0.5345, cy: 0.2878, s: 0.8711 },
+  "Jenny Marcroft": { cx: 0.5538, cy: 0.3989, s: 0.7900 },
+  "Taine Randell": { cx: 0.7322, cy: 0.2580, s: 0.1426 },
+  "Craig Stobo": { cx: 0.7399, cy: 0.2887, s: 0.1356 },
+  "Harete Hipango": { cx: 0.5027, cy: 0.4218, s: 0.9892 },
+  "Michael Laws": { cx: 0.5632, cy: 0.3347, s: 0.9659 },
+  "Qiulae Wong": { cx: 0.4998, cy: 0.3388, s: 0.7010 },
+  "Daniel Eb": { cx: 0.5027, cy: 0.2774, s: 0.2910 },
+  "Jessica Hammond": { cx: 0.5864, cy: 0.2504, s: 0.5083 },
+  "Kayla Kingdon-Bebb": { cx: 0.4269, cy: 0.3360, s: 0.8674 },
+  "Eden Skipper": { cx: 0.5061, cy: 0.3350, s: 0.3401 },
+  "Jodie Kuntzsch": { cx: 0.4770, cy: 0.3578, s: 0.6343 },
+  "Sarah Lucas": { cx: 0.5033, cy: 0.3055, s: 0.3359 },
+  "Rawiri Waititi": { cx: 0.4779, cy: 0.3498, s: 0.8232 },
+  "Debbie Ngarewa-Packer": { cx: 0.5367, cy: 0.3316, s: 0.8341 },
+  "Hana-Rawhiti Maipi-Clarke": { cx: 0.5206, cy: 0.2622, s: 0.5867 },
+  "Oriini Kaipara": { cx: 0.5214, cy: 0.3374, s: 0.9891 },
+  "Aperahama Edwards": { cx: 0.4818, cy: 0.3094, s: 0.7398 },
+  "Gerry Brownlee": { cx: 0.4615, cy: 0.3515, s: 0.9836 },
+  "Nicola Willis": { cx: 0.5273, cy: 0.3086, s: 0.7211 },
+  "Chris Bishop": { cx: 0.4932, cy: 0.3980, s: 1.0195 },
+  "Paul Goldsmith": { cx: 0.5216, cy: 0.3816, s: 1.0442 },
+  "Tākuta Ferris": { cx: 0.5348, cy: 0.3666, s: 0.9648 },
+  "Mariameno Kapa-Kingi": { cx: 0.5123, cy: 0.3749, s: 0.2205 },
+  "Chris Penk": { cx: 0.4979, cy: 0.3831, s: 0.9896 },
 };
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 // Give each head a printed-programme finish: a little faded, warm, with a faint dot screen.
@@ -100,56 +162,15 @@ function standIn(p, color) {
   gloss(g);
   return c;
 }
-// Framing nudges on top of the crop: [shift right, shift down, zoom out], as fractions of the crop size.
-const ADJ = {
-  "Christopher Luxon": [0, -0.05, 1.25],
-  "Simeon Brown": [0, -0.02, 1.15],
-  "Erica Stanford": [0, 0, 1.1],
-  "Louise Upston": [0, -0.03, 1.15],
-  "Mark Mitchell": [0, -0.04, 1.3],
-  "Tama Potaka": [0, -0.02, 1.25],
-  "Simon Watts": [0, -0.02, 1.2],
-  "Todd McClay": [0, -0.02, 1.35],
-  "Matt Doocey": [0, -0.02, 1.25],
-  "Mahesh Muralidhar": [0, 0, 1.15],
-  "Jessica Rowe": [0, 0, 1.2],
-  "Marama Davidson": [0, 0, 1.15],
-  "Lan Pham": [0, 0, 1.08],
-  "Karen Chhour": [0, 0, 1.1],
-  "Simon Court": [0.14, 0.05, 1],
-  "Todd Stephenson": [0, 0, 1.2],
-  "Andrew Hoggard": [-0.08, -0.12, 0.85],
-  "Paul Henry": [0.12, 0, 1.15],
-  "James Christmas": [0, 0, 1.1],
-  "Winston Peters": [0.05, 0, 1],
-  "Shane Jones": [0.05, 0.08, 0.75],
-  "Casey Costello": [0, 0, 1.1],
-  "Jenny Marcroft": [0, 0.04, 1],
-  "Taine Randell": [-0.15, 0, 1.15],
-  "Craig Stobo": [0, 0, 1.1],
-  "Michael Laws": [-0.05, 0, 1],
-  "Daniel Eb": [-0.06, 0, 1.1],
-  "Jessica Hammond": [-0.035, -0.08, 0.75],
-  "Kayla Kingdon-Bebb": [-0.05, 0, 1.15],
-  "Jodie Kuntzsch": [0, 0.03, 0.85],
-  "Sarah Lucas": [0, 0, 1.15],
-  "Hana-Rawhiti Maipi-Clarke": [0, -0.02, 0.75],
-  "Oriini Kaipara": [0, 0, 1.15],
-  "Aperahama Edwards": [0, 0.03, 1],
-  "Gerry Brownlee": [0, 0, 1.1],
-  "Nicola Willis": [0, 0, 0.85],
-  "Chris Bishop": [0, -0.03, 1.3],
-  "Paul Goldsmith": [0, -0.02, 1.3],
-  "Tākuta Ferris": [0, 0.12, 1],
-  "Chris Penk": [0, -0.02, 1.25],
-};
+const ADJ = {};   // (framing now lives in CROP)
 function rawCrop(img, name) {   // the square head crop, unclipped
   const c = document.createElement('canvas'); c.width = c.height = 160; const g = c.getContext('2d');
   const w = img.naturalWidth, h = img.naturalHeight, o = CROP[name];
   let s = Math.min(w, h * 0.8) * 0.86, cx = w / 2, top = Math.max(0, h * 0.36 - s / 2);
-  if (o) { s = o.s * w; cx = o.cx * w; top = Math.max(0, o.cy * h - s / 2); }
+  if (o) { s = o.s * w; cx = o.cx * w; top = o.cy * h - s / 2; }
   const j = ADJ[name]; if (j) { const my = top + s / 2 + j[1] * s; cx += j[0] * s; s *= j[2]; top = my - s / 2; }
   g.fillStyle = '#ccc'; g.fillRect(0, 0, 160, 160);
+  if (cx - s / 2 < 0 || top < 0 || cx + s / 2 > w || top + s > h) { g.save(); try { g.filter = 'blur(10px)'; } catch (e) {} g.drawImage(img, -20, -20, 200, 200); g.restore(); }   // soft stand-in where the crop runs off the photo
   g.drawImage(img, cx - s / 2, top, s, s, 0, 0, 160, 160);
   return c;
 }
