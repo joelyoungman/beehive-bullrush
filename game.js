@@ -344,16 +344,22 @@ const Snd = {
 };
 
 /* ---------- game state ---------- */
-const G = { phase: 'builder', dir: 1, round: 0, t: 0, time: 0, mps: [], sheets: [], flying: [], fx: [], waves: [], puffs: [], boops: [], init: 0, shake: 0, endT: 0, assign: {} };
+const G = { grip: 1, wind: 0, wx: 'clear', swing: null, seatStart: 0, wobCd: 0, life: { t: 20, kind: '', p: 0 }, phase: 'builder', dir: 1, round: 0, t: 0, time: 0, mps: [], sheets: [], flying: [], fx: [], waves: [], puffs: [], boops: [], init: 0, shake: 0, endT: 0, assign: {} };
 const partyOf = id => D.parties.find(p => p.id === id);
 
+// One small trait per party (shown on its team-builder card). Effects are kept small so a match still lasts 5 to 8 rounds.
+// Set window.__moves = false in the console to switch them all off when balancing.
+window.__moves = true; window.__moveScale = 0.6;
+const MOVES = { labour: ['Union shove', 'Pushes a tackler back'], national: ['Front-row', 'Harder to knock down'], green: ['Weaver', 'Better sidesteps'], act: ['Quick feet', '+6% top speed'],
+  nzfirst: ['Seasoned', 'Never stumbles twice'], top: ['Wildcard', 'Random bursts of pace'], tpm: ['Strength in numbers', 'Harder to tag in a group'] };
 function makeMP(m, party, team) {
   const h = hash(m.name);
-  return { name: m.name, short: m.short, party, team, role: team === 1 ? 'runner' : 'tagger', x: 0, y: 0, vx: 0, vy: 0, pvx: 0, pvy: 0,
-    spd: 15.5 + (h % 100) / 100 * 4.5 + (m.leader ? 0.8 : 0), str: 0.1 + ((h >> 8) % 100) / 100 * 0.2,
+  const o = { name: m.name, short: m.short, party, team, role: team === 1 ? 'runner' : 'tagger', x: 0, y: 0, vx: 0, vy: 0, pvx: 0, pvy: 0,
+    pid: party.id, spd: (15.5 + (h % 100) / 100 * 4.5 + (m.leader ? 0.8 : 0)) * (window.__moves && party.id === 'act' ? 1.04 : 1), str: 0.1 + ((h >> 8) % 100) / 100 * 0.2 + (window.__moves && party.id === 'national' ? 0.03 * window.__moveScale : 0),
     state: 'idle', stun: 0, safe: false, conv: false, joined: false, delay: 0, saCd: 0, lunge: 0, lungeCd: rand(0, 1), tgt: null, think: 0,
     jf: rand(1.5, 3.2), jp: rand(TAU), phase: rand(TAU), side: h % 2 ? 1 : -1, pose: '', poseT: 0, hop: 0,
     hd: { ox: 0, oy: 0, vx: 0, vy: 0, a: 0, va: 0 }, tx: 0, ty: 0, sx: 0, sy: 0, U: 1, rd: { dodge: 0, tags: 0, dist: 0, by: '' } };
+  o.spd0 = o.spd; return o;
 }
 function startMatch() {
   Snd.init(); clearTimeout(starTimer); $('star').classList.add('hidden');
@@ -361,9 +367,12 @@ function startMatch() {
   G.mps = [];
   for (const p of D.parties) { const t = G.assign[p.id]; if (t) for (const m of p.members) G.mps.push(makeMP(m, p, t)); }
   G.sheets = []; G.flying = []; G.fx = []; G.waves = []; G.round = 1; G.dir = 1;
+  G.wx = pick(['clear', 'clear', 'north', 'showers']); G.wind = G.wx === 'north' ? (rand() < 0.5 ? -1 : 1) * rand(2, 3.5) : 0; G.grip = G.wx === 'showers' ? 0.55 : 1;
+  G.swing = null; G.wobCd = 0; G.life = { t: rand(8, 18), kind: '', p: 0 };
   G.log = []; G.logT = -9; G.tickT = 0; G.stats = { pile: 0, papers: 0, tags: 0, dodges: 0, last: null };
   G.init = G.mps.filter(m => m.role === 'runner').length;
-  formation(true); G.phase = 'call'; G.t = 0; callRound();
+  formation(true); G.phase = 'call'; G.t = 0; callRound(); G.seatStart = seatSplit().L;
+  note(WX[G.wx], true);
   $('builder').classList.add('hidden'); $('over').classList.add('hidden'); $('hud').classList.remove('hidden'); $('menu').classList.remove('hidden'); $('hint').classList.remove('hidden');
   Snd.init(); Snd.go(); Snd.startMusic(); hud();
 }
@@ -380,7 +389,8 @@ function formation(snap) {
   for (const m of G.mps) { m.safe = false; m.conv = false; m.joined = m.role === 'tagger'; if (snap) { m.x = m.tx; m.y = m.ty; m.vx = m.vy = 0; } m.state = 'idle'; m.stun = 0; }
 }
 function callRound() {
-  for (const m of G.mps) m.rd = { dodge: 0, tags: 0, dist: 0, by: '' };   // this round's tally, for Player of the round
+  G.seatStart = seatSplit().L;
+  for (const m of G.mps) { m.rd = { dodge: 0, tags: 0, dist: 0, by: '' }; m.stumbled = false; }   // this round's tally, for Player of the round
   Snd.gavel(2); cam.gerry.blow = 1.2; cam.gerry.say = 'Order!'; cam.gerry.sayT = 2; note(`Round ${G.round}: Runners head for the ${G.dir > 0 ? 'South' : 'North'} End`, true);
   banner('BULLRUSH!', G.round === 1 ? 'Runners: get to the South End!' : `Round ${G.round} — back to the ${G.dir > 0 ? 'South' : 'North'} End!`);
   setTimeout(() => Snd.cheer(0.22, 1.8), 350);
@@ -405,12 +415,32 @@ function fx(x, y, text, color = '#fff', size = 1) { G.fx.push({ x, y, text, colo
 function knock(m, t, state = 'down') { if (state === 'down' && m.state !== 'down') m.kt = G.time; m.stun = Math.max(m.stun, t); m.state = state; m.lunge = 0; }
 function bump(m, ix, iy, spin) { m.hd.vx += ix; m.hd.vy += iy; m.hd.va += spin; }
 
+const WX = { clear: 'Weather: fine on the lawn', north: 'Weather: a Wellington northerly is blowing', showers: 'Weather: showers, the lawn is slippery' };
+// Each MP is worth their party's seats divided by that party's MPs in the game, so the bar reads as a share of Parliament.
+const seatTotal = () => D.parties.reduce((a, p) => a + p.seats, 0);
+function seatSplit() {
+  const left = new Map(), right = new Map(); let L = 0, R = 0;
+  for (const m of G.mps || []) { const v = m.party.seats / m.party.members.length, side = m.role === 'runner' && !m.conv ? left : right; side.set(m.party, (side.get(m.party) || 0) + v); if (side === left) L += v; else R += v; }
+  return { left, right, L, R };
+}
+function seatsUpdate() {
+  const el = $('seats'), live = G.phase === 'call' || G.phase === 'run' || G.phase === 'between';
+  el.classList.toggle('hidden', !live); if (!live) return;
+  const { left, right, L, R } = seatSplit(), T = seatTotal(), maj = Math.floor(T / 2) + 1, seg = m => D.parties.filter(p => m.has(p)).map(p => `<span style="flex:${m.get(p)};background:${p.color}"></span>`).join('');
+  $('sbL').style.width = (L / T * 100) + '%'; $('sbL').innerHTML = seg(left); $('sbR').style.width = (R / T * 100) + '%'; $('sbR').innerHTML = seg(right);
+  $('sLa').textContent = `RUNNERS ${Math.round(L)}` + (L >= maj ? ' · MAJORITY' : ''); $('sRa').textContent = `TAGGERS ${Math.round(R)}` + (R >= maj ? ' · MAJORITY' : '');
+  $('sMaj').style.left = (maj / T * 100) + '%'; $('sMaj').title = `${maj} seats to govern`;
+  if (G.swing && G.swing.t <= 0) G.swing = null;
+  $('sMid').textContent = G.swing ? G.swing.txt : `${maj} TO GOVERN`;
+  $('sMid').classList.toggle('swing', !!G.swing);
+  const z = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui')) || 1; el.style.top = ($('hud').getBoundingClientRect().bottom / z + 4) + 'px';
+}
 function hud() {
   const runners = G.mps.filter(m => m.role === 'runner' && !m.conv), taggers = G.mps.filter(m => m.role === 'tagger' || m.conv);
   $('n1').textContent = runners.length; $('n2').textContent = taggers.length;
   const badges = list => D.parties.map(p => { const n = list.filter(m => m.party === p).length; return n ? `<span class="badge" style="background:${p.color};color:${p.text}">${p.name} ${n}</span>` : ''; }).join('');
   $('b1').innerHTML = badges(runners) || '<span class="badge" style="background:#444">nobody left</span>'; $('b2').innerHTML = badges(taggers);
-  $('rnd').textContent = 'Round ' + G.round; $('dir').textContent = HZ ? (G.dir > 0 ? 'to the South End ▶' : '◀ to the North End') : (G.dir > 0 ? '▼ to the South End' : '▲ to the North End');
+  seatsUpdate(); $('rnd').textContent = 'Round ' + G.round; $('dir').textContent = HZ ? (G.dir > 0 ? 'to the South End ▶' : '◀ to the North End') : (G.dir > 0 ? '▼ to the South End' : '▲ to the North End');
 }
 
 /* ---------- sideline cameos ---------- */
@@ -576,7 +606,7 @@ function exclaim(m) {   // a poked MP blurts something; the sideline hushes so t
 function sideSay(c, name, t, force) { c.say = t; c.sayT = 2; Voice.say(t, hash(name), force, name); }
 function tossSheet(n) {
   note(n > 1 ? 'Willis hurls a stack of budget papers onto the lawn' : 'Willis tosses a budget paper onto the lawn', n > 1);
-  for (let i = 0; i < n; i++) G.flying.push({ x0: cam.nicola.x, y0: cam.nicola.y, x1: rand(8, W - 8), y1: rand(ZN + 6, ZS - 6), t: -i * 0.15, rot: rand(TAU) });
+  for (let i = 0; i < n; i++) G.flying.push({ x0: cam.nicola.x, y0: cam.nicola.y, x1: clamp(rand(8, W - 8) + G.wind * 7, 4, W - 4), y1: rand(ZN + 6, ZS - 6), t: -i * 0.15, rot: rand(TAU) });
   cam.nicola.toss = 0.6; if (n > 1) sideSay(cam.nicola, 'Nicola Willis', pick(SIDELINE_QUOTES['Nicola Willis']).t, true);   // she only speaks when tapped
 }
 function shockwave() {
@@ -602,6 +632,9 @@ function updateCameos(dt) {
   go.shake = Math.max(0, go.shake - dt); go.drop = Math.max(0, (go.drop || 0) - dt);
   if (run && go.shake <= 0) for (const m of G.mps) if (m.party.id === 'act' && m.state === 'run' && Math.abs(m.vy) > 6 && Math.hypot(m.x - go.x, m.y - go.y) < 30) { go.shake = 1.6; go.drop = 1.3; Snd.pop(0.35, 300, 0.12); go.say = pick(SIDELINE_QUOTES['Paul Goldsmith']).t; Voice.say(go.say, hash('Paul Goldsmith'), false, 'Paul Goldsmith'); break; }
   pk.sip = Math.max(0, pk.sip - dt); pk.sayT = Math.max(0, pk.sayT - dt); pk.next -= dt; if (pk.next <= 0) { pk.next = rand(6, 11); pk.sip = 1.4; if (run) { sideSay(pk, 'Chris Penk', pick(SIDELINE_QUOTES['Chris Penk']).t, false); pk.sayT = 2.6; } }
+  { const lf = G.life;   // now and then something wanders along the far touchline; nobody real
+    if (!lf.kind) { if (run) { lf.t -= dt; if (lf.t <= 0) { lf.kind = rand() < 0.5 ? 'gull' : 'school'; lf.p = 0; if (lf.kind === 'gull') note('A seagull has stolen a pie and is making a getaway', true); else note('A school tour is crossing the lawn', true); } } }
+    else { lf.p += dt / (lf.kind === 'gull' ? 9 : 15); if (lf.p >= 1) { lf.kind = ''; lf.t = rand(25, 45); } } }
   cam.ferris.fist = Math.max(0, cam.ferris.fist - dt); cam.kapa.fist = Math.max(0, cam.kapa.fist - dt);
 }
 
@@ -609,7 +642,7 @@ function updateCameos(dt) {
 function update(dt) {
   G.time += dt; G.t += dt; G.shake = Math.max(0, G.shake - dt);
   updateCameos(dt);
-  G.tickT -= dt; if (G.tickT <= 0 && G.log) { G.tickT = 0.5; renderTicker(); }
+  G.tickT -= dt; if (G.tickT <= 0 && G.log) { G.tickT = 0.5; renderTicker(); if (G.swing) G.swing.t -= 0.5; seatsUpdate(); }
   for (const f of G.fx) f.t += dt; G.fx = G.fx.filter(f => f.t < 1.3);
   for (const f of G.puffs) f.t += dt; G.puffs = G.puffs.filter(f => f.t < 0.55);
   for (const s of G.flying) { s.t += dt / 0.8; if (s.t >= 1) G.sheets.push({ x: s.x1, y: s.y1, rot: s.rot, life: 16 }); }
@@ -624,6 +657,7 @@ function update(dt) {
 
   if (G.phase === 'builder' || G.phase === 'over') { for (const m of G.mps) body(m, dt); return; }
   const runners = G.mps.filter(m => m.role === 'runner'), taggers = G.mps.filter(m => m.role === 'tagger');
+  if (window.__moves) for (const m of G.mps) if (m.pid === 'top') { m.bt = (m.bt == null ? rand(1, 4) : m.bt) - dt; if (m.bt <= 0) { m.bt = rand(3, 6); m.bur = 0.8; } m.bur = Math.max(0, (m.bur || 0) - dt); m.spd = m.spd0 * (m.bur > 0 ? 1 + 0.12 * window.__moveScale : 1); }
 
   if (G.phase === 'between') {
     let far = 0;
@@ -646,10 +680,13 @@ function update(dt) {
     for (const t of taggers) { if (t.stun > 0) continue;
       for (const r of live) { if (r.conv || r.safe) continue; const d = Math.hypot(t.x - r.x, t.y - r.y); if (d > 2.7) continue;
         const roll = rand(); if (r.imm > 0) continue;
-        if (r.stun <= 0 && roll < r.str + window.__dodge) {      // stiff-arm or sidestep
+        let bonus = 0;
+        if (window.__moves) { if (r.pid === 'green') bonus = 0.02 * window.__moveScale; else if (r.pid === 'tpm') bonus = 0.01 * window.__moveScale * Math.min(3, live.filter(o => o !== r && o.pid === 'tpm' && !o.conv && Math.hypot(o.x - r.x, o.y - r.y) < 14).length); }
+        if (r.stun <= 0 && roll < r.str + window.__dodge + bonus) {      // stiff-arm or sidestep
           r.imm = 0.45; const stiff = roll < r.str;
           r.saCd = 2.2; r.pose = 'stiff'; r.poseT = 0.5; r.side = t.x > r.x ? 1 : -1;
-          knock(t, 1.3); t.vx = (t.x - r.x) / (d || 1) * 14; t.vy = (t.y - r.y) / (d || 1) * 10; bump(t, rand(-8, 8), -9, rand(-12, 12));
+          const shove = window.__moves && r.pid === 'labour' ? 1 + 0.2 * window.__moveScale : 1;
+          knock(t, 1.3 * shove); t.vx = (t.x - r.x) / (d || 1) * 14 * shove; t.vy = (t.y - r.y) / (d || 1) * 10 * shove; bump(t, rand(-8, 8), -9, rand(-12, 12));
           fx(r.x, r.y - 8, stiff ? 'STIFF-ARM!' : pick(['JUKED!', 'SIDESTEP!', 'MISSED!']), '#FBF6EA'); if (stiff) Snd.boing(); else Snd.juke();
           r.dodges = (r.dodges || 0) + 1; r.rd.dodge++; G.stats.dodges++; note(stiff ? `${r.short} stiff-arms ${t.short}` : `${r.short} jinks past ${t.short}`);
         } else {                                                   // tackled
@@ -686,7 +723,7 @@ function runnerAI(m, dt, taggers) {
   if (m.x < 7) ax += (7 - m.x) * 0.5; if (m.x > W - 7) ax -= (m.x - (W - 7)) * 0.5;
   let dx = clamp(ax, -1.5, 1.5), dy = dir + ay; if (dy * dir < 0.3) dy = 0.3 * dir;
   const n = Math.hypot(dx, dy), near = dir > 0 ? ZS - m.y : m.y - ZN, sp = m.spd * (near < 14 ? 1.15 : 1);
-  m.vx = lerp(m.vx, dx / n * sp, Math.min(1, dt * 7)); m.vy = lerp(m.vy, dy / n * sp, Math.min(1, dt * 7)); m.state = 'run';
+  m.vx = lerp(m.vx, dx / n * sp, Math.min(1, dt * 7 * G.grip)); m.vy = lerp(m.vy, dy / n * sp, Math.min(1, dt * 7 * G.grip)); m.state = 'run';
   if (dir > 0 ? m.y >= ZS + 1 : m.y <= ZN - 1) {
     m.safe = true; fx(m.x, m.y - 8, 'SAFE!', GOLD); Snd.safe(); bump(m, 0, -8, 0); note(`${m.short} is safe at the ${G.dir > 0 ? 'South' : 'North'} End`);
     if (m.party.id === 'tpm') { cam.ferris.fist = 2.2; cam.kapa.fist = 2.2; cam.ferris.say = pick(SIDELINE_QUOTES['Tākuta Ferris']).t; cam.kapa.say = pick(SIDELINE_QUOTES['Mariameno Kapa-Kingi']).t;
@@ -711,18 +748,22 @@ function taggerAI(m, dt, live, load) {
   else if (d < 7.5 && m.lungeCd <= 0 && r.stun <= 0) { m.lunge = 0.34; m.pose = 'dive'; m.poseT = 0.4; }
   m.poseT -= dt; if (m.poseT <= 0) m.pose = '';
   const dx = gx - m.x, dy = gy - m.y, n = Math.hypot(dx, dy) || 1;
-  m.vx = lerp(m.vx, dx / n * sp, Math.min(1, dt * 6)); m.vy = lerp(m.vy, dy / n * sp, Math.min(1, dt * 6)); m.state = 'run';
+  m.vx = lerp(m.vx, dx / n * sp, Math.min(1, dt * 6 * G.grip)); m.vy = lerp(m.vy, dy / n * sp, Math.min(1, dt * 6 * G.grip)); m.state = 'run';
 }
 function separate(dt) {
+  G.wobCd = Math.max(0, G.wobCd - dt);
   const a = G.mps;
   for (let i = 0; i < a.length; i++) for (let j = i + 1; j < a.length; j++) { const p = a[i], q = a[j];
     if (G.phase === 'run' && p.role !== q.role && !p.conv && !q.conv) continue;
     let dx = q.x - p.x, dy = q.y - p.y; const d = Math.hypot(dx, dy); if (d > 3.4) continue;
+    if (G.phase === 'run' && G.wobCd <= 0 && d < 2.6 && p.role === 'tagger' && q.role === 'tagger' && !p.conv && !q.conv && p.party !== q.party && p.stun <= 0 && q.stun <= 0 && Math.hypot(p.vx - q.vx, p.vy - q.vy) > 11 && rand() < 0.1) {
+      G.wobCd = 9; knock(p, 0.7, 'stumble'); knock(q, 0.7, 'stumble'); bump(p, -6, -6, rand(-8, 8)); bump(q, 6, -6, rand(-8, 8)); fx((p.x + q.x) / 2, (p.y + q.y) / 2 - 6, 'COALITION WOBBLE!', GOLD, 1.1); note(`Coalition wobble: ${p.short} and ${q.short} collide`, true); Snd.boing(); }
     if (d < 0.01) { dx = 1; dy = 0; } const f = (3.4 - d) * 6 * dt / (d || 1);
     p.x -= dx * f; p.y -= dy * f; q.x += dx * f; q.y += dy * f; }
 }
 function body(m, dt) {
   if (m.sayT > 0) m.sayT -= dt;
+  if (G.phase === 'run' && G.wind && m.state === 'run') m.x += G.wind * dt * (m.role === 'runner' ? 1 : 0.6);   // the northerly
   m.x += m.vx * dt; m.y += m.vy * dt; if (G.phase === 'run' && m.rd) m.rd.dist += Math.hypot(m.vx, m.vy) * dt;
   m.x = clamp(m.x, 1.5, W - 1.5); m.y = clamp(m.y, 1, L - 1);
   if (m.role === 'tagger' && G.phase === 'run') m.y = clamp(m.y, ZN + 1, ZS - 1);
@@ -762,6 +803,7 @@ function endRound() {
   hud();
   if (left.length === 0) return gameOver(null);
   if (left.length === 1 && (G.init > 1 || G.round >= 5)) return gameOver(left[0]);
+  { const L = seatSplit().L, d = L - G.seatStart; if (Math.abs(d) >= 1) { G.swing = { txt: `SWING ${Math.round(Math.abs(d))} SEATS TO THE ${d < 0 ? 'TAGGERS' : 'RUNNERS'}`, t: 7 }; note(G.swing.txt.charAt(0) + G.swing.txt.slice(1).toLowerCase(), true); } }
   if (star) showStar(star);
   G.round++; G.dir *= -1; G.phase = 'between'; G.t = 0; formation(false); hud();
 }
@@ -976,6 +1018,46 @@ function prop(p, U, seed) {
     ctx.fillStyle = RED; ctx.beginPath(); ctx.arc(p.x + 38 * U, p.y - 106 * U, 10 * U, 0, TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = PAPER; ctx.font = `${8 * U}px ${SHOUT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('NEW', p.x + 38 * U, p.y - 106 * U);
   }
 }
+const SLOGANS = ['RECOUNT!', 'SPECIALS PENDING', 'WAIT FOR THE 27TH', 'HEAR, HEAR!', 'COUNT EVERY VOTE', 'COALITION TALKS?'];
+const farPt = f => HZ ? { x: -19, y: f * L } : { x: f * W, y: -10 };
+function placard(i) {   // a faceless crowd member waving an election-week sign behind the far touchline
+  const p = proj(farPt(0.14 + i * 0.145).x, farPt(0.14 + i * 0.145).y), U = p.s * 1.05, bob = Math.sin(G.time * 2.1 + i * 1.7) * 2 * U, tilt = Math.sin(G.time * 1.6 + i) * 0.07, cols = [PAPER, GOLD, SKY, '#FBF6EA', RED, PAPER], tc = [INK, INK, INK, INK, PAPER, INK];
+  ctx.save(); ctx.translate(p.x, p.y + bob); ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 2;
+  ctx.fillStyle = ['#3b4a63', '#6b3f1d', '#2f6f4a', '#7a2f2f'][i % 4]; rr(-9 * U, -22 * U, 18 * U, 22 * U, 6 * U); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = PAPER; ell(0, -29 * U, 7 * U, 7.5 * U); ctx.fill(); ctx.stroke();
+  ctx.save(); ctx.translate(0, -38 * U); ctx.rotate(tilt); ctx.fillStyle = '#8b5a2b'; ctx.fillRect(-1.5 * U, -2 * U, 3 * U, 40 * U);
+  const txt = SLOGANS[i % SLOGANS.length]; ctx.font = `${7.5 * U}px ${SHOUT}`; const w = Math.max(40 * U, ctx.measureText(txt).width + 10 * U);
+  ctx.fillStyle = cols[i % cols.length]; rr(-w / 2, -26 * U, w, 24 * U, 3 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = tc[i % tc.length]; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, 0, -14 * U); ctx.restore();
+  ctx.restore();
+}
+function lawnLife() {
+  const lf = G.life; if (!lf.kind) return;
+  const a = HZ ? lf.p * L : lf.p * W, pos = HZ ? { x: -4.5, y: a } : { x: a, y: -5 }, p = proj(pos.x, pos.y), U = p.s * 1.1, hop = Math.abs(Math.sin(G.time * 9)) * 4 * U;
+  ctx.save(); ctx.translate(p.x, p.y); ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 2;
+  if (lf.kind === 'gull') {
+    ctx.translate(0, -hop); ctx.fillStyle = '#fff'; ell(0, -8 * U, 11 * U, 7 * U); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#c9ccd2'; ctx.beginPath(); ctx.ellipse(-3 * U, -9 * U, 8 * U, 4 * U, -0.3 + Math.sin(G.time * 18) * 0.25, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fff'; ell(10 * U, -15 * U, 5 * U, 5 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = INK; ell(11.5 * U, -16 * U, 1 * U, 1 * U); ctx.fill();
+    ctx.fillStyle = GOLD; ctx.beginPath(); ctx.moveTo(14 * U, -15 * U); ctx.lineTo(21 * U, -13 * U); ctx.lineTo(14 * U, -12 * U); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#d9a05b'; ell(21 * U, -9 * U, 6 * U, 4.6 * U); ctx.fill(); ctx.stroke(); ctx.strokeStyle = INK; ctx.beginPath(); ctx.moveTo(17 * U, -9 * U); ctx.lineTo(25 * U, -9 * U); ctx.stroke();   // the pie
+    ctx.strokeStyle = GOLD; ctx.lineWidth = 2 * U; ctx.beginPath(); ctx.moveTo(-3 * U, -1 * U); ctx.lineTo(-4 * U, hop / 2 + 1); ctx.moveTo(3 * U, -1 * U); ctx.lineTo(4 * U, hop / 2 + 1); ctx.stroke();
+  } else {
+    const jackets = [RED, SKY, GOLD, '#2f8f3e', RED];
+    for (let k = 4; k >= 0; k--) { const teacher = k === 0, hh = (teacher ? 30 : 21) * U, ox = -k * 15 * U * (HZ ? 1 : 1), bob = Math.abs(Math.sin(G.time * 6 + k)) * 2 * U;
+      ctx.fillStyle = teacher ? '#3b3b3b' : jackets[k]; rr(ox - 5 * U, -hh - bob, 10 * U, hh * 0.7, 3 * U); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = PAPER; ell(ox, -hh - 5 * U - bob, 5.2 * U, 5.5 * U); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = INK; ctx.lineWidth = 2.4 * U; ctx.beginPath(); ctx.moveTo(ox - 2 * U, -hh * 0.3 - bob); ctx.lineTo(ox - 2 * U + Math.sin(G.time * 6 + k) * 2 * U, 0); ctx.moveTo(ox + 2 * U, -hh * 0.3 - bob); ctx.lineTo(ox + 2 * U - Math.sin(G.time * 6 + k) * 2 * U, 0); ctx.stroke(); ctx.lineWidth = 2; }
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.fillRect(-14 * U, -42 * U, 22 * U, 9 * U); ctx.strokeRect(-14 * U, -42 * U, 22 * U, 9 * U); ctx.fillStyle = INK; ctx.font = `${5 * U}px ${SHOUT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('SCHOOL TOUR', -3 * U, -37.5 * U);
+  }
+  ctx.restore();
+}
+function drawWeather() {
+  if (G.phase === 'builder' || G.phase === 'over') return;
+  ctx.save(); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  if (G.wx === 'showers') { ctx.strokeStyle = 'rgba(210,235,250,.55)'; ctx.lineWidth = 1.4; ctx.beginPath(); for (let i = 0; i < 90; i++) { const x = ((i * 97) % VW + G.time * 70) % VW, y = ((i * 53) % VH + G.time * 620 + i * 31) % VH; ctx.moveTo(x, y); ctx.lineTo(x - 6, y + 16); } ctx.stroke(); }
+  else if (G.wx === 'north') { const dir = Math.sign(G.wind) || 1; ctx.strokeStyle = 'rgba(243,233,210,.55)'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); for (let i = 0; i < 14; i++) { const y = (i * 61) % VH + 20, x = (((i * 211) + G.time * 260 * dir) % (VW + 200) + VW + 200) % (VW + 200) - 100, len = 50 + (i % 4) * 22; ctx.moveTo(x, y); ctx.lineTo(x + len * dir, y + Math.sin(G.time + i) * 3); } ctx.stroke(); }
+  ctx.restore();
+}
 const pick2 = (seed, a) => a[seed % a.length];
 function flag(x, y, ph) {
   const p = proj(x, y), U = p.s * 1.1, top = p.y - 108 * U;
@@ -1125,6 +1207,8 @@ function draw() {
     for (const w of G.waves) { const p = proj(w.x, w.y); ctx.strokeStyle = `rgba(255,240,150,${clamp(1 - w.r / 240, 0, 1)})`; ctx.lineWidth = 7; ctx.beginPath(); ctx.ellipse(p.x, p.y, w.r * ax, w.r * dz, 0, 0, TAU); ctx.stroke(); } }
   const items = [];
   cam.flags.forEach((f, i) => items.push({ z: depth({ x: f[0], y: f[1] }) - 0.1 * i, f: () => flag(f[0], f[1], i * 2) }));
+  for (let i = 0; i < 6; i++) items.push({ z: depth(farPt(0.14 + i * 0.145)) - 0.3, f: () => placard(i) });
+  items.push({ z: depth(HZ ? { x: -4.5, y: 0 } : { x: 0, y: -5 }), f: lawnLife });
   cam.trees.forEach(t => items.push({ z: depth({ x: t[0], y: t[1] }), f: () => tree(t[0], t[1], t[2]) }));
   items.push({ z: depth(cam.ferris), f: () => tree(cam.ferris.x, cam.ferris.y, 11, { side: 1, c: cam.ferris, name: depName('Ferris') }) });
   items.push({ z: depth(cam.kapa), f: () => tree(cam.kapa.x, cam.kapa.y, 23, { side: -1, c: cam.kapa, name: depName('Kapa-Kingi') }) });
@@ -1140,7 +1224,7 @@ function draw() {
     ctx.fillStyle = 'rgba(27,42,65,.5)'; rr(-w / 2 + 3, -hh / 2 + 3, w, hh, 3); ctx.fill();
     ctx.fillStyle = f.color; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; rr(-w / 2, -hh / 2, w, hh, 3); ctx.fill(); ctx.stroke();
     ctx.fillStyle = INK; ctx.fillText(f.text, 0, fs * 0.06); ctx.restore(); }
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); drawHand();
+  drawWeather(); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); drawHand();
   if (!grain) { const c = document.createElement('canvas'); c.width = c.height = 160; const d = c.getContext('2d'); d.fillStyle = '#fff'; d.fillRect(0, 0, 160, 160);
     for (let i = 0; i < 2600; i++) { d.fillStyle = `rgba(60,45,20,${Math.random() * 0.16})`; d.fillRect(Math.random() * 160, Math.random() * 160, 1.3, 1.3); } grain = ctx.createPattern(c, 'repeat'); }
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = grain; ctx.fillRect(0, 0, VW, VH); ctx.globalCompositeOperation = 'source-over';
@@ -1158,7 +1242,8 @@ cv.addEventListener('pointerdown', e => {
   const list = G.mps.slice().sort((a, b) => depth(b) - depth(a));
   for (const m of list) { const U = m.U, onHead = Math.hypot(x - m.sx, y - (m.sy - 50 * U)) < 21 * U, onBody = Math.abs(x - m.sx) < 12 * U && y < m.sy + 4 * U && y > m.sy - 36 * U;
     if (!onHead && !onBody) continue; if (m.safe || m.conv || m.state === 'down') continue;
-    if (m.role === 'runner') { knock(m, 1.15, 'stumble'); bump(m, rand(-6, 6), 16, rand(-16, 16)); m.vx *= 0.2; m.vy *= 0.2; fx(m.x, m.y - 10, 'BONK!', GOLD, 1.25); Snd.bonk(); exclaim(m); note(`${m.short} is bonked off stride`, true); }
+    if (window.__moves && m.pid === 'nzfirst' && m.role === 'runner' && m.stumbled) { fx(m.x, m.y - 10, 'SEASONED!', '#8EC5E8', 1.1); Snd.boing(); return; }
+    if (m.role === 'runner') { m.stumbled = true; knock(m, 1.15, 'stumble'); bump(m, rand(-6, 6), 16, rand(-16, 16)); m.vx *= 0.2; m.vy *= 0.2; fx(m.x, m.y - 10, 'BONK!', GOLD, 1.25); Snd.bonk(); exclaim(m); note(`${m.short} is bonked off stride`, true); }
     else { knock(m, 1.4); bump(m, rand(-8, 8), -10, rand(-14, 14)); fx(m.x, m.y - 10, 'TRIPPED!', '#8EC5E8', 1.15); Snd.trip(); exclaim(m); note(`${m.short} is tripped from behind`, true); }
     return; }
 });
@@ -1177,7 +1262,7 @@ function renderBuilder() {
       const mk = (txt, to, dis, aria) => { const b = document.createElement('button'); b.className = 'mv'; b.textContent = txt; b.disabled = dis; b.setAttribute('aria-label', aria); b.onclick = () => { Snd.ui(); G.assign[p.id] = to; renderBuilder(); }; return b; };
       const left = k === 2 ? 0 : 1, right = k === 1 ? 0 : 2;
       card.append(mk('◀', left, k === 1, `Move ${p.name} left`));
-      const body = document.createElement('div'); body.className = 'body'; body.innerHTML = `<div class="nm"><span class="dot" style="background:${p.color}"></span>${p.name} <span class="cnt">${p.members.length} MPs</span></div>`;
+      const body = document.createElement('div'); body.className = 'body'; body.innerHTML = `<div class="nm"><span class="dot" style="background:${p.color}"></span>${p.name} <span class="cnt">${p.members.length} MPs</span></div>${MOVES[p.id] ? `<div class="mvchip"><b>★ ${MOVES[p.id][0]}</b> ${MOVES[p.id][1]}</div>` : ''}`;
       const faces = document.createElement('div'); faces.className = 'faces'; for (const m of p.members) faces.append(avatar(m.name)); body.append(faces);
       card.append(body, mk('▶', right, k === 2, `Move ${p.name} right`)); col.append(card); } }
   const n = t => D.parties.filter(p => G.assign[p.id] === t).reduce((s, p) => s + p.members.length, 0);
