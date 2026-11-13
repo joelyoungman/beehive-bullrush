@@ -1,6 +1,6 @@
 # Beehive Bullrush
 
-A satirical browser game (formerly "Bullrush on the Parliament Lawn"): NZ MPs play Bullrush on the Parliament lawn. Plain HTML, canvas and JavaScript. No build step, no dependencies.
+A satirical browser game: NZ MPs play Bullrush on the Parliament lawn. Plain HTML, canvas and JavaScript. No build step, no dependencies.
 
 Public repo: github.com/joelyoungman/beehive-bullrush. Collaborator: Sarah (sandwichwilson), who pushes to `sarah/*` branches.
 
