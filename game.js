@@ -518,8 +518,8 @@ function updateCameos(dt) {
   b.sayT = Math.max(0, b.sayT - dt);
   go.p += go.dir * dt * 0.12; if (go.p > 1) go.dir = -1; if (go.p < 0) go.dir = 1;
   if (HZ) { go.x = W + 5.5; go.y = lerp(L * 0.48, L * 0.86, go.p); } else { go.x = W + 6.5; go.y = lerp(68, 95, go.p); }
-  go.shake = Math.max(0, go.shake - dt);
-  if (run && go.shake <= 0) for (const m of G.mps) if (m.party.id === 'act' && m.state === 'run' && Math.abs(m.vy) > 6 && Math.hypot(m.x - go.x, m.y - go.y) < 30) { go.shake = 1.6; break; }
+  go.shake = Math.max(0, go.shake - dt); go.drop = Math.max(0, (go.drop || 0) - dt);
+  if (run && go.shake <= 0) for (const m of G.mps) if (m.party.id === 'act' && m.state === 'run' && Math.abs(m.vy) > 6 && Math.hypot(m.x - go.x, m.y - go.y) < 30) { go.shake = 1.6; go.drop = 1.3; Snd.pop(0.35, 300, 0.12); break; }
   pk.sip = Math.max(0, pk.sip - dt); pk.next -= dt; if (pk.next <= 0) { pk.next = rand(6, 11); pk.sip = 1.4; }
   cam.ferris.fist = Math.max(0, cam.ferris.fist - dt); cam.kapa.fist = Math.max(0, cam.kapa.fist - dt);
 }
@@ -879,8 +879,10 @@ const drawCam = {
   },
   gold() { const c = cam.gold, p = proj(c.x, c.y), U = p.s * 1.05, sh = c.shake > 0;
     const q = person(p.x, p.y, U, { suit: '#33415c', trim: '#1a2233', tie: '#00529f', sprite: headSprite(depName('Goldsmith')), moving: true, phase: G.time * 5, face: c.dir, aL: 1.0, aR: 1.0, headRot: sh ? Math.sin(G.time * 13) * 0.42 : 0, hd: { ox: 0, oy: 0, a: 0 } });
-    const cols = ['#7a1f1f', '#1f4d7a', '#3d6b2f', '#8a6a1f']; for (let i = 0; i < 4; i++) { ctx.fillStyle = cols[i]; ctx.strokeStyle = INK; ctx.lineWidth = 1.5; rr(p.x - 11 * U + (i % 2) * 2 * U, p.y - 26 * U - i * 5 * U, 22 * U, 5 * U, 1); ctx.fill(); ctx.stroke(); }
-    if (sh) bubble(p.x, p.y - 72 * U, 'Tsk. Not in the history books.', U);
+    const cols = ['#7a1f1f', '#1f4d7a', '#3d6b2f', '#8a6a1f'], d = c.drop > 0;   // a shaken head sends the top history book flying
+    const book = (i, ox, oy, rot) => { ctx.save(); ctx.translate(p.x + ox * U, p.y + oy * U); ctx.rotate(rot); ctx.fillStyle = cols[i]; ctx.strokeStyle = INK; ctx.lineWidth = 1.5; rr(-11 * U, -2.5 * U, 22 * U, 5 * U, 1); ctx.fill(); ctx.stroke(); ctx.fillStyle = PAPER; ctx.fillRect(-9 * U, 0.4 * U, 17 * U, 1.2 * U); ctx.restore(); };
+    for (let i = 0; i < (d ? 3 : 4); i++) book(i, (i % 2) * 2, -23.5 - i * 5, 0);
+    if (d) { const t = 1 - c.drop / 1.3, bt = Math.min(1, t * 1.25); book(3, 4 + c.dir * -bt * 34, -38.5 - Math.sin(bt * Math.PI) * 30 + bt * bt * 38, bt * 7 * -c.dir); }
   },
   penk() { const c = cam.penk, p = proj(c.x, c.y), U = p.s * 1.1;
     ctx.strokeStyle = '#d9d9d9'; ctx.lineWidth = 3 * U; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p.x - 24 * U, p.y); ctx.lineTo(p.x + 6 * U, p.y - 16 * U); ctx.moveTo(p.x + 22 * U, p.y); ctx.lineTo(p.x - 6 * U, p.y - 16 * U); ctx.stroke();
@@ -904,7 +906,8 @@ function drawBackground() {
   const top = farY - VH * 0.065, lg = ctx.createLinearGradient(0, top, 0, VH); lg.addColorStop(0, 'rgba(63,143,78,0)'); lg.addColorStop(0.1, 'rgba(63,143,78,1)'); lg.addColorStop(1, '#3F8F4E'); ctx.fillStyle = lg; ctx.fillRect(0, top, VW, VH - top);
   for (let i = 0; i < 12; i++) { quad(0, i * L / 12, W, (i + 1) * L / 12); if (i % 2) { ctx.fillStyle = '#4B9C59'; ctx.fill(); } }
   const zone = (y0, y1, label) => { quad(0, y0, W, y1); ctx.fillStyle = 'rgba(243,233,210,.3)'; ctx.fill();
-    const m = proj(W / 2, (y0 + y1) / 2); ctx.save(); ctx.translate(m.x, m.y); if (HZ) ctx.rotate(-Math.PI / 2); ctx.fillStyle = PAPER; ctx.font = `700 ${22 * m.s}px ${LABEL}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, 0, 0); ctx.restore(); };
+    const ym = (y0 + y1) / 2, m = proj(W / 2, ym); ctx.save(); ctx.translate(m.x, m.y);
+    if (HZ) { const fa = proj(0, ym), na = proj(W, ym); ctx.rotate(Math.atan2(fa.y - na.y, fa.x - na.x)); } ctx.fillStyle = PAPER; ctx.font = `700 ${22 * m.s}px ${LABEL}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, 0, 0); ctx.restore(); };
   zone(0, ZN, 'NORTH END · SAFE'); zone(ZS, L, 'SOUTH END · SAFE');
   ctx.strokeStyle = PAPER; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; quad(0, 0, W, L); ctx.stroke();
   for (const y of [ZN, ZS, L / 2]) { const a = proj(0, y), b = proj(W, y); ctx.setLineDash(y === L / 2 ? [10, 10] : []); ctx.globalAlpha = y === L / 2 ? 0.5 : 1; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
