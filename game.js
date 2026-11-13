@@ -248,6 +248,57 @@ const Snd = {
   stopMusic() { if (this.music) { clearInterval(this.music); this.music = null; } },
 };
 
+/* ---------- character voices (browser speech synthesis) ----------
+   Caricature voices only: each character gets a pitch and speed on the device's own voices
+   (New Zealand English first). It does not imitate anyone's real voice. */
+const VOICES = {
+  gerry: { male: true, pitch: 0.55, rate: 0.82 },    // booming Speaker
+  nicola: { male: false, pitch: 1.15, rate: 1.15 },  // brisk finance minister
+  bishop: { male: true, pitch: 1.05, rate: 1.4 },    // hurried roads man
+  gold: { male: true, pitch: 0.8, rate: 0.78 },      // dry history teacher
+  penk: { male: true, pitch: 0.7, rate: 0.68 },      // laid-back drawl
+  crowd: { male: null, pitch: 1.3, rate: 1.2 },
+};
+const Voice = {
+  on: (() => { try { return localStorage.getItem('bullrush.voices') !== '0'; } catch (e) { return true; } })(),
+  list: [], until: 0,
+  ok() { return 'speechSynthesis' in window && this.on && !Snd.muted; },
+  load() {
+    if (!('speechSynthesis' in window)) return;
+    const f = () => { this.list = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang)); };
+    f(); speechSynthesis.addEventListener('voiceschanged', f);
+  },
+  pick(male) {
+    const M = /\b(male|david|george|mark|james|daniel|guy|ryan|william|liam|mitchell|thomas|oliver|arthur|aaron|fred|rishi)\b/i;
+    const F = /\b(female|zira|hazel|susan|molly|libby|sonia|natasha|karen|catherine|samantha|kate|serena|moira|tessa|aria|jenny|clara|emma)\b/i;
+    const byLang = ['en-NZ', 'en-AU', 'en-GB', 'en-'];
+    for (const lang of byLang) {
+      const pool = this.list.filter(v => v.lang.replace('_', '-').toLowerCase().startsWith(lang.toLowerCase()));
+      if (!pool.length) continue;
+      const fit = male == null ? pool : pool.filter(v => (male ? M : F).test(v.name) && !(male ? F : M).test(v.name));
+      if (fit.length) return fit[0];
+      if (lang !== 'en-') continue;
+      return pool[0];
+    }
+    return null;
+  },
+  // Speaks unless someone else is still talking (or `force`), so lines never pile up.
+  say(who, text, force = false) {
+    if (!this.ok() || /^Zzz/.test(text)) return;   // snores stay as text
+    const now = performance.now();
+    if (!force && (now < this.until || speechSynthesis.speaking)) return;
+    const c = VOICES[who] || VOICES.crowd, u = new SpeechSynthesisUtterance(text.replace(/[…]/g, '...'));
+    const v = this.pick(c.male); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'en-NZ';
+    u.pitch = c.pitch; u.rate = c.rate; u.volume = 0.9;
+    if (force) speechSynthesis.cancel();
+    Snd.noise(0.12, 0.05, 2600, 1.4);   // a little radio crackle before each line
+    speechSynthesis.speak(u);
+    this.until = now + 400 + text.length * 55 / c.rate;
+  },
+  stop() { if ('speechSynthesis' in window) speechSynthesis.cancel(); this.until = 0; },
+};
+Voice.load();
+
 /* ---------- game state ---------- */
 const G = { phase: 'builder', dir: 1, round: 0, t: 0, time: 0, mps: [], sheets: [], flying: [], fx: [], waves: [], init: 0, shake: 0, endT: 0, assign: {} };
 const partyOf = id => D.parties.find(p => p.id === id);
@@ -301,14 +352,24 @@ function hud() {
 
 /* ---------- sideline cameos ---------- */
 const cam = {
-  gerry: { x: -15, y: 50, cd: 0, blow: 0, order: 0, orderCd: 0 },
-  nicola: { x: W + 15, y: 57, cd: 0, toss: 0, auto: 4 },
+  gerry: { x: -15, y: 50, cd: 0, blow: 0, order: 0, orderCd: 0, say: '', sayT: 0 },
+  nicola: { x: W + 15, y: 57, cd: 0, toss: 0, auto: 4, say: '', sayT: 0 },
   bishop: { x: W + 12, y: 25, say: '', sayT: 0, next: 3 },
-  gold: { x: W + 6.5, y: 78, dir: 1, shake: 0 },
-  penk: { x: -9.5, y: 85, sip: 0, next: 5 },
+  gold: { x: W + 6.5, y: 78, dir: 1, shake: 0, say: '' },
+  penk: { x: -9.5, y: 85, sip: 0, next: 5, say: '', sayT: 0 },
   ferris: { x: -17, y: 9, fist: 0 }, kapa: { x: W + 17, y: 7, fist: 0 },
 };
-const HECKLES = ['Keep left!', 'Call that a tackle?', 'Merge like a zip!', 'Traffic is backing up!', 'Move it, Taggers!', 'Eyes on the road!', 'That lane is closed!', 'Faster! Faster!'];
+const HECKLES = ['Keep left!', 'Call that a tackle?', 'Merge like a zip!', 'Traffic is backing up!', 'Move it, Taggers!', 'Eyes on the road!', 'That lane is closed!', 'Faster! Faster!',
+  'Roads of National Significance!', 'Four lanes or nothing!', 'Cone season is open!', 'Who approved this detour?'];
+const LINES = {
+  gerry: ['ORDER!', 'Order! Order!', 'Sit down!', 'Withdraw and apologise!', 'The member will resume their seat!'],
+  nicola: ['Back to surplus… eventually!', 'Line by line!', "That's a cost pressure!", 'Not in the forecast!'],
+  gold: ['Tsk. Not in the history books.', "That's going in the curriculum.", 'Historically inaccurate tackle.'],
+  penk: ['Lovely day.', 'Not my problem.', 'Flat white, thanks.', 'Consent pending.', 'Needs a building inspection.', 'Zzz…'],
+  crowd: ['Recount!', 'Point of order!', 'Hear, hear!', "Specials aren't counted yet!", 'Wait for the 27th!', 'Coalition talks at halftime!'],
+};
+// Show a speech bubble for a sideline character and speak it in their caricature voice.
+function talk(key, text, secs = 2.4, force = false) { const c = cam[key]; if (c) { c.say = text; c.sayT = secs; } Voice.say(key, text, force); }
 function tossSheet(n) {
   for (let i = 0; i < n; i++) G.flying.push({ x0: cam.nicola.x, y0: cam.nicola.y, x1: rand(W * 0.3, W - 8), y1: rand(ZN + 6, ZS - 6), t: -i * 0.15, rot: rand(TAU) });
   cam.nicola.toss = 0.6;
@@ -316,24 +377,26 @@ function tossSheet(n) {
 function shockwave() {
   G.waves.push({ x: cam.gerry.x, y: cam.gerry.y, r: 0, hit: new Set() });
   Snd.whistle(1.1); cam.gerry.blow = 1.3; cam.gerry.order = 1.6; G.shake = 0.5;
+  setTimeout(() => talk('gerry', pick(LINES.gerry), 2.4, true), 650);
 }
 function updateCameos(dt) {
   const g = cam.gerry, n = cam.nicola, b = cam.bishop, go = cam.gold, pk = cam.penk, run = G.phase === 'run';
   g.cd = Math.max(0, g.cd - dt); g.blow = Math.max(0, g.blow - dt); g.order = Math.max(0, g.order - dt); g.orderCd = Math.max(0, g.orderCd - dt);
   n.cd = Math.max(0, n.cd - dt); n.toss = Math.max(0, n.toss - dt);
+  for (const c of [g, n, cam.penk]) c.sayT = Math.max(0, c.sayT - dt);
   if (run) {
-    n.auto -= dt; if (n.auto <= 0) { n.auto = rand(4, 7); tossSheet(1); }
+    n.auto -= dt; if (n.auto <= 0) { n.auto = rand(4, 7); tossSheet(1); if (Math.random() < 0.3) talk('nicola', pick(LINES.nicola)); }
     if (g.orderCd <= 0) {   // pile-up check
       const down = G.mps.filter(m => m.state === 'down');
-      for (const a of down) { let c = 0; for (const o of down) if (Math.hypot(a.x - o.x, a.y - o.y) < 13) c++; if (c >= 4) { g.order = 2; g.orderCd = 5; fx(a.x, a.y - 6, 'PILE-UP!', '#ffc93c', 1.3); break; } }
+      for (const a of down) { let c = 0; for (const o of down) if (Math.hypot(a.x - o.x, a.y - o.y) < 13) c++; if (c >= 4) { g.order = 2; g.orderCd = 5; fx(a.x, a.y - 6, 'PILE-UP!', '#ffc93c', 1.3); talk('gerry', pick(LINES.gerry)); break; } }
     }
-    b.next -= dt; if (b.next <= 0) { b.next = rand(3.5, 6); b.say = pick(HECKLES); b.sayT = 2.2; }
+    b.next -= dt; if (b.next <= 0) { b.next = rand(3.5, 6); talk('bishop', pick(HECKLES), 2.2); }
   }
   b.sayT = Math.max(0, b.sayT - dt);
   go.y += go.dir * 3.2 * dt; if (go.y > 95) go.dir = -1; if (go.y < 68) go.dir = 1;
   go.shake = Math.max(0, go.shake - dt);
-  if (run && go.shake <= 0) for (const m of G.mps) if (m.party.id === 'act' && m.state === 'run' && Math.abs(m.vy) > 6 && m.x > W - 55 && Math.abs(m.y - go.y) < 14) { go.shake = 1.6; break; }
-  pk.sip = Math.max(0, pk.sip - dt); pk.next -= dt; if (pk.next <= 0) { pk.next = rand(6, 11); pk.sip = 1.4; }
+  if (run && go.shake <= 0) for (const m of G.mps) if (m.party.id === 'act' && m.state === 'run' && Math.abs(m.vy) > 6 && m.x > W - 55 && Math.abs(m.y - go.y) < 14) { go.shake = 1.6; go.say = pick(LINES.gold); Voice.say('gold', go.say); break; }
+  pk.sip = Math.max(0, pk.sip - dt); pk.next -= dt; if (pk.next <= 0) { pk.next = rand(6, 11); pk.sip = 1.4; if (run) talk('penk', pick(LINES.penk), 2.5); }
   cam.ferris.fist = Math.max(0, cam.ferris.fist - dt); cam.kapa.fist = Math.max(0, cam.kapa.fist - dt);
 }
 
@@ -384,6 +447,7 @@ function update(dt) {
           r.conv = true; knock(r, 2.2); r.vx = t.vx * 0.6; r.vy = t.vy * 0.6; bump(r, rand(-10, 10), -12, rand(-14, 14));
           knock(t, 0.55, 'stumble'); bump(t, 0, -6, rand(-6, 6)); t.tgt = null;
           fx(r.x, r.y - 8, pick(['TAGGED!', 'TACKLED!', 'GOTCHA!', 'CONVERTED!']), t.party.color === '#1b1b1b' ? '#ddd' : t.party.color, 1.15);
+          if (Math.random() < 0.22 && performance.now() > Voice.until) { const line = pick(LINES.crowd); setTimeout(() => fx(r.x, r.y - 2, line, '#ffe9a8', 0.75), 300); Voice.say('crowd', line); }
           Snd.boing(); if (rand() < 0.5) Snd.groan(); hud();
         }
         break; } }
@@ -602,6 +666,7 @@ const drawCam = {
     ctx.save(); ctx.translate(hx, hy); ctx.rotate(up ? Math.sin(G.time * 16) * 0.3 + 0.3 : 0.5); ctx.fillStyle = '#8b5a2b'; ctx.fillRect(-2 * U, -16 * U, 4 * U, 18 * U); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2; ell(0, -30 * U, 20 * U, 15 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#b3261e'; ctx.font = `900 ${10 * U}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('ORDER!', 0, -30 * U); ctx.restore();
     if (c.blow > 0) { ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 2; for (let i = 0; i < 3; i++) { const r = (10 + i * 9 + (G.time * 60) % 9) * U; ctx.beginPath(); ctx.arc(p.x + 12 * U, p.y - seat - 44 * U, r, -0.6, 0.6); ctx.stroke(); } }
     tapTag(p.x, p.y + 10 * U, U, c.cd, 12, 'TAP: WHISTLE'); c.hit = [p.x, p.y - seat - 20 * U, 46 * U];
+    if (c.sayT > 0) bubble(p.x + 26 * U, p.y - seat - 76 * U, c.say, U);
   },
   nicola() { const c = cam.nicola, p = proj(c.x, c.y), U = p.s * 1.1;
     ctx.fillStyle = '#7a5230'; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2; rr(p.x - 30 * U, p.y - 13 * U, 60 * U, 5 * U, 2 * U); ctx.fill(); ctx.stroke(); ctx.fillRect(p.x - 26 * U, p.y - 8 * U, 4 * U, 8 * U); ctx.fillRect(p.x + 22 * U, p.y - 8 * U, 4 * U, 8 * U);
@@ -613,6 +678,7 @@ const drawCam = {
     const cx = p.x - 24 * U, cy = p.y - 4 * U; ctx.save(); ctx.translate(cx, cy); ctx.rotate(-0.12); ctx.fillStyle = '#3a3f47'; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2; rr(-11 * U, -36 * U, 22 * U, 34 * U, 3 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#bfe6b0'; ctx.fillRect(-8 * U, -33 * U, 16 * U, 7 * U); ctx.fillStyle = '#1a1a1a'; ctx.font = `800 ${5 * U}px monospace`; ctx.textAlign = 'right'; ctx.fillText('-9.8b', 7 * U, -29 * U);
     for (let i = 0; i < 12; i++) { ctx.fillStyle = i === 11 ? '#e2562e' : '#d9d9d9'; ctx.fillRect((-8 + (i % 3) * 5.7) * U, (-23 + Math.floor(i / 3) * 5) * U, 4.4 * U, 3.6 * U); } ctx.restore();
     tapTag(p.x, p.y + 12 * U, U, c.cd, 8, 'TAP: BUDGET'); c.hit = [p.x, p.y - 26 * U, 44 * U];
+    if (c.sayT > 0) bubble(p.x - 10 * U, p.y - 72 * U, c.say, U);
   },
   bishop() { const c = cam.bishop, p = proj(c.x, c.y), U = p.s * 1.1;
     for (let i = 0; i < 2; i++) { const bx = p.x - 34 * U + i * 46 * U, by = p.y + 4 * U; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; for (let k = 0; k < 6; k++) { ctx.fillStyle = k % 2 ? '#fff' : '#ff6a13'; ctx.fillRect(bx + k * 6 * U, by - 14 * U, 6 * U, 6 * U); } ctx.strokeRect(bx, by - 14 * U, 36 * U, 6 * U); ctx.fillStyle = '#444'; ctx.fillRect(bx + 3 * U, by - 8 * U, 2.5 * U, 8 * U); ctx.fillRect(bx + 30 * U, by - 8 * U, 2.5 * U, 8 * U); }
@@ -623,7 +689,7 @@ const drawCam = {
   gold() { const c = cam.gold, p = proj(c.x, c.y), U = p.s * 1.05, sh = c.shake > 0;
     const q = person(p.x, p.y, U, { suit: '#33415c', trim: '#1a2233', tie: '#00529f', sprite: headSprite(depName('Goldsmith')), moving: true, phase: G.time * 5, face: c.dir, aL: 1.0, aR: 1.0, headRot: sh ? Math.sin(G.time * 13) * 0.42 : 0, hd: { ox: 0, oy: 0, a: 0 } });
     const cols = ['#7a1f1f', '#1f4d7a', '#3d6b2f', '#8a6a1f']; for (let i = 0; i < 4; i++) { ctx.fillStyle = cols[i]; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; rr(p.x - 11 * U + (i % 2) * 2 * U, p.y - 26 * U - i * 5 * U, 22 * U, 5 * U, 1); ctx.fill(); ctx.stroke(); }
-    if (sh) bubble(p.x, p.y - 72 * U, 'Tsk. Not in the history books.', U);
+    if (sh) bubble(p.x, p.y - 72 * U, c.say || LINES.gold[0], U);
   },
   penk() { const c = cam.penk, p = proj(c.x, c.y), U = p.s * 1.1;
     ctx.strokeStyle = '#d9d9d9'; ctx.lineWidth = 3 * U; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(p.x - 24 * U, p.y); ctx.lineTo(p.x + 6 * U, p.y - 16 * U); ctx.moveTo(p.x + 22 * U, p.y); ctx.lineTo(p.x - 6 * U, p.y - 16 * U); ctx.stroke();
@@ -632,7 +698,7 @@ const drawCam = {
     const q = person(4 * U, 2 * U, U, { suit: '#5b6b7a', trim: '#2c3640', tie: '#ffc93c', sprite: headSprite(depName('Penk')), sit: true, face: 1, shades: true, aL: 0.5, aR: c.sip > 0 ? 2.5 : 1.3, hd: { ox: 0, oy: 0, a: 0.25 } });
     const hx = 4 * U + q.hR[0], hy = 2 * U + q.hR[1]; ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; rr(hx - 3.5 * U, hy - 9 * U, 7 * U, 9 * U, 1.5); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#6b3f1d'; ctx.fillRect(hx - 3.5 * U, hy - 6 * U, 7 * U, 3 * U);
     ctx.restore();
-    if ((G.time % 9) < 2.5 && G.phase === 'run') bubble(p.x + 6 * U, p.y - 78 * U, pick2(Math.floor(G.time / 9), ['Lovely day.', 'Not my problem.', 'Flat white, thanks.', 'Zzz…']), U);
+    if (c.sayT > 0) bubble(p.x + 6 * U, p.y - 78 * U, c.say, U);
   },
 };
 
@@ -682,7 +748,7 @@ cv.addEventListener('pointerdown', e => {
   if (G.phase === 'builder') return;
   const g = cam.gerry, n = cam.nicola, inHit = h => h && Math.hypot(x - h[0], y - h[1]) < h[2];
   if (inHit(g.hit)) { if (g.cd <= 0 && G.phase !== 'over') { g.cd = 12; shockwave(); } return; }
-  if (inHit(n.hit)) { if (n.cd <= 0 && G.phase !== 'over') { n.cd = 8; tossSheet(4); Snd.tone(700, 0.15, 'triangle', 0.2, 0, 1200); } return; }
+  if (inHit(n.hit)) { if (n.cd <= 0 && G.phase !== 'over') { n.cd = 8; tossSheet(4); Snd.tone(700, 0.15, 'triangle', 0.2, 0, 1200); talk('nicola', pick(LINES.nicola), 2.4, true); } return; }
   if (G.phase !== 'run') return;
   const list = G.mps.slice().sort((a, b) => b.y - a.y);
   for (const m of list) { const U = m.U, onHead = Math.hypot(x - m.sx, y - (m.sy - 47 * U)) < 20 * U, onBody = Math.abs(x - m.sx) < 12 * U && y < m.sy + 4 * U && y > m.sy - 36 * U;
@@ -725,12 +791,16 @@ document.querySelectorAll('.preset[data-p]').forEach(b => b.onclick = () => {
 });
 $('go').onclick = () => startMatch();
 $('again').onclick = () => startMatch();
-const toBuilder = () => { G.phase = 'builder'; G.mps = []; G.sheets = []; G.flying = []; Snd.stopMusic(); $('over').classList.add('hidden'); $('hud').classList.add('hidden'); $('menu').classList.add('hidden'); $('hint').classList.add('hidden'); $('builder').classList.remove('hidden'); renderBuilder(); };
+const toBuilder = () => { G.phase = 'builder'; G.mps = []; G.sheets = []; G.flying = []; Snd.stopMusic(); Voice.stop(); $('over').classList.add('hidden'); $('hud').classList.add('hidden'); $('menu').classList.add('hidden'); $('hint').classList.add('hidden'); $('builder').classList.remove('hidden'); renderBuilder(); };
 $('back').onclick = toBuilder; $('menu').onclick = toBuilder;
 const bobbleLabel = () => { $('bobble').textContent = BOBBLE ? '🎎 Bobbleheads' : '⚪ Face discs'; };
 $('bobble').onclick = () => { BOBBLE = !BOBBLE; try { localStorage.setItem('bullrush.bobble', BOBBLE ? '1' : '0'); } catch (e) {} bobbleLabel(); document.querySelectorAll('.faces canvas').forEach(c => paintAvatar(c, c.dataset.n)); };
 bobbleLabel();
-$('mute').onclick = () => { Snd.setMuted(!Snd.muted); $('mute').textContent = Snd.muted ? '🔇 Muted' : '🔊 Sound'; };
+$('mute').onclick = () => { Snd.setMuted(!Snd.muted); if (Snd.muted) Voice.stop(); $('mute').textContent = Snd.muted ? '🔇 Muted' : '🔊 Sound'; };
+const voiceLabel = () => { $('voices').textContent = Voice.on ? '🗣️ Voices' : '🤐 No voices'; };
+$('voices').onclick = () => { Voice.on = !Voice.on; try { localStorage.setItem('bullrush.voices', Voice.on ? '1' : '0'); } catch (e) {} if (!Voice.on) Voice.stop(); else Voice.say('crowd', 'Hear, hear!', true); voiceLabel(); };
+if (!('speechSynthesis' in window)) $('voices').style.display = 'none';
+voiceLabel();
 $('cred').onclick = () => {
   const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const link = c => c.src && /^https:\/\//.test(c.src) ? ` · <a href="${esc(c.src)}" target="_blank" rel="noopener">source</a>` : '';
@@ -739,7 +809,7 @@ $('cred').onclick = () => {
   $('credIn').innerHTML = `<p><b>Backdrop:</b> ${esc(bg.title)}, ${esc(bg.by)} · ${esc(bg.lic)}${link(bg)}</p>` +
     D.parties.map(p => `<h3 style="margin:.6em 0 .2em">${esc(p.name)}</h3><ul style="margin:0;padding-left:18px">${p.members.map(m => row(m.name, hasPhoto[m.name] ? m.credit : null)).join('')}</ul>`).join('') +
     `<h3 style="margin:.6em 0 .2em">Sideline</h3><ul style="margin:0;padding-left:18px">${D.departed.map(m => row(m.name, hasPhoto[m.name] ? m.credit : null)).join('')}</ul>` +
-    `<p>Photos are cropped and cut out by the game for the bobbleheads (or shown as face discs). Music and sound effects are synthesised in the browser. This is a parody; it is not affiliated with any party or with Parliament.</p>`;
+    `<p>Photos are cropped and cut out by the game for the bobbleheads (or shown as face discs). Music and sound effects are synthesised in the browser, and the sideline voices use your device's own text-to-speech voices; they are caricatures, not the real people's voices. This is a parody; it is not affiliated with any party or with Parliament.</p>`;
   $('credits').classList.remove('hidden');
 };
 $('credX').onclick = () => $('credits').classList.add('hidden');
@@ -753,5 +823,5 @@ function frame(now) {
   draw(); requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-window.__bullrush = { G, cam, sprites, bobbles, hasPhoto, Snd, update };   // handy for debugging in the console
+window.__bullrush = { Voice, LINES, G, cam, sprites, bobbles, hasPhoto, Snd, update };   // handy for debugging in the console
 })();

@@ -59,6 +59,24 @@ You can turn it on or off from the address bar with `?bobble=1` or `?bobble=0`.
 - Seven MPs still have no free photo, so they show as drawn discs among the bobbleheads: Craig Renney (Labour), Jessica Rowe (National), Taine Randell and Craig Stobo (NZ First), and Daniel Eb, Eden Skipper and Sarah Lucas (TOP). The Commons photos called "Jessica Rowe" are of the Australian TV presenter, not the National MP.
 - `tools/build-data.js` was edited but not run, because Node wasn't installed on the machine. `data.js` was rebuilt with a Python copy of the script, which reproduced the existing `data.js` byte for byte before the changes. Running `node tools/build-data.js` should give the same output.
 
+## Also added: topical lines and character voices
+
+The sideline characters have new topical lines, and they're now spoken aloud with the browser's built-in text-to-speech:
+
+| Character | When they speak | New lines (examples) | Voice |
+|---|---|---|---|
+| Bishop | Every few seconds | "Roads of National Significance!", "Four lanes or nothing!", "Cone season is open!" | Fast, a bit high |
+| Willis | When you tap BUDGET, and sometimes when she throws a spreadsheet | "Line by line!", "Not in the forecast!", "That's a cost pressure!" | Brisk |
+| Brownlee | When you tap the whistle, or there's a pile-up | "Order! Order!", "Withdraw and apologise!" | Very deep, slow |
+| Goldsmith | When an ACT runner barrels past him | "Historically inaccurate tackle.", "That's going in the curriculum." | Low, slow |
+| Penk | Each time he sips his coffee | "Consent pending.", "Needs a building inspection." | Slow drawl |
+| Crowd | About one tag in five | "Recount!", "Specials aren't counted yet!", "Coalition talks at halftime!" | Higher |
+
+- The voices are caricatures, not imitations of the real people. Each character gets a different pitch and speed on the device's own voices, New Zealand English first. The Credits panel says so.
+- Only one character talks at a time, and a short radio crackle plays before each line.
+- A new **🗣️ Voices** toolbar button turns speech off (the game remembers the choice), and **🔊 Sound** mutes everything.
+- The voices sound different on each phone and computer.
+
 ## Recommended next steps
 
 1. **Play it and decide on the default.** The prototype starts in bobblehead mode. If it's a keeper, keep the toggle and leave bobbleheads on by default.
