@@ -21,8 +21,8 @@ const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 const lerp = (a, b, t) => a + (b - a) * t;
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const TAU = Math.PI * 2;
-const INK = '#1B2A41', PAPER = '#F3E9D2', RED = '#E4572E', GOLD = '#F2B134';
-const SHOUT = '"Bowlby One", ${SHOUT}, sans-serif', LABEL = '"Barlow Condensed", "Arial Narrow", "Trebuchet MS", sans-serif';
+const INK = '#1B2A41', PAPER = '#F3E9D2', RED = '#E4572E', GOLD = '#F2B134', SKY = '#8EC5E8';
+const SHOUT = '"Bowlby One", Impact, "Arial Black", sans-serif', LABEL = '"Barlow Condensed", "Arial Narrow", "Trebuchet MS", sans-serif';
 if (document.fonts && document.fonts.load) { document.fonts.load('20px "Bowlby One"'); document.fonts.load('700 20px "Barlow Condensed"'); }
 
 /* ---------- view ---------- */
@@ -358,7 +358,7 @@ function formation(snap) {
   for (const m of G.mps) { m.safe = false; m.conv = false; m.joined = m.role === 'tagger'; if (snap) { m.x = m.tx; m.y = m.ty; m.vx = m.vy = 0; } m.state = 'idle'; m.stun = 0; }
 }
 function callRound() {
-  Snd.gavel(2); cam.gerry.blow = 1.2; sideSay(cam.gerry, 'Gerry Brownlee', 'Order!', false);
+  Snd.gavel(2); cam.gerry.blow = 1.2; cam.gerry.say = 'Order!'; cam.gerry.sayT = 2;
   banner('BULLRUSH!', G.round === 1 ? 'Runners: get to the South End!' : `Round ${G.round} — back to the ${G.dir > 0 ? 'South' : 'North'} End!`);
   setTimeout(() => Snd.cheer(0.22, 1.8), 350);
   for (const m of G.mps) { m.delay = m.role === 'runner' ? rand(0, 0.9) : rand(0, 0.3); m.saCd = 0; m.tgt = null; }
@@ -389,9 +389,9 @@ const cam = {
 function placeCameos() {
   const c = cam, set = (o, x, y) => { o.x = x; o.y = y; };
   if (HZ) { set(c.gerry, -10, L / 2); set(c.nicola, -9, L * 0.8); set(c.bishop, -9, L * 0.2); set(c.penk, W + 4, L * 0.1); set(c.ferris, -8, -15); set(c.kapa, -8, L + 15);
-    c.trees = [[W * 0.62, -16, 37], [W * 0.56, L + 16, 58]]; c.flags = [[-15, L * 0.36], [-15, L * 0.64]]; }
+    c.trees = [[W * 0.62, -16, 36], [W * 0.56, L + 16, 37]]; c.flags = [[-15, L * 0.36], [-15, L * 0.64]]; }
   else { set(c.gerry, -15, 50); set(c.nicola, W + 15, 57); set(c.bishop, W + 12, 25); set(c.penk, -9.5, 85); set(c.ferris, -17, 9); set(c.kapa, W + 17, 7);
-    c.trees = [[-25, 31, 37], [W + 26, 40, 58]]; c.flags = [[-7, -3], [W + 7, -3]]; }
+    c.trees = [[-25, 31, 36], [W + 26, 40, 37]]; c.flags = [[-7, -3], [W + 7, -3]]; }
   c.gold.p = 0.5; c.gold.dir = 1;
 }
 // Things these people are on record as saying, each with its source. Everyone else gets stock phrases of the House.
@@ -439,14 +439,17 @@ const SIDELINE_QUOTES = {
     { t: "Oh, that's very generous of you.", src: "https://thespinoff.co.nz/politics/13-03-2026/echo-chamber-nz-firsts-takes-jabs-at-gerry-brownlee" },
     { t: "I never ever wanted to be Speaker.", src: "https://www.nzherald.co.nz/nz/politics/gerry-brownlee-the-wit-and-grumpiness-of-parliaments-speaker/Y2DDNX66FNAE7NG4DJEY3XO54E/" }],
 };
+const CROWD = ['Recount!', "Specials aren't counted yet!", 'Wait for the 27th!', 'Coalition talks at halftime!', 'Point of order!', 'Hear, hear!'];
 const HOUSE = ['Point of order!', 'Mr Speaker!', 'Shame!', 'I seek leave!', 'Withdraw and apologise!', 'Hear, hear!', 'Order, order!', 'I move the question be put!', 'That is out of order!'];
 // Lines are pre-recorded in voices/ with two natural New Zealand voices (see tools/make-voices.py). They are generic
 // voices, not impressions of anyone. If a file is missing, the browser's own speech voice reads the line instead.
 const slug = n => n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
 const Voice = {
   cur: null,
+  on: (() => { try { return localStorage.getItem('bullrush.voices') !== '0'; } catch (e) { return true; } })(),
+  stop() { if (this.cur) this.cur.pause(); if (window.speechSynthesis) speechSynthesis.cancel(); },
   say(text, seed, force, who) {
-    if (Snd.muted) return;
+    if (Snd.muted || !this.on) return;
     if (this.cur && !this.cur.ended && !this.cur.paused) { if (!force) return; this.cur.pause(); }
     if (window.speechSynthesis && (speechSynthesis.speaking || speechSynthesis.pending)) { if (!force) return; speechSynthesis.cancel(); }
     const file = 'voices/' + (who ? slug(who) : 'house-' + (seed % 2 ? 'a' : 'b')) + '-' + hash(text).toString(36) + '.mp3';
@@ -455,7 +458,7 @@ const Voice = {
     const p = a.play(); if (p && p.catch) p.catch(fallback);
   },
   browser(text, seed) {
-    if (Snd.muted || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+    if (Snd.muted || !this.on || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
     const ss = window.speechSynthesis, u = new SpeechSynthesisUtterance(text.replace(/\bBS\b/g, 'B S').replace('coq', 'cock'));
     const rank = v => (/natural|online|neural|google/i.test(v.name) ? 10 : 0) + (/en[-_]NZ/i.test(v.lang) ? 4 : /en[-_]AU/i.test(v.lang) ? 3 : /en[-_]GB/i.test(v.lang) ? 2 : 1);
     const all = ss.getVoices().filter(v => /^en/i.test(v.lang)).sort((x, y) => rank(y) - rank(x)), pool = all.filter(v => rank(v) >= rank(all[0]) - 1);
@@ -464,7 +467,8 @@ const Voice = {
     ss.speak(u);
   },
 };
-function exclaim(m) {   // a poked MP blurts something
+function exclaim(m) {   // a poked MP blurts something; the sideline hushes so the voice you hear is theirs
+  cam.gerry.sayT = cam.nicola.sayT = cam.bishop.sayT = 0;
   const own = QUOTES[m.name], t = own ? pick(own).t : pick(HOUSE);
   m.say = t; m.sayT = 2.1; Voice.say(t, hash(m.name), true, own ? m.name : null);
 }
@@ -472,7 +476,7 @@ function sideSay(c, name, t, force) { c.say = t; c.sayT = 2; Voice.say(t, hash(n
 const HECKLES = ['What a lot of crap!', 'Keep left!', 'Call that a tackle?', 'Merge like a zip!', 'Traffic is backing up!', 'Move it, Taggers!', 'Eyes on the road!', 'That lane is closed!', 'Faster! Faster!'];
 function tossSheet(n) {
   for (let i = 0; i < n; i++) G.flying.push({ x0: cam.nicola.x, y0: cam.nicola.y, x1: rand(8, W - 8), y1: rand(ZN + 6, ZS - 6), t: -i * 0.15, rot: rand(TAU) });
-  cam.nicola.toss = 0.6; sideSay(cam.nicola, 'Nicola Willis', pick(SIDELINE_QUOTES['Nicola Willis']).t, n > 1);
+  cam.nicola.toss = 0.6; if (n > 1) sideSay(cam.nicola, 'Nicola Willis', pick(SIDELINE_QUOTES['Nicola Willis']).t, true);   // she only speaks when tapped
 }
 function shockwave() {
   G.waves.push({ x: cam.gerry.x, y: cam.gerry.y, r: 0, hit: new Set() });
@@ -548,6 +552,7 @@ function update(dt) {
           r.conv = true; knock(r, 2.2); r.vx = t.vx * 0.6; r.vy = t.vy * 0.6; bump(r, rand(-10, 10), -12, rand(-14, 14));
           knock(t, 0.55, 'stumble'); bump(t, 0, -6, rand(-6, 6)); t.tgt = null;
           fx(r.x, r.y - 8, pick(['TAGGED!', 'TACKLED!', 'GOTCHA!', 'CONVERTED!']), RED, 1.15);
+          if (rand() < 0.2) { const line = pick(CROWD); setTimeout(() => fx(r.x, r.y - 2, line, '#F3E9D2', 0.75), 300); }   // crowd chatter, text only
           Snd.tag(); hud();
         }
         break; } }
@@ -775,9 +780,32 @@ function tree(x, y, seed, peek) {
     const q = person(px, p.y - 2 * U, U * 0.8, { suit: '#3b3b3b', trim: '#111', tie: '#d12c38', sprite: headSprite(peek.name), binos: !shaking, headRot: lean, hd: { ox: 0, oy: shaking ? Math.sin(G.time * 30) * 0.05 : 0, a: 0 },
       aL: shaking && peek.side < 0 ? 2.7 + Math.sin(G.time * 26) * 0.35 : 0.2, aR: shaking && peek.side > 0 ? 2.7 + Math.sin(G.time * 26) * 0.35 : 0.2 });
     if (shaking) bubble(px, p.y - 62 * U, pick2(seed, ['Oi!!', 'Hmph!', 'Unbelievable!']), U); }
-  ctx.fillStyle = '#5a3d28'; ctx.strokeStyle = '#2b1a0f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(p.x - 9 * U, p.y); ctx.quadraticCurveTo(p.x - 4 * U, p.y - 30 * U, p.x - 14 * U, p.y - 62 * U); ctx.lineTo(p.x + 12 * U, p.y - 62 * U); ctx.quadraticCurveTo(p.x + 3 * U, p.y - 30 * U, p.x + 10 * U, p.y); ctx.closePath(); ctx.fill(); ctx.stroke();
-  for (let i = 0; i < 11; i++) { const bx = p.x + (r() - 0.5) * 78 * U, by = p.y - (58 + r() * 44) * U, br = (17 + r() * 13) * U; ctx.fillStyle = i % 3 ? '#27552f' : '#1e4526'; ell(bx, by, br, br * 0.82); ctx.fill(); }
-  for (let i = 0; i < 44; i++) { const bx = p.x + (r() - 0.5) * 92 * U, by = p.y - (50 + r() * 58) * U; ctx.fillStyle = r() > 0.4 ? '#d81f2e' : '#f0475a'; ell(bx, by, 2.8 * U, 2.2 * U); ctx.fill(); }
+  prop(p, U, seed);
+}
+// Sideline props, in place of trees: roadworks, a democracy sausage sizzle, and an election hoarding.
+function prop(p, U, seed) {
+  const kind = seed % 3, out = () => { ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.lineJoin = 'round'; };
+  const sign = (cx, cy, w, h, txt, bg, fg, fs) => { ctx.fillStyle = bg; out(); rr(cx - w / 2, cy - h / 2, w, h, 3 * U); ctx.fill(); ctx.stroke(); ctx.fillStyle = fg; ctx.font = `${fs * U}px ${SHOUT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; txt.split('|').forEach((t, i, a) => ctx.fillText(t, cx, cy + (i - (a.length - 1) / 2) * fs * 1.15 * U)); };
+  if (kind === 0) {          // roadworks: three cones and a sign
+    for (const [dx, sc] of [[-26, 1], [0, 1.25], [26, 1]]) { const bx = p.x + dx * U, by = p.y, w = 17 * sc * U, h = 46 * sc * U;
+      ctx.fillStyle = RED; out(); ctx.beginPath(); ctx.moveTo(bx - w, by); ctx.lineTo(bx - w * 0.18, by - h); ctx.lineTo(bx + w * 0.18, by - h); ctx.lineTo(bx + w, by); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = PAPER; ctx.beginPath(); ctx.moveTo(bx - w * 0.64, by - h * 0.38); ctx.lineTo(bx + w * 0.64, by - h * 0.38); ctx.lineTo(bx + w * 0.4, by - h * 0.68); ctx.lineTo(bx - w * 0.4, by - h * 0.68); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = INK; rr(bx - w * 1.15, by - 4 * U, w * 2.3, 6 * U, 2 * U); ctx.fill(); }
+    ctx.strokeStyle = INK; ctx.lineWidth = 3 * U; ctx.beginPath(); ctx.moveTo(p.x, p.y - 56 * U); ctx.lineTo(p.x, p.y - 80 * U); ctx.stroke();
+    sign(p.x, p.y - 94 * U, 78 * U, 30 * U, 'ROADWORKS|18 MONTHS', GOLD, INK, 8.5);
+  } else if (kind === 1) {   // democracy sausage sizzle
+    ctx.fillStyle = '#8b5a2b'; out(); rr(p.x - 30 * U, p.y - 30 * U, 60 * U, 8 * U, 2 * U); ctx.fill(); ctx.stroke(); ctx.fillRect(p.x - 26 * U, p.y - 22 * U, 5 * U, 22 * U); ctx.fillRect(p.x + 21 * U, p.y - 22 * U, 5 * U, 22 * U);
+    ctx.fillStyle = '#3a3f47'; rr(p.x - 20 * U, p.y - 44 * U, 40 * U, 14 * U, 3 * U); ctx.fill(); ctx.stroke();
+    for (let i = 0; i < 4; i++) { ctx.fillStyle = '#b5532f'; rr(p.x - 15 * U + i * 8 * U, p.y - 48 * U, 5.5 * U, 11 * U, 2.5 * U); ctx.fill(); ctx.stroke(); }
+    for (let i = 0; i < 3; i++) { const t = (G.time * 0.7 + i * 0.33) % 1; ctx.fillStyle = `rgba(243,233,210,${0.6 * (1 - t)})`; ell(p.x - 10 * U + i * 10 * U + Math.sin(G.time * 2 + i) * 3 * U, p.y - 54 * U - t * 22 * U, 4 * U, 5 * U); ctx.fill(); }
+    ctx.strokeStyle = INK; ctx.lineWidth = 2.5 * U; for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(p.x + s * 34 * U, p.y - 30 * U); ctx.lineTo(p.x + s * 34 * U, p.y - 86 * U); ctx.stroke(); }
+    for (let i = 0; i < 6; i++) { ctx.fillStyle = i % 2 ? PAPER : RED; out(); ctx.beginPath(); ctx.moveTo(p.x - 36 * U + i * 12 * U, p.y - 86 * U); ctx.lineTo(p.x - 24 * U + i * 12 * U, p.y - 86 * U); ctx.lineTo(p.x - 24 * U + i * 12 * U, p.y - 74 * U); ctx.quadraticCurveTo(p.x - 30 * U + i * 12 * U, p.y - 68 * U, p.x - 36 * U + i * 12 * U, p.y - 74 * U); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    sign(p.x, p.y - 100 * U, 86 * U, 20 * U, 'DEMOCRACY SAUSAGE $2', PAPER, INK, 7);
+  } else {                   // election hoarding
+    ctx.fillStyle = '#8b5a2b'; out(); for (const s of [-1, 1]) { ctx.fillRect(p.x + s * 28 * U - 3 * U, p.y - 54 * U, 6 * U, 54 * U); ctx.strokeRect(p.x + s * 28 * U - 3 * U, p.y - 54 * U, 6 * U, 54 * U); }
+    sign(p.x, p.y - 82 * U, 88 * U, 56 * U, 'PROMISES|2 FOR 1|*terms apply', SKY, INK, 10);
+    ctx.fillStyle = RED; ctx.beginPath(); ctx.arc(p.x + 38 * U, p.y - 106 * U, 10 * U, 0, TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = PAPER; ctx.font = `${8 * U}px ${SHOUT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('NEW', p.x + 38 * U, p.y - 106 * U);
+  }
 }
 const pick2 = (seed, a) => a[seed % a.length];
 function flag(x, y, ph) {
@@ -1003,6 +1031,9 @@ $('back').onclick = toBuilder; $('menu').onclick = toBuilder;
 const bobbleLabel = () => { $('bobble').textContent = BOBBLE ? 'Bobbleheads' : 'Face discs'; };
 $('bobble').onclick = () => { BOBBLE = !BOBBLE; try { localStorage.setItem('bullrush.bobble', BOBBLE ? '1' : '0'); } catch (e) {} bobbleLabel(); document.querySelectorAll('.faces canvas').forEach(c => paintAvatar(c, c.dataset.n)); };
 bobbleLabel();
+const voicesLabel = () => { $('voices').textContent = Voice.on ? 'Voices on' : 'Voices off'; };
+$('voices').onclick = () => { Voice.on = !Voice.on; try { localStorage.setItem('bullrush.voices', Voice.on ? '1' : '0'); } catch (e) {} if (!Voice.on) Voice.stop(); voicesLabel(); };
+voicesLabel();
 $('mute').onclick = () => { Snd.setMuted(!Snd.muted); $('mute').textContent = Snd.muted ? 'Sound off' : 'Sound on'; };
 $('cred').onclick = () => {
   const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
