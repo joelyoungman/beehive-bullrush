@@ -682,7 +682,8 @@ function ell(x, y, rx, ry) { ctx.beginPath(); ctx.ellipse(x, y, Math.abs(rx), Ma
 function limb(x0, y0, x1, y1, w, col) { ctx.strokeStyle = INK; ctx.lineWidth = w + 2.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = w; ctx.stroke(); }
 function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 function bubble(x, y, text, U, col = '#FBF6EA') {
-  ctx.font = `700 ${Math.max(11, 15 * U)}px ${LABEL}`; const w = ctx.measureText(text).width + 14 * U, h = 22 * U;
+  let fz = Math.max(11, 15 * U); ctx.font = `700 ${fz}px ${LABEL}`; while (fz > 8 && ctx.measureText(text).width + 14 * U > VW - 12) { fz -= 0.5; ctx.font = `700 ${fz}px ${LABEL}`; }
+  const w = ctx.measureText(text).width + 14 * U, h = 22 * U;
   x = clamp(x, w / 2 + 4, VW - w / 2 - 4);
   ctx.fillStyle = col; ctx.strokeStyle = INK; ctx.lineWidth = 2; rr(x - w / 2, y - h, w, h, 8 * U); ctx.fill(); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(x - 5 * U, y - 1); ctx.lineTo(x, y + 7 * U); ctx.lineTo(x + 5 * U, y - 1); ctx.fill();
@@ -794,7 +795,7 @@ function drawMP(m) {
     lie: Math.min(1, (G.time - (m.kt || 0)) * 7, m.conv ? 1 : Math.max(0.15, m.stun * 5)), side: m.side, face: m.face || 1,
     pose: m.pose, hop: m.hop, ring: G.phase === 'builder' ? null : tagger ? RED : m.safe ? GOLD : PAPER, sweat: sp > 14 && m.stun <= 0, seed: m.jp });
   if (reading) drawSheet(p.x + (q.hL[0] + q.hR[0]) / 2 + fc * 3 * U, p.y + (q.hL[1] + q.hR[1]) / 2 - 4 * U, 0.14 * fc, U * 0.8, 0.01);
-  if (!down) { ctx.font = `700 ${Math.max(9, 12 * U)}px ${LABEL}`; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; ctx.strokeStyle = INK; const nm = m.short.toUpperCase(); ctx.strokeText(nm, p.x, p.y + 5 * U); ctx.fillStyle = PAPER; ctx.fillText(nm, p.x, p.y + 5 * U); }
+  if (!down) { const nm = m.short.toUpperCase(); let nf = Math.max(9, 12 * U); ctx.font = `700 ${nf}px ${LABEL}`; while (nf > 6 && ctx.measureText(nm).width > 44 * U) { nf -= 0.5; ctx.font = `700 ${nf}px ${LABEL}`; } ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.strokeText(nm, p.x, p.y + 5 * U); ctx.fillStyle = PAPER; ctx.fillText(nm, p.x, p.y + 5 * U); }
 }
 function tree(x, y, seed, peek) {
   const p = proj(x, y), U = p.s * 1.25; if (!peek) p.x = clamp(p.x, 58 * U, VW - 58 * U);   // keep props fully on screen let h = seed; const r = () => ((h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0) % 1000) / 1000;
@@ -909,10 +910,10 @@ function drawBackground() {
     ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = 'rgba(27,42,65,.22)'; ctx.fillRect(0, 0, VW, bh); ctx.restore(); }
   const top = farY - VH * 0.065, lg = ctx.createLinearGradient(0, top, 0, VH); lg.addColorStop(0, 'rgba(63,143,78,0)'); lg.addColorStop(0.1, 'rgba(63,143,78,1)'); lg.addColorStop(1, '#3F8F4E'); ctx.fillStyle = lg; ctx.fillRect(0, top, VW, VH - top);
   for (let i = 0; i < 12; i++) { quad(0, i * L / 12, W, (i + 1) * L / 12); if (i % 2) { ctx.fillStyle = '#4B9C59'; ctx.fill(); } }
-  const zone = (y0, y1, label) => { quad(0, y0, W, y1); ctx.fillStyle = 'rgba(243,233,210,.3)'; ctx.fill();
+  const zone = (y0, y1, label, flip) => { quad(0, y0, W, y1); ctx.fillStyle = 'rgba(243,233,210,.3)'; ctx.fill();
     const ym = (y0 + y1) / 2, m = proj(W / 2, ym); ctx.save(); ctx.translate(m.x, m.y);
-    if (HZ) { const fa = proj(0, ym), na = proj(W, ym); ctx.rotate(Math.atan2(fa.y - na.y, fa.x - na.x)); } ctx.fillStyle = PAPER; ctx.font = `700 ${22 * m.s}px ${LABEL}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, 0, 0); ctx.restore(); };
-  zone(0, ZN, 'NORTH END · SAFE'); zone(ZS, L, 'SOUTH END · SAFE');
+    if (HZ) { const fa = proj(0, ym), na = proj(W, ym); ctx.rotate(Math.atan2(fa.y - na.y, fa.x - na.x) + (flip ? Math.PI : 0)); } let zf = 22 * m.s; const room = (HZ ? Math.hypot(proj(0, ym).x - proj(W, ym).x, proj(0, ym).y - proj(W, ym).y) : proj(W, ym).x - proj(0, ym).x) * 0.9; ctx.fillStyle = PAPER; ctx.font = `700 ${zf}px ${LABEL}`; while (zf > 8 && ctx.measureText(label).width > room) { zf -= 0.5; ctx.font = `700 ${zf}px ${LABEL}`; } ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, 0, 0); ctx.restore(); };
+  zone(0, ZN, 'NORTH END · SAFE'); zone(ZS, L, 'SOUTH END · SAFE', true);
   ctx.strokeStyle = PAPER; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; quad(0, 0, W, L); ctx.stroke();
   for (const y of [ZN, ZS, L / 2]) { const a = proj(0, y), b = proj(W, y); ctx.setLineDash(y === L / 2 ? [10, 10] : []); ctx.globalAlpha = y === L / 2 ? 0.5 : 1; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
   ctx.setLineDash([]); ctx.globalAlpha = 1;
@@ -989,9 +990,9 @@ function draw() {
   for (const m of G.mps) if (m.sayT > 0) bubble(m.sx, m.sy - (m.state === 'down' ? 96 : 116) * m.U, m.say, m.U * 1.1);
   for (const s of G.flying) if (s.t > 0) { const x = lerp(s.x0, s.x1, s.t), y = lerp(s.y0, s.y1, s.t), p = proj(x, y); drawSheet(p.x, p.y, s.rot + s.t * 9, p.s, (Math.sin(s.t * Math.PI) * 90 + 30 * (1 - s.t)) * p.s); }
   for (const f of G.fx) { const p = proj(f.x, f.y), al = clamp((1.3 - f.t) * 2.5, 0, 1), pop = 1 + Math.max(0, 0.22 - f.t) * 2.6, fs = 15 * p.s * f.size * pop;
-    ctx.save(); ctx.globalAlpha = al; ctx.translate(p.x, p.y - (64 + f.t * 30) * p.s); ctx.rotate(((f.x * 7 + f.y * 3) % 9 - 4) * 0.022);
+    ctx.font = `400 ${fs}px ${SHOUT}`; const w = ctx.measureText(f.text).width + fs * 0.8, hh = fs * 1.5;
+    ctx.save(); ctx.globalAlpha = al; ctx.translate(clamp(p.x, w / 2 + 6, VW - w / 2 - 6), p.y - (64 + f.t * 30) * p.s); ctx.rotate(((f.x * 7 + f.y * 3) % 9 - 4) * 0.022);
     ctx.font = `400 ${fs}px ${SHOUT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const w = ctx.measureText(f.text).width + fs * 0.8, hh = fs * 1.5;
     ctx.fillStyle = 'rgba(27,42,65,.5)'; rr(-w / 2 + 3, -hh / 2 + 3, w, hh, 3); ctx.fill();
     ctx.fillStyle = f.color; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; rr(-w / 2, -hh / 2, w, hh, 3); ctx.fill(); ctx.stroke();
     ctx.fillStyle = INK; ctx.fillText(f.text, 0, fs * 0.06); ctx.restore(); }
